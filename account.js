@@ -76,7 +76,9 @@
     st.finance_best=parseInt(localStorage.getItem("nx_finance_best")||"0",10)||0;
     try{ const e=JSON.parse(localStorage.getItem("nx_finance_empire")||"{}");
       st.finance_flips=(e.stats&&e.stats.flips)||0; st.finance_career_profit=(e.stats&&e.stats.careerProfit)||0;
-    }catch(e){ st.finance_flips=0; st.finance_career_profit=0; }
+      const biz=e.businesses||[]; st.finance_biz_count=biz.length; st.finance_managers=biz.filter(b=>b.manager).length;
+      st.finance_biz_profit=(e.stats&&e.stats.bizProfit)||0;
+    }catch(e){ st.finance_flips=0; st.finance_career_profit=0; st.finance_biz_count=0; st.finance_managers=0; }
     try{ const r=JSON.parse(localStorage.getItem("nr_save_v1")||"{}");
       st.idle_zone=r.maxZone||1; st.idle_hero=r.heroLv||1; st.idle_shards=r.gems||0;
       st.idle_dps=(r.up&&r.up.dps)||0; st.idle_gold=r.gold||0;
@@ -375,7 +377,7 @@
   }
   function numMerge(a,b){ const x=parseInt(a||"0",10)||0,y=parseInt(b||"0",10)||0; return String(Math.max(x,y)); }
   function progScore(sv){ try{const o=JSON.parse(sv)||{}; return (o.gems||0)*1e9+(o.maxZone||0)*1e6+(o.heroLv||0)*1e3+(o.gold||0);}catch(e){return -1;} }
-  function empProgScore(sv){ try{const o=JSON.parse(sv)||{}; return (o.capital||0)+((o.stats&&o.stats.careerProfit)||0)*2+((o.owned&&o.owned.length)||0)*5000+(o.xp||0)*10;}catch(e){return -1;} }
+  function empProgScore(sv){ try{const o=JSON.parse(sv)||{}; const biz=o.businesses||[]; return (o.capital||0)+((o.stats&&o.stats.careerProfit)||0)*2+((o.stats&&o.stats.bizProfit)||0)*2+((o.owned&&o.owned.length)||0)*5000+(o.xp||0)*10+(o.founderXp||0)*10+biz.length*5000+biz.filter(b=>b.manager).length*10000;}catch(e){return -1;} }
   const NUM_BESTS=["nd_best","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best"];
   function mergeKey(k,local,cloud){
     if(cloud==null) return local;

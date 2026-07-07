@@ -148,6 +148,9 @@ window.NEXUS_DATA=(function(){
   ACH.push({id:"finance_flip1",game:"finance",icon:"🏠",xp:60,name:{en:"First Flip",de:"Erster Flip"},desc:{en:"Sell your first renovated property in Nexus Empire",de:"Dein erstes renoviertes Objekt in Nexus Empire verkaufen"},cond:{stat:"finance_flips",gte:1}});
   addTier("financeflips","finance","🏠","finance_flips",[5,15,40,100],"Flips","Flips","Sell {n} properties in Nexus Empire","{n} Objekte in Nexus Empire verkaufen",false);
   addTier("financeprofit","finance","💰","finance_career_profit",[5000,25000,100000,500000],"Realtor","Makler","Earn ${n} career profit in Nexus Empire","{n}$ Karriere-Gewinn in Nexus Empire erreichen",true);
+  ACH.push({id:"finance_biz1",game:"finance",icon:"🏪",xp:60,name:{en:"Business Owner",de:"Unternehmer"},desc:{en:"Open your first business in Nexus Empire",de:"Dein erstes Unternehmen in Nexus Empire eröffnen"},cond:{stat:"finance_biz_count",gte:1}});
+  ACH.push({id:"finance_manager1",game:"finance",icon:"🤖",xp:220,name:{en:"Hands Off",de:"Loslassen"},desc:{en:"Hire your first manager to automate a business",de:"Deinen ersten Manager anheuern, der ein Unternehmen automatisiert"},cond:{stat:"finance_managers",gte:1}});
+  addTier("financebizprofit","finance","💼","finance_biz_profit",[5000,25000,100000],"Mogul","Mogul","Earn ${n} total business profit in Nexus Empire","{n}$ Unternehmensgewinn in Nexus Empire erreichen",true);
 
   /* ---------- Taegliche Quests ---------- */
   const QUESTS = [

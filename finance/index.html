@@ -97,6 +97,24 @@
   .psell.profit{background:linear-gradient(90deg,var(--green),var(--neon));color:#04121a;}
   .psell.loss{background:var(--panel2);color:var(--pink);border:1px solid var(--pink);}
   .portEmpty{color:var(--muted);font-size:13px;text-align:center;padding:14px 0;}
+  .etabs{display:flex;gap:8px;width:100%;margin-bottom:4px;}
+  .lvlLbl{text-align:center;margin-top:6px;}
+  .lvlBig{text-align:center;font-size:22px;}
+  .readybar{height:10px;background:rgba(0,0,0,.4);border-radius:6px;overflow:hidden;margin:8px 0;}
+  .readyfill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));width:0%;}
+  .bizrow{display:flex;gap:6px;margin:8px 0 0;}
+  .bizbtn{flex:1;border:none;background:var(--panel2);color:var(--text);border-radius:9px;padding:8px 6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .bizbtn:disabled{opacity:.35;cursor:not-allowed;}
+  .bizshift{width:100%;border:none;padding:10px;border-radius:9px;font-weight:800;cursor:pointer;font-size:13px;font-family:inherit;background:linear-gradient(90deg,var(--neon),var(--green));color:#04121a;margin-top:8px;}
+  .bizshift:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.4);}
+  .stafflabel{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-top:8px;}
+  .staffdots{display:flex;gap:4px;}
+  .staffdots .sdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);display:inline-block;}
+  .staffdots .sdot.on{background:var(--gold);}
+  .hirebtn{border:none;background:var(--panel2);color:var(--gold);border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid var(--gold);}
+  .hirebtn:disabled{opacity:.35;cursor:not-allowed;}
+  .managerbadge{background:rgba(124,255,107,.12);color:var(--green);border:1px solid var(--green);border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;text-align:center;margin-top:8px;}
+  .bizlock{opacity:.55;}
 </style>
 </head>
 <body>
@@ -144,10 +162,15 @@
 <div id="empireMode" class="hidden">
   <div class="hud">
     <div class="box"><div class="l" data-i18n="capital">Capital</div><div class="v cash" id="capVal">$0</div></div>
-    <div class="box"><div class="l" data-i18n="realtorLvl">Realtor Lv</div><div class="v net" id="lvlVal">1</div></div>
-    <div class="box"><div class="l" data-i18n="properties">Properties</div><div class="v time" id="propCountVal">0</div></div>
+    <div class="box"><div class="l" data-i18n="assets">Assets</div><div class="v net" id="assetCountVal">0</div></div>
   </div>
-  <div class="wrap" style="min-height:0">
+  <div class="etabs" id="eTabs" style="max-width:480px;padding:8px 16px 0">
+    <button class="modeTab active" data-etab="estate">🏠 <span data-i18n="tabEstate">Real Estate</span></button>
+    <button class="modeTab" data-etab="biz">🏢 <span data-i18n="tabBiz">Businesses</span></button>
+  </div>
+  <div class="wrap" id="estateTab" style="min-height:0">
+    <div class="l lvlLbl" data-i18n="realtorLvl">Realtor Lv</div>
+    <div class="v net lvlBig" id="lvlVal">1</div>
     <div class="xpbar"><div class="xpfill" id="xpFill"></div></div>
     <div class="xplabel" id="xpLabel">0 / 100 XP</div>
     <div class="nextunlock" id="nextUnlockHint"></div>
@@ -156,6 +179,17 @@
     <h2 class="secH" data-i18n="portfolioH">📁 My Properties</h2>
     <div id="portfolioList"></div>
     <div class="portEmpty" id="portfolioEmpty" data-i18n="portfolioEmpty">No properties yet — buy one from the market above.</div>
+  </div>
+  <div class="wrap hidden" id="bizTab" style="min-height:0">
+    <div class="l lvlLbl" data-i18n="founderLvl">Founder Lv</div>
+    <div class="v net lvlBig" id="founderLvlVal">1</div>
+    <div class="xpbar"><div class="xpfill" id="founderXpFill"></div></div>
+    <div class="xplabel" id="founderXpLabel">0 / 40 XP</div>
+    <h2 class="secH" data-i18n="openBizH">🏪 Open a Business</h2>
+    <div id="bizOpenList"></div>
+    <h2 class="secH" data-i18n="myBizH">🏢 My Businesses</h2>
+    <div id="bizOwnedList"></div>
+    <div class="portEmpty" id="bizEmpty" data-i18n="bizEmpty">No businesses yet — open one above.</div>
   </div>
   <section class="about">
     <h2 id="empAboutH">About Nexus Empire</h2>
@@ -178,7 +212,11 @@
     askingPrice:"Asking price",estValue:"Est. value",nextUnlock:(n,l)=>"🔒 "+n+" unlocks at Realtor Lv "+l,allUnlocked:"All neighborhoods unlocked",
     flipProfit:s=>"🏠 Sold for a "+s+" profit!",flipLoss:s=>"📉 Sold at a "+s+" loss.",
     empAboutH:"About Nexus Empire",
-    empAboutP:"Nexus Empire is the long-term investing side of Nexus Finance. Unlike the 75-second Trading Floor, your capital and progress here are permanent. Buy undervalued properties, renovate them — kitchen, bathroom, flooring, curb appeal — and sell for a profit. Every flip builds your Realtor Level, which unlocks better neighborhoods, cheaper renovations and sharper deals. How big can your real estate empire grow?"},
+    empAboutP:"Nexus Empire is the long-term investing side of Nexus Finance. Unlike the 75-second Trading Floor, your capital and progress here are permanent. Buy undervalued properties, renovate them — kitchen, bathroom, flooring, curb appeal — and sell for a profit. Every flip builds your Realtor Level, which unlocks better neighborhoods, cheaper renovations and sharper deals. How big can your real estate empire grow?",
+    assets:"Assets",tabEstate:"Real Estate",tabBiz:"Businesses",founderLvl:"Founder Lv",openBizH:"🏪 Open a Business",myBizH:"🏢 My Businesses",bizEmpty:"No businesses yet — open one above.",
+    open:"Open",workShift:"Work Shift",ready:"Ready",staff:"Staff",hireStaff:"Hire Staff",manager:"Manager",hireManager:"Hire Manager",automated:"🤖 Automated",
+    bizLocked:(n,l)=>"🔒 "+n+" unlocks at Founder Lv "+l,shiftDone:s=>"💵 Shift complete: +"+s,managerHired:"🤖 Manager hired — this business now runs itself!",
+    managerOffline:s=>"🤖 Your managers earned "+s+" while you were away!"},
   de:{hub:"Spiele",cash:"Cash",networth:"Nettovermögen",time:"Zeit",best:"Bestwert",play:"▶ HANDELN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",gameover:"MARKT GESCHLOSSEN",newbest:"★ NEUER REKORD ★",buy:"Kaufen",sell:"Verkaufen",low:"Niedriges Risiko",mid:"Mittel",high:"Hohes Risiko",
     intro:"Vier volatile Neon-Märkte, eine 75-Sekunden-Runde. Tippe Kaufen, um einen Teil deines Cash zu investieren, tippe Verkaufen zum Kassieren. Reite die Kurssprünge, meide die Crashs — steigere dein Nettovermögen so hoch du kannst.",
     hint:"$1.000 Startkapital · 75 Sekunden",aboutH:"Über Nexus Finance",
@@ -190,7 +228,11 @@
     askingPrice:"Angebotspreis",estValue:"Gesch. Wert",nextUnlock:(n,l)=>"🔒 "+n+" ab Makler-Lv "+l,allUnlocked:"Alle Viertel freigeschaltet",
     flipProfit:s=>"🏠 Mit "+s+" Gewinn verkauft!",flipLoss:s=>"📉 Mit "+s+" Verlust verkauft.",
     empAboutH:"Über Nexus Empire",
-    empAboutP:"Nexus Empire ist die Langzeit-Investment-Seite von Nexus Finance. Anders als die 75-Sekunden-Trading-Runde bleiben Kapital und Fortschritt hier dauerhaft erhalten. Kaufe unterbewertete Objekte, renoviere sie — Küche, Bad, Boden, Außenbereich — und verkaufe mit Gewinn. Jeder Flip steigert dein Makler-Level, das bessere Viertel, günstigere Renovierungen und schärfere Deals freischaltet. Wie groß wird dein Immobilien-Imperium?"}};
+    empAboutP:"Nexus Empire ist die Langzeit-Investment-Seite von Nexus Finance. Anders als die 75-Sekunden-Trading-Runde bleiben Kapital und Fortschritt hier dauerhaft erhalten. Kaufe unterbewertete Objekte, renoviere sie — Küche, Bad, Boden, Außenbereich — und verkaufe mit Gewinn. Jeder Flip steigert dein Makler-Level, das bessere Viertel, günstigere Renovierungen und schärfere Deals freischaltet. Wie groß wird dein Immobilien-Imperium?",
+    assets:"Objekte",tabEstate:"Immobilien",tabBiz:"Unternehmen",founderLvl:"Gründer-Lv",openBizH:"🏪 Unternehmen eröffnen",myBizH:"🏢 Meine Unternehmen",bizEmpty:"Noch keine Unternehmen — eröffne oben eins.",
+    open:"Eröffnen",workShift:"Schicht arbeiten",ready:"Bereit",staff:"Personal",hireStaff:"Personal einstellen",manager:"Manager",hireManager:"Manager anheuern",automated:"🤖 Automatisiert",
+    bizLocked:(n,l)=>"🔒 "+n+" ab Gründer-Lv "+l,shiftDone:s=>"💵 Schicht abgeschlossen: +"+s,managerHired:"🤖 Manager angeheuert — dieses Unternehmen läuft jetzt von selbst!",
+    managerOffline:s=>"🤖 Deine Manager haben "+s+" verdient, während du weg warst!"}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const $=id=>document.getElementById(id);
@@ -297,7 +339,7 @@
     if(timeLeft<=0){ timeLeft=0; updateTimer(); endRound(); return; }
     updateTimer();
   }
-  let last=0; function loop(ts){ if(!last) last=ts; let dt=(ts-last)/1000; last=ts; if(dt>0.25) dt=0.25; tick(dt); requestAnimationFrame(loop); }
+  let last=0; function loop(ts){ if(!last) last=ts; let dt=(ts-last)/1000; last=ts; if(dt>0.25) dt=0.25; tick(dt); bizTick(dt); requestAnimationFrame(loop); }
 
   function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1600); }
   async function share(){ const txt=T().shareText(best), url=location.origin+location.pathname; if(navigator.share){ try{ await navigator.share({title:"Nexus Finance",text:txt,url}); return; }catch(e){} } try{ await navigator.clipboard.writeText(txt+" "+url); toast(T().copied); }catch(e){ toast(txt); } }
@@ -320,9 +362,9 @@
   ];
   const CAT_MAXLV=3, EMP_KEY="nx_finance_empire";
   let emp;
-  function empFresh(){ return {capital:3000, xp:0, stats:{flips:0,careerProfit:0,bestFlip:0}, owned:[], market:[], nextId:1}; }
-  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({flips:0,careerProfit:0,bestFlip:0},emp.stats); return; } }catch(e){} emp=empFresh(); }
-  function empSave(){ localStorage.setItem(EMP_KEY, JSON.stringify(emp)); }
+  function empFresh(){ return {capital:3000, xp:0, stats:{flips:0,careerProfit:0,bestFlip:0,bizProfit:0}, owned:[], market:[], nextId:1, founderXp:0, businesses:[]}; }
+  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({flips:0,careerProfit:0,bestFlip:0,bizProfit:0},emp.stats); emp.businesses=emp.businesses||[]; return; } }catch(e){} emp=empFresh(); }
+  function empSave(){ for(const b of emp.businesses||[]) if(b.manager) b.lastTick=Date.now(); localStorage.setItem(EMP_KEY, JSON.stringify(emp)); }
   function empLevelXp(l){ return Math.pow(Math.max(0,l-1),2)*40; }
   function empLevel(){ let l=1; while(empLevelXp(l+1)<=(emp.xp||0)) l++; return l; }
   function empProgress(){ const l=empLevel(); const cur=empLevelXp(l), next=empLevelXp(l+1); return {level:l, into:(emp.xp||0)-cur, need:next-cur, pct:Math.min(100,((emp.xp||0)-cur)/(next-cur)*100)}; }
@@ -376,8 +418,11 @@
   }
   function renderEmpireHud(){
     $("capVal").textContent=fmt$(emp.capital);
+    $("assetCountVal").textContent=emp.owned.length+emp.businesses.length;
+  }
+  function renderEstateHud(){
     const pr=empProgress();
-    $("lvlVal").textContent=pr.level; $("propCountVal").textContent=emp.owned.length;
+    $("lvlVal").textContent=pr.level;
     $("xpFill").style.width=pr.pct+"%"; $("xpLabel").textContent=pr.into+" / "+pr.need+" XP";
     const hoods=unlockedHoods(), locked=HOODS.find(h=>!hoods.includes(h));
     $("nextUnlockHint").textContent = locked ? T().nextUnlock(locked.name[lang],locked.req) : T().allUnlocked;
@@ -412,17 +457,157 @@
     box.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{ const parts=b.getAttribute("data-up").split("|"); upgrade(parts[0],parts[1]); });
     box.querySelectorAll("[data-sellp]").forEach(b=>b.onclick=()=>sellProperty(b.getAttribute("data-sellp")));
   }
-  function renderEmpire(){ renderEmpireHud(); renderMarket(); renderPortfolio(); $("empAboutH").textContent=T().empAboutH; $("empAboutP").textContent=T().empAboutP; }
+  /* ---------- Businesses (Phase 2) ---------- */
+  const BIZ_TYPES=[
+    {id:"diner", name:{en:"Neon Diner",de:"Neon-Diner"}, icon:"🍔", cost:2500, founderReq:1,
+     prep:[{id:"stock",icon:"📦",label:{en:"Restock",de:"Nachschub"},cost:40},
+           {id:"promo",icon:"📣",label:{en:"Promo",de:"Werbung"},cost:60}],
+     shiftIncome:[90,160], staffCost:250, managerReq:6, managerCost:4000},
+    {id:"garage", name:{en:"Retro Repair Garage",de:"Retro-Werkstatt"}, icon:"🔧", cost:4000, founderReq:4,
+     prep:[{id:"parts",icon:"🔩",label:{en:"Order Parts",de:"Teile bestellen"},cost:70},
+           {id:"tools",icon:"🧰",label:{en:"Sharpen Tools",de:"Werkzeug schärfen"},cost:50}],
+     shiftIncome:[150,280], staffCost:450, managerReq:8, managerCost:7000}
+  ];
+  const STAFF_MAX=3, STAFF_REGEN_PCT_PER_SEC=100/60, MANAGER_SHIFT_S=15, MANAGER_OFFLINE_CAP_S=12*3600;
+  function bizTypeOf(b){ return BIZ_TYPES.find(t=>t.id===b.typeId); }
+  function founderLevelXp(l){ return Math.pow(Math.max(0,l-1),2)*40; }
+  function founderLevel(){ let l=1; while(founderLevelXp(l+1)<=(emp.founderXp||0)) l++; return l; }
+  function founderProgress(){ const l=founderLevel(); const cur=founderLevelXp(l), next=founderLevelXp(l+1); return {level:l, into:(emp.founderXp||0)-cur, need:next-cur, pct:Math.min(100,((emp.founderXp||0)-cur)/(next-cur)*100)}; }
+  function founderDiscount(){ return Math.min(0.25, (founderLevel()-1)*0.02); }
+
+  function openBusiness(typeId){
+    const t=BIZ_TYPES.find(x=>x.id===typeId); if(!t) return;
+    if(emp.businesses.some(b=>b.typeId===typeId)) return;
+    if(founderLevel()<t.founderReq || emp.capital<t.cost) return;
+    emp.capital-=t.cost;
+    emp.businesses.push({id:"b"+(emp.nextId++), typeId:typeId, ready:0, staff:0, manager:false, lastTick:Date.now()});
+    empSave(); renderEmpire();
+  }
+  function prepAction(bizId,prepId){
+    const b=emp.businesses.find(x=>x.id===bizId); if(!b||b.manager||b.ready>=100) return;
+    const t=bizTypeOf(b); const p=t.prep.find(x=>x.id===prepId); if(!p||emp.capital<p.cost) return;
+    emp.capital-=p.cost; b.ready=Math.min(100,b.ready+35);
+    empSave(); renderEmpire();
+  }
+  function workShift(bizId){
+    const b=emp.businesses.find(x=>x.id===bizId); if(!b||b.manager||b.ready<100) return;
+    const t=bizTypeOf(b);
+    const income=Math.round(t.shiftIncome[0]+Math.random()*(t.shiftIncome[1]-t.shiftIncome[0]));
+    emp.capital+=income; b.ready=0; emp.stats.bizProfit=(emp.stats.bizProfit||0)+income;
+    emp.founderXp=(emp.founderXp||0)+Math.max(8,Math.round(income/15)+5);
+    toast(T().shiftDone(fmt$(income)));
+    empSave(); renderEmpire();
+  }
+  function hireStaff(bizId){
+    const b=emp.businesses.find(x=>x.id===bizId); if(!b||b.manager||b.staff>=STAFF_MAX) return;
+    const t=bizTypeOf(b); const cost=t.staffCost*(b.staff+1);
+    if(emp.capital<cost) return;
+    emp.capital-=cost; b.staff++;
+    empSave(); renderEmpire();
+  }
+  function hireManager(bizId){
+    const b=emp.businesses.find(x=>x.id===bizId); if(!b||b.manager) return;
+    const t=bizTypeOf(b);
+    if(founderLevel()<t.managerReq || emp.capital<t.managerCost) return;
+    emp.capital-=t.managerCost; b.manager=true; b.lastTick=Date.now();
+    toast(T().managerHired); empSave(); renderEmpire();
+  }
+  function bizOfflineCatchup(){
+    let earned=0; const now=Date.now();
+    for(const b of emp.businesses){
+      const elapsedS=Math.min(MANAGER_OFFLINE_CAP_S, Math.max(0,(now-(b.lastTick||now))/1000));
+      if(b.manager){
+        const t=bizTypeOf(b); const per=(t.shiftIncome[0]+t.shiftIncome[1])/2;
+        const shifts=Math.floor(elapsedS/MANAGER_SHIFT_S);
+        if(shifts>0){ const gain=shifts*per; emp.capital+=gain; earned+=gain; emp.stats.bizProfit=(emp.stats.bizProfit||0)+gain; }
+      }
+      b.lastTick=now;
+    }
+    if(earned>0){ toast(T().managerOffline(fmt$(Math.round(earned)))); empSave(); }
+  }
+  let bizSaveAcc=0;
+  function bizTick(dt){
+    if(!emp||!emp.businesses.length) return;
+    let changed=false;
+    for(const b of emp.businesses){
+      if(b.manager){
+        b.ready=(b.ready||0)+dt*(100/MANAGER_SHIFT_S);
+        if(b.ready>=100){
+          const t=bizTypeOf(b);
+          const income=Math.round(t.shiftIncome[0]+Math.random()*(t.shiftIncome[1]-t.shiftIncome[0]));
+          emp.capital+=income; b.ready=0; emp.stats.bizProfit=(emp.stats.bizProfit||0)+income; changed=true;
+        }
+      } else if(b.staff>0 && b.ready<100){
+        b.ready=Math.min(100, b.ready+b.staff*STAFF_REGEN_PCT_PER_SEC*dt); changed=true;
+      }
+    }
+    if(changed){ if(mode==="empire"&&eTab==="biz") renderBizOwned(); renderEmpireHud(); }
+    bizSaveAcc+=dt; if(bizSaveAcc>=1){ bizSaveAcc=0; empSave(); }
+  }
+  function renderFounderHud(){
+    const pr=founderProgress();
+    $("founderLvlVal").textContent=pr.level;
+    $("founderXpFill").style.width=pr.pct+"%"; $("founderXpLabel").textContent=pr.into+" / "+pr.need+" XP";
+  }
+  function renderBizOpen(){
+    const box=$("bizOpenList");
+    const toOpen=BIZ_TYPES.filter(t=>!emp.businesses.some(b=>b.typeId===t.id));
+    box.innerHTML=toOpen.map(t=>{
+      const unlocked=founderLevel()>=t.founderReq, afford=emp.capital>=t.cost;
+      if(!unlocked) return '<div class="pcard bizlock"><div class="phead"><span class="pname">'+t.icon+' '+t.name[lang]+'</span></div><div class="sub">'+T().bizLocked(t.name[lang],t.founderReq)+'</div></div>';
+      return '<div class="pcard"><div class="phead"><span class="pname">'+t.icon+' '+t.name[lang]+'</span><b style="color:var(--gold)">'+fmt$(t.cost)+'</b></div>'+
+        '<button class="pbuy" data-open="'+t.id+'" '+(afford?'':'disabled')+'>'+T().open+'</button></div>';
+    }).join("");
+    box.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openBusiness(b.getAttribute("data-open")));
+  }
+  function renderBizOwned(){
+    const box=$("bizOwnedList");
+    $("bizEmpty").classList.toggle("hidden", emp.businesses.length>0);
+    box.innerHTML=emp.businesses.map(b=>{
+      const t=bizTypeOf(b);
+      if(b.manager){
+        return '<div class="pcard"><div class="phead"><span class="pname">'+t.icon+' '+t.name[lang]+'</span></div>'+
+          '<div class="readybar"><div class="readyfill" style="width:'+(b.ready||0)+'%"></div></div>'+
+          '<div class="managerbadge">'+T().automated+'</div></div>';
+      }
+      const prepHtml=t.prep.map(p=>'<button class="bizbtn" data-prep="'+b.id+'|'+p.id+'" '+(b.ready>=100||emp.capital<p.cost?'disabled':'')+'>'+p.icon+' '+fmt$(p.cost)+'</button>').join("");
+      const staffDots=Array.from({length:STAFF_MAX}).map((_,i)=>'<span class="sdot'+(i<b.staff?' on':'')+'"></span>').join("");
+      const staffCost=t.staffCost*(b.staff+1);
+      const canManager=founderLevel()>=t.managerReq;
+      return '<div class="pcard"><div class="phead"><span class="pname">'+t.icon+' '+t.name[lang]+'</span><span class="pstars">'+Math.round(b.ready||0)+'% '+T().ready+'</span></div>'+
+        '<div class="readybar"><div class="readyfill" style="width:'+(b.ready||0)+'%"></div></div>'+
+        '<div class="bizrow">'+prepHtml+'</div>'+
+        '<button class="bizshift" data-shift="'+b.id+'" '+(b.ready>=100?'':'disabled')+'>'+T().workShift+'</button>'+
+        '<div class="stafflabel"><span>'+T().staff+' <span class="staffdots">'+staffDots+'</span></span>'+
+        (b.staff<STAFF_MAX?'<button class="hirebtn" data-staff="'+b.id+'" '+(emp.capital<staffCost?'disabled':'')+'>'+T().hireStaff+' · '+fmt$(staffCost)+'</button>':'')+'</div>'+
+        (canManager?'<button class="hirebtn" data-mgr="'+b.id+'" style="width:100%;margin-top:8px" '+(emp.capital<t.managerCost?'disabled':'')+'>'+T().hireManager+' · '+fmt$(t.managerCost)+'</button>':'')+
+        '</div>';
+    }).join("");
+    box.querySelectorAll("[data-prep]").forEach(bt=>bt.onclick=()=>{ const parts=bt.getAttribute("data-prep").split("|"); prepAction(parts[0],parts[1]); });
+    box.querySelectorAll("[data-shift]").forEach(bt=>bt.onclick=()=>workShift(bt.getAttribute("data-shift")));
+    box.querySelectorAll("[data-staff]").forEach(bt=>bt.onclick=()=>hireStaff(bt.getAttribute("data-staff")));
+    box.querySelectorAll("[data-mgr]").forEach(bt=>bt.onclick=()=>hireManager(bt.getAttribute("data-mgr")));
+  }
+  function renderBiz(){ renderFounderHud(); renderBizOpen(); renderBizOwned(); }
+  function renderEmpire(){ renderEmpireHud(); renderEstateHud(); renderMarket(); renderPortfolio(); renderBiz(); $("empAboutH").textContent=T().empAboutH; $("empAboutP").textContent=T().empAboutP; }
 
   let mode="trade";
   function setMode(m){
     mode=m;
     $("tradeMode").classList.toggle("hidden", m!=="trade");
     $("empireMode").classList.toggle("hidden", m!=="empire");
-    document.querySelectorAll(".modeTab").forEach(b=>b.classList.toggle("active", b.getAttribute("data-mode")===m));
+    document.querySelectorAll("#modeTabs .modeTab").forEach(b=>b.classList.toggle("active", b.getAttribute("data-mode")===m));
     if(m==="empire") renderEmpire();
   }
-  document.querySelectorAll(".modeTab").forEach(b=>b.addEventListener("click",()=>setMode(b.getAttribute("data-mode"))));
+  document.querySelectorAll("#modeTabs .modeTab").forEach(b=>b.addEventListener("click",()=>setMode(b.getAttribute("data-mode"))));
+  let eTab="estate";
+  function setETab(t){
+    eTab=t;
+    $("estateTab").classList.toggle("hidden", t!=="estate");
+    $("bizTab").classList.toggle("hidden", t!=="biz");
+    document.querySelectorAll("#eTabs .modeTab").forEach(b=>b.classList.toggle("active", b.getAttribute("data-etab")===t));
+  }
+  document.querySelectorAll("#eTabs .modeTab").forEach(b=>b.addEventListener("click",()=>setETab(b.getAttribute("data-etab"))));
   window.addEventListener("beforeunload",()=>{ if(emp) empSave(); });
   document.addEventListener("visibilitychange",()=>{ if(document.hidden && emp) empSave(); });
 
@@ -439,7 +624,7 @@
   $("langBtn").addEventListener("click",()=>{ lang=lang==="en"?"de":"en"; localStorage.setItem("nx_lang",lang); applyLang(); });
   $("year").textContent=new Date().getFullYear();
   $("overBest").textContent=fmt$(best);
-  empLoad(); refillMarket();
+  empLoad(); refillMarket(); bizOfflineCatchup();
   buildBoard(); applyLang(); requestAnimationFrame(loop);
 })();
 </script>
