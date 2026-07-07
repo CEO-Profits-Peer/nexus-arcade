@@ -341,6 +341,17 @@
   }
 
   /* ---------- Supabase Sync ---------- */
+  const shownSyncErrors = {};
+  function syncErrToast(raw){
+    const msg = String((raw&&raw.message)||raw||"");
+    let key="generic", friendly=t.syncErrGeneric+msg;
+    if(/does not exist|relation .* does not exist|42P01/i.test(msg)){ key="table"; friendly=t.syncErrTable; }
+    else if(/row-level security|policy|42501/i.test(msg)){ key="rls"; friendly=t.syncErrRls; }
+    if(shownSyncErrors[key]) return; // pro Fehlerart nur einmal pro Session zeigen
+    shownSyncErrors[key]=true;
+    console.warn("[nexus] sync", msg);
+    toast("⚠ "+friendly);
+  }
   function initSupabase(){
     const URL=window.NEXUS_SUPABASE_URL, KEY=window.NEXUS_SUPABASE_ANON_KEY;
     configured = !!(URL && KEY && !/DEIN-|YOUR-/i.test(URL) && !/DEIN-|YOUR-/i.test(KEY) && window.supabase);
@@ -374,7 +385,7 @@
   async function pull(){
     try{
       const r=await sb.from("saves").select("data").eq("user_id",user.id).maybeSingle();
-      if(r.error){ console.warn("[nexus] pull",r.error.message); return; }
+      if(r.error){ syncErrToast(r.error); return; }
       const cloud=(r.data&&r.data.data)||{};
       pulling=true; let changed=false;
       for(const k of SYNC_KEYS){ const local=localStorage.getItem(k); const m=mergeKey(k,local,(k in cloud)?cloud[k]:null); if(m!=null && m!==local){ localStorage.setItem(k,m); changed=true; } }
@@ -384,14 +395,14 @@
       renderButton();
       syncPush(); // gemergtes Ergebnis zurück in die Cloud
       if(changed && !sessionStorage.getItem("nexus_pulled")){ sessionStorage.setItem("nexus_pulled","1"); location.reload(); return; }
-    }catch(e){ console.warn("[nexus] pull",e); }
+    }catch(e){ syncErrToast(e); }
   }
   function syncPush(){ if(!user||!sb) return; clearTimeout(pushTimer); pushTimer=setTimeout(doPush,1400); }
   async function doPush(){
     if(!user||!sb) return;
     const bundle={}; for(const k of SYNC_KEYS){ const v=localStorage.getItem(k); if(v!=null) bundle[k]=v; }
-    try{ await sb.from("saves").upsert({user_id:user.id, data:bundle, updated_at:new Date().toISOString()}); }
-    catch(e){ console.warn("[nexus] push",e); }
+    try{ const r=await sb.from("saves").upsert({user_id:user.id, data:bundle, updated_at:new Date().toISOString()}); if(r.error) syncErrToast(r.error); }
+    catch(e){ syncErrToast(e); }
   }
 
   /* ---------- Leaderboards ---------- */
@@ -404,16 +415,16 @@
     const st=readStats(); const rows=[];
     for(const gk in SCORE_MAP){ const v=st[SCORE_MAP[gk]]||0; if(v>0) rows.push({user_id:user.id,game:gk,score:Math.floor(v),name:displayName(),updated_at:new Date().toISOString()}); }
     if(!rows.length) return;
-    try{ await sb.from("scores").upsert(rows,{onConflict:"user_id,game"}); }catch(e){ console.warn("[nexus] scores",e); }
+    try{ const r=await sb.from("scores").upsert(rows,{onConflict:"user_id,game"}); if(r.error) syncErrToast(r.error); }catch(e){ syncErrToast(e); }
   }
   async function submitScore(game,score){
     if(!user||!sb||!score) return;
-    try{ await sb.from("scores").upsert([{user_id:user.id,game:game,score:Math.floor(score),name:displayName(),updated_at:new Date().toISOString()}],{onConflict:"user_id,game"}); }catch(e){ console.warn("[nexus] score",e); }
+    try{ const r=await sb.from("scores").upsert([{user_id:user.id,game:game,score:Math.floor(score),name:displayName(),updated_at:new Date().toISOString()}],{onConflict:"user_id,game"}); if(r.error) syncErrToast(r.error); }catch(e){ syncErrToast(e); }
   }
   async function fetchLeaderboard(game){
     if(!sb) return null;
-    try{ const r=await sb.from("scores").select("name,score").eq("game",game).order("score",{ascending:false}).limit(10); if(r.error){console.warn(r.error);return[];} return r.data||[]; }
-    catch(e){ console.warn(e); return []; }
+    try{ const r=await sb.from("scores").select("name,score").eq("game",game).order("score",{ascending:false}).limit(10); if(r.error){syncErrToast(r.error);return[];} return r.data||[]; }
+    catch(e){ syncErrToast(e); return []; }
   }
   async function loadLeaderboard(){
     const el=dom.card&&dom.card.querySelector("#nxLbList"); if(!el)return; const t=TXT[L]||{};
