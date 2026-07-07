@@ -19,7 +19,7 @@ Live: `https://nexusarcade.vercel.app`
 - Je ein Spiel pro Ordner als **eine** `index.html` (HTML+CSS+JS in einer Datei):
   `dash/` (Arcade), `idle/` (Idle-Action-RPG „Nexus Realms"), `words/` (Wordle), `racer/` (Rennen),
   `merge/` (2048), `run3d/` (3D-Runner, Three.js), `snake/`, `breaker/` (Breakout), `tycoon/` (Idle-Business),
-  `stack/` (Timing-Stapeln), `blocks/` (Tetris-artig).
+  `stack/` (Timing-Stapeln), `blocks/` (Tetris-artig), `finance/` (Trading-Simulator, 75s-Runde).
 - Gemeinsame Module (Reihenfolge auf **jeder** Seite so einhalten):
   1. `account-config.js` — Supabase URL + Publishable Key (vom Nutzer gepflegt)
   2. supabase-js (CDN)
@@ -35,19 +35,19 @@ Live: `https://nexusarcade.vercel.app`
 - **localStorage-Keys** (Bestwerte/Speicherstände):
   Dash `nd_best`, Racer `nx_racer_best`, 2048 `nx_2048_best`, Run3D `nx_run3d_best`, Snake `nx_snake_best`,
   Breaker `nx_breaker_best`, Tycoon `nx_tycoon` (State) + `nx_tycoon_best` (lifetime), Stack `nx_stack_best`,
-  Blocks `nx_blocks_best`, Realms `nr_save_v1` (Feld `maxZone`=Region, `gems`, `heroLv`, `gold`, …),
+  Blocks `nx_blocks_best`, Finance `nx_finance_best` (bester Nettovermögen-Endstand), Realms `nr_save_v1` (Feld `maxZone`=Region, `gems`, `heroLv`, `gold`, …),
   Words `nw_v1_en`/`nw_v1_de` (`.stats.max`=Streak). Meta: `nexus_profile`, `nexus_ach`, `nexus_quests`, `nexus_favs`.
 - **Konto-Anbindung aus Spielen** (immer defensiv, `if(window.NexusArcade)`):
   - `window.NexusArcade.addXP(n)` bei Fortschritt/Game-Over.
-  - `window.NexusArcade.submitScore("<gameKey>", best)` bei Game-Over (Leaderboard). gameKeys = dash/racer/merge/run3d/snake/breaker/tycoon/stack/blocks/idle/words.
+  - `window.NexusArcade.submitScore("<gameKey>", best)` bei Game-Over (Leaderboard). gameKeys = dash/racer/merge/run3d/snake/breaker/tycoon/stack/blocks/finance/idle/words.
   - Erfolge schalten **automatisch** frei: `account.js` liest die localStorage-Stats (siehe `readStats()`), keine manuellen Calls nötig.
 - **Neues Spiel hinzufügen** = Ordner + `index.html` (Muster von einem bestehenden Spiel kopieren), die 6 Script-Includes ans Ende, in `index.html` (Portal) zur `GAMES`-Liste + SVG-Icon, in `account.js` `detectGame()` + Erfolge (in `nexus-data.js`) + `SCORE_MAP` (in `nexus-data.js`) ergänzen, `sitemap.xml` erweitern.
 - **Sync/Datensicherheit:** Login **merged** lokal+Cloud (`mergeKey` in `account.js` behält pro Feld den besseren Wert — niemals blind überschreiben).
 
 ## Bekannte Baustellen / Aufräumen
-- `account.js` enthält einen **großen auskommentierten Datenblock** (`/* ===== unten ausgelagert … */`) — die Daten leben jetzt in `nexus-data.js`. **Diesen toten Kommentar löschen** (echte Verkleinerung). Danach ganze Datei im Browser testen.
 - `account.js` ist groß; optional weiter modularisieren (UI/Render in `nexus-ui.js`). Nur mit Browser-Test.
 - Nach jedem Deploy **Hard-Refresh** (alter „immutable"-Cache).
+- Sync-Fehler (fehlende Tabelle/RLS) werden jetzt als Toast angezeigt (`syncErrToast` in `account.js`), nicht mehr nur in der Konsole.
 
 ## Definition of Done für Änderungen
 1. Im **echten Browser** getestet (Desktop + schmales Fenster).

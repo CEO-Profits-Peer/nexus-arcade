@@ -140,9 +140,11 @@ window.NEXUS_DATA=(function(){
   ACH.push({id:"play_tycoon",game:"tycoon",icon:"💼",xp:40,name:{en:"Entrepreneur",de:"Unternehmer"},desc:{en:"Play Nexus Tycoon",de:"Nexus Tycoon spielen"}});
   ACH.push({id:"play_stack",game:"stack",icon:"🧱",xp:40,name:{en:"Builder",de:"Baumeister"},desc:{en:"Play Nexus Stack",de:"Nexus Stack spielen"}});
   ACH.push({id:"play_blocks",game:"blocks",icon:"🟪",xp:40,name:{en:"Stacker",de:"Stapler"},desc:{en:"Play Nexus Blocks",de:"Nexus Blocks spielen"}});
+  ACH.push({id:"play_finance",game:"finance",icon:"💹",xp:40,name:{en:"Trader",de:"Trader"},desc:{en:"Play Nexus Finance",de:"Nexus Finance spielen"}});
   addTier("tycoon","tycoon","💼","tycoon_best",[1000,100000,1000000,100000000,10000000000,1000000000000],"Empire","Imperium","Earn {n} total in Nexus Tycoon","{n} gesamt in Nexus Tycoon verdienen",true);
   addTier("stack","stack","🏢","stack_best",[10,25,50,100,150,250],"Tower","Turm","Stack {n} blocks in Nexus Stack","{n} Blöcke in Nexus Stack stapeln",false);
   addTier("blocks","blocks","🟪","blocks_best",[500,2000,5000,10000,25000,50000],"Blocks","Blocks","Score {n} in Nexus Blocks","{n} Punkte in Nexus Blocks",false);
+  addTier("finance","finance","💹","finance_best",[1500,2500,4000,6000,10000,20000],"Net Worth","Nettovermögen","Reach ${n} net worth in Nexus Finance","{n}$ Nettovermögen in Nexus Finance erreichen",true);
 
   /* ---------- Taegliche Quests ---------- */
   const QUESTS = [
@@ -155,6 +157,6 @@ window.NEXUS_DATA=(function(){
   ];
   const questSub={play1:{en:"Play any game today",de:"Heute irgendein Spiel spielen"},play3:{en:"Play 3 different games today",de:"Heute 3 verschiedene Spiele spielen"},xp150:{en:"Earn 150 XP today",de:"Heute 150 XP verdienen"},beat:{en:"Beat any highscore today",de:"Heute einen Highscore knacken"},word:{en:"Win a word puzzle today",de:"Heute ein Worträtsel gewinnen"},realm:{en:"Reach a new realm today",de:"Heute ein neues Reich erreichen"}};
   const questById=id=>QUESTS.find(q=>q.id===id);
-  const SCORE_MAP={dash:"dash_best",racer:"racer_best",merge:"merge_best",run3d:"run3d_best",snake:"snake_best",breaker:"breaker_best",tycoon:"tycoon_best",stack:"stack_best",blocks:"blocks_best",idle:"idle_zone",words:"words_max"};
+  const SCORE_MAP={dash:"dash_best",racer:"racer_best",merge:"merge_best",run3d:"run3d_best",snake:"snake_best",breaker:"breaker_best",tycoon:"tycoon_best",stack:"stack_best",blocks:"blocks_best",finance:"finance_best",idle:"idle_zone",words:"words_max"};
   return {FRAMES:FRAMES,PREMIUM_FRAMES:PREMIUM_FRAMES,ALLFRAMES:ALLFRAMES,frameById:frameById,PREMIUM_AVATARS:PREMIUM_AVATARS,SVG_ICON:SVG_ICON,SVG_AVATARS:SVG_AVATARS,CUSTOM_IMG_LEVEL:CUSTOM_IMG_LEVEL,TITLES:TITLES,titleById:titleById,ACH:ACH,achById:achById,QUESTS:QUESTS,questSub:questSub,questById:questById,SCORE_MAP:SCORE_MAP};
 })();
