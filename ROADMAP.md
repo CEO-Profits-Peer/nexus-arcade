@@ -21,8 +21,12 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
 ## Offene Features (priorisiert)
 
 ### 1. Bugs — konkret, zuerst beheben
-- [ ] **Nexus 2048**: Lose-Screen rendert **hinter** dem Spielfeld (Layering-/z-index-Bug).
-- [ ] **Nexus Stack**: Breitbild-/Wide-Modus rendert falsch (Layout bricht).
+- [x] **Nexus 2048**: Lose-Screen rendert hinter dem Spielfeld — behoben (`z-index` auf `.over`).
+- [x] **Nexus Stack**: Breitbild-/Wide-Modus rendert falsch — behoben (Blockhöhe im Chill-Modus proportional angepasst).
+- [ ] **Nexus Finance Empire**: Neon-Diner-Buttons (Nachschub/Werbung/Schicht/Personal) laut Nutzer teils ohne
+      Reaktion. Im Test (frischer State, alle Buttons) konnte ich das nicht reproduzieren — sehr wahrscheinlich der
+      bekannte Cache-Fallstrick (Hard-Refresh nach Deploy nötig, siehe unten). Nutzer um Hard-Refresh + erneuten
+      Test gebeten; falls es bleibt, genaue Reproduktionsschritte einholen.
 - [ ] **Leaderboards weiterhin unzuverlässig** — Nutzer meldet „funktioniert immer noch nicht sooo gescheit".
       Genaue Symptome reproduzieren (welche Spiele, eingeloggt/Gast, welcher Browser) und Ursache finden.
 
@@ -33,6 +37,8 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
 
 ### 3. Hauptmenü & Top-Bar — Redesign (hohe Priorität)
 - [ ] Portal-Hauptmenü und die Top-Bar innerhalb der Spiele clean, modern und **innovativ** neu gestalten.
+      Nutzer-Feedback: **einheitliche Top-Bar über alle Spiele** ist wichtig (aktuell pro Spiel leicht
+      unterschiedlich), Gesamt-UI generell cleaner (Basis wird als „schon super" empfunden — Politur, kein Neubau).
       Visuelle Richtung mit Nutzer klären, bevor umgesetzt wird (großer, sichtbarer Schritt für alle Spieler).
 
 ### 4. UI/UX — Grundsatzfrage (Entscheidung offen)
@@ -50,11 +56,18 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
 - [ ] **Nexus Realms v2** nachbalancen (Loot-Rate, HP-/Gold-Kurve) + mehr Tiefe: Skills, Set-Boni, mehr Slots, Prestige.
 - [ ] In-Game-Piktogramme statt Emojis pro Spiel, wo es passt (SVG, wie in Portal/Tabs).
 - [ ] Weitere kleine Spiele nach Bedarf (jede neue Seite = neue SEO-Tür + Cross-Traffic).
+- [ ] **Neue Spielideen (Nutzer-Vorschläge, noch nicht eingeplant):** Tower-Defence-Spiel · PvE-Spiel ·
+      Aufbauspiel im Clash-of-Clans-Stil. Größere Würfe — vor Umsetzung jeweils eigene Scoping-Runde.
 
 ### 6. Monetarisierung
-- [ ] **Rewarded Ads**: Ad-Netzwerk-Konto nötig (AdSense oder AdinPlay/CreativeClan für Games). Danach: „Video
-      ansehen → Belohnung" (z. B. 2× Gold/Coins, Continue in Arcade-Spielen). Reward-Hook + Platzhalter vorbereiten.
-- [ ] Ad-Slots füllen (sind als leere `.ad-slot` vorhanden, `:empty`=unsichtbar).
+- [ ] **Rewarded Ads zuerst** (opt-in, z. B. „Video ansehen → 2× Gold/Coins, Continue"): können **jetzt schon**
+      sinnvoll sein — Spieler entscheiden sich freiwillig dafür, geringes Risiko fürs Nutzererlebnis, monetarisiert
+      jeden Traffic der schon da ist. Ad-Netzwerk-Konto nötig (AdSense oder AdinPlay/CreativeClan für Games).
+- [ ] **Display-/Banner-Ads (die vorhandenen `.ad-slot`-Platzhalter) erst später füllen**: aktuell noch keine eigene
+      Domain, nicht bei Search Console eingereicht, kein organischer Traffic — Banner würden nur den ersten
+      Eindruck für frühe Tester verschlechtern, ohne nennenswert Umsatz zu bringen (zu wenig Impressionen für
+      Ad-Netzwerk-Fill-Rate). Sinnvoller Trigger: **nach** eigener Domain + Search-Console-Einreichung, sobald
+      im Analytics echter (nicht selbst erzeugter) Traffic über mehrere Wochen ankommt.
 
 ### 7. Meta / QoL
 - [ ] Globale Sound-Einstellung, evtl. Theme-Optionen.
@@ -64,6 +77,13 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
 - [ ] Eigene Domain kaufen + verbinden (statt vercel.app) — besser fürs SEO.
 - [ ] Spiele auf Portale hochladen: itch.io, CrazyGames, Poki, GameDistribution (bringen eigenen Traffic).
 - [ ] `sitemap.xml` bei Google Search Console einreichen; strukturierte Daten sind pro Spiel schon drin.
+
+---
+
+## Notiz: Fable 5
+Nutzer-Haltung: Fable 5 ist „wie ein Gott" — nicht für kleine Dinge (Flavor-Texte etc.) einsetzen. Falls überhaupt,
+dann für etwas ganz Großes: ein **Generational Game** oder ein **Engine-Upgrade Extreme**. Kein aktueller Task,
+nur als Haltung/Ambition festgehalten für spätere große Weichenstellungen.
 
 ---
 
