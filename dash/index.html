@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nexus Dash — Free Online Arcade Highscore Game | Kostenloses Arcade-Spiel</title>
+<meta name="description" content="Nexus Dash is a fast, free browser arcade game. Dodge the shards, grab orbs, chase the highscore. Play instantly — no download. Nexus Dash ist ein kostenloses Arcade-Spiel im Browser." />
+<meta name="keywords" content="free browser game, arcade game, highscore game, dodge game, online game no download, kostenloses spiel, arcade spiel, browsergame" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/dash/" />
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Dash — Free Arcade Highscore Game" />
+<meta property="og:description" content="Dodge, collect, survive. Can you beat the highscore? Play free in your browser." />
+<meta property="og:url" content="https://nexusarcade.vercel.app/dash/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Nexus Dash — Free Arcade Highscore Game" />
+<meta name="twitter:description" content="Dodge, collect, survive. Beat the highscore. Play free." />
+
+<!-- Structured data helps Google understand this is a game (better search visibility) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Nexus Dash",
+  "genre": "Arcade",
+  "gamePlatform": "Web Browser",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+
+<style>
+  :root{
+    --bg:#05060f;
+    --panel:rgba(14,18,38,0.82);
+    --neon:#39e6ff;
+    --neon2:#ff3ea5;
+    --accent:#7cff6b;
+    --text:#eaf6ff;
+    --muted:#8a97c2;
+    --danger:#ff4d6d;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(57,230,255,0.12), transparent 60%),
+      radial-gradient(900px 500px at 90% 110%, rgba(255,62,165,0.12), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;min-height:100%;
+    overflow-x:hidden;
+  }
+  header.top{
+    width:100%;max-width:960px;padding:14px 18px 4px;display:flex;
+    align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:1px;}
+  .brand .dot{width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,#fff,var(--neon));
+    box-shadow:0 0 14px var(--neon),0 0 30px var(--neon);}
+  .brand span{font-size:20px;background:linear-gradient(90deg,var(--neon),var(--neon2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{
+    background:var(--panel);border:1px solid rgba(120,140,220,0.25);color:var(--text);
+    padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;user-select:none;transition:.15s;
+  }
+  .chip:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(57,230,255,0.25);}
+
+  /* Ad slots — replace the inner content with your ad network snippet (e.g. Google AdSense) */
+  .ad-slot{
+    width:100%;max-width:960px;min-height:90px;margin:8px 0;border-radius:12px;
+    border:1px dashed rgba(120,140,220,0.35);display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:12px;letter-spacing:1px;background:rgba(255,255,255,0.02);
+  }
+  .ad-slot:empty{display:none;}
+
+  .stage-wrap{width:100%;max-width:960px;padding:6px 12px 12px;}
+  .hud{
+    display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;font-variant-numeric:tabular-nums;
+  }
+  .hud .box{
+    flex:1;background:var(--panel);border:1px solid rgba(120,140,220,0.22);
+    border-radius:12px;padding:8px 12px;text-align:center;
+  }
+  .hud .label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .hud .val{font-size:22px;font-weight:800;}
+  .hud .val.neon{color:var(--neon);text-shadow:0 0 10px rgba(57,230,255,0.5);}
+  .hud .val.pink{color:var(--neon2);text-shadow:0 0 10px rgba(255,62,165,0.5);}
+
+  .canvas-frame{
+    position:relative;width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;
+    border:1px solid rgba(120,140,220,0.3);
+    box-shadow:0 0 40px rgba(57,230,255,0.08),inset 0 0 60px rgba(0,0,0,0.6);
+    background:radial-gradient(700px 400px at 50% 40%,rgba(30,40,80,0.35),transparent 70%);
+    touch-action:none;cursor:none;
+  }
+  canvas{display:block;width:100%;height:100%;}
+
+  .overlay{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;gap:14px;background:rgba(5,6,15,0.72);backdrop-filter:blur(3px);
+  }
+  .overlay.hidden{display:none;}
+  .overlay h1{margin:0;font-size:clamp(28px,6vw,52px);letter-spacing:2px;
+    background:linear-gradient(90deg,var(--neon),var(--neon2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .overlay p{margin:0;color:var(--muted);max-width:460px;line-height:1.5;font-size:15px;}
+  .overlay .score-big{font-size:clamp(40px,10vw,72px);font-weight:900;color:var(--neon);text-shadow:0 0 20px rgba(57,230,255,0.6);}
+  .overlay .sub{font-size:14px;color:var(--muted);}
+  .btn{
+    border:none;cursor:pointer;font-weight:800;letter-spacing:1px;font-size:16px;
+    padding:14px 28px;border-radius:999px;color:#04121a;
+    background:linear-gradient(90deg,var(--neon),var(--accent));
+    box-shadow:0 0 24px rgba(57,230,255,0.4);transition:.15s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(57,230,255,0.7);}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(120,140,220,0.4);box-shadow:none;}
+  .btn.secondary:hover{border-color:var(--neon);box-shadow:0 0 16px rgba(57,230,255,0.3);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .new-best{color:var(--accent);font-weight:800;letter-spacing:1px;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+  .about{max-width:960px;padding:8px 18px 40px;color:var(--muted);line-height:1.7;}
+  .about h2{color:var(--text);font-size:18px;margin-top:22px;}
+  .about a{color:var(--neon);}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
+
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    background:var(--panel);border:1px solid var(--neon);color:var(--text);
+    padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS DASH</span></a>
+  <div class="controls">
+    <a class="chip" href="../" title="More games" style="text-decoration:none">← Games</a>
+    <div class="chip" id="langBtn" title="Language">🌐 <span id="langLabel">EN</span></div>
+    <div class="chip" id="muteBtn" title="Sound">🔊 <span id="muteLabel">On</span></div>
+  </div>
+</header>
+
+<!-- ===== AD SLOT (top banner) — paste AdSense code inside this div ===== -->
+<div class="ad-slot" id="adTop"></div>
+
+<div class="stage-wrap">
+  <div class="hud">
+    <div class="box"><div class="label" data-i18n="score">Score</div><div class="val neon" id="scoreVal">0</div></div>
+    <div class="box"><div class="label" data-i18n="multi">Multiplier</div><div class="val pink" id="multiVal">x1</div></div>
+    <div class="box"><div class="label" data-i18n="best">Best</div><div class="val" id="bestVal">0</div></div>
+  </div>
+
+  <div class="canvas-frame" id="frame">
+    <canvas id="game"></canvas>
+
+    <!-- Start / Menu overlay -->
+    <div class="overlay" id="startOverlay">
+      <h1>NEXUS DASH</h1>
+      <p data-i18n="intro">Move your node with the mouse or your finger. Dodge the red shards, grab the glowing orbs, survive as long as you can. One hit ends the run.</p>
+      <button class="btn" id="startBtn" data-i18n="play">▶ PLAY</button>
+      <div class="sub" data-i18n="hint">Desktop: move mouse · Mobile: drag finger</div>
+    </div>
+
+    <!-- Game Over overlay -->
+    <div class="overlay hidden" id="overOverlay">
+      <div class="sub" data-i18n="gameover">GAME OVER</div>
+      <div class="score-big" id="finalScore">0</div>
+      <div class="new-best hidden" id="newBest" data-i18n="newbest">★ NEW HIGHSCORE ★</div>
+      <div class="sub"><span data-i18n="best">Best</span>: <b id="overBest">0</b></div>
+      <div class="btn-row">
+        <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
+        <button class="btn secondary" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AD SLOT (below game) ===== -->
+<div class="ad-slot" id="adBottom"></div>
+
+<section class="about">
+  <h2 id="aboutH1">About Nexus Dash</h2>
+  <p id="aboutP1">Nexus Dash is a free online arcade game you can play instantly in your browser — no download, no install, no signup. Guide your glowing node through an endless field of hazards, collect energy orbs to build your score multiplier, and push for a new personal highscore. It works on desktop and mobile.</p>
+  <h2 id="howH">How to play</h2>
+  <p id="howP">Move your node with the mouse (desktop) or by dragging your finger (mobile). Avoid the red shards — a single hit ends your run. Collect the cyan orbs to raise your multiplier and score faster. The longer you survive, the faster and more crowded it gets. Share your score and challenge a friend to beat it.</p>
+</section>
+
+<footer>© <span id="year"></span> Nexus Dash · Built as a lightweight, traffic-first web arcade game.</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  /* ---------------- i18n ---------------- */
+  const I18N = {
+    en:{
+      score:"Score", multi:"Multiplier", best:"Best", play:"▶ PLAY", retry:"↻ RETRY",
+      share:"⤴ SHARE", gameover:"GAME OVER", newbest:"★ NEW HIGHSCORE ★",
+      intro:"Move your node with the mouse or your finger. Dodge the red shards, grab the glowing orbs, survive as long as you can. One hit ends the run.",
+      hint:"Desktop: move mouse · Mobile: drag finger",
+      aboutH:"About Nexus Dash",
+      aboutP:"Nexus Dash is a free online arcade game you can play instantly in your browser — no download, no install, no signup. Guide your glowing node through an endless field of hazards, collect energy orbs to build your score multiplier, and push for a new personal highscore. It works on desktop and mobile.",
+      howH:"How to play",
+      howP:"Move your node with the mouse (desktop) or by dragging your finger (mobile). Avoid the red shards — a single hit ends your run. Collect the cyan orbs to raise your multiplier and score faster. The longer you survive, the faster and more crowded it gets. Share your score and challenge a friend to beat it.",
+      shareText:(s)=>`I scored ${s} in Nexus Dash! Can you beat me?`,
+      copied:"Score copied — paste it anywhere!",
+      soundOn:"On", soundOff:"Off"
+    },
+    de:{
+      score:"Punkte", multi:"Multiplikator", best:"Bestwert", play:"▶ SPIELEN", retry:"↻ NOCHMAL",
+      share:"⤴ TEILEN", gameover:"GAME OVER", newbest:"★ NEUER REKORD ★",
+      intro:"Bewege deinen Node mit der Maus oder dem Finger. Weiche den roten Splittern aus, sammle die leuchtenden Orbs, überlebe so lange wie möglich. Eine Berührung beendet den Lauf.",
+      hint:"Desktop: Maus bewegen · Mobil: Finger ziehen",
+      aboutH:"Über Nexus Dash",
+      aboutP:"Nexus Dash ist ein kostenloses Arcade-Spiel, das du sofort im Browser spielen kannst — kein Download, keine Installation, keine Anmeldung. Steuere deinen leuchtenden Node durch ein endloses Hindernisfeld, sammle Energie-Orbs für deinen Multiplikator und jage einen neuen Highscore. Läuft auf Desktop und Handy.",
+      howH:"So wird gespielt",
+      howP:"Bewege deinen Node mit der Maus (Desktop) oder ziehe mit dem Finger (Handy). Weiche den roten Splittern aus — eine Berührung beendet den Lauf. Sammle die cyanfarbenen Orbs, um deinen Multiplikator und deine Punkte schneller steigen zu lassen. Je länger du überlebst, desto schneller und voller wird es. Teile deinen Score und fordere Freunde heraus.",
+      shareText:(s)=>`Ich habe ${s} Punkte in Nexus Dash! Schaffst du mehr?`,
+      copied:"Score kopiert — überall einfügen!",
+      soundOn:"An", soundOff:"Aus"
+    }
+  };
+  let lang = (navigator.language||"en").toLowerCase().startsWith("de") ? "de" : "en";
+
+  function applyLang(){
+    const t = I18N[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el=>{
+      const k = el.getAttribute("data-i18n");
+      if(t[k]) el.textContent = t[k];
+    });
+    document.getElementById("langLabel").textContent = lang.toUpperCase();
+    document.getElementById("aboutH1").textContent = t.aboutH;
+    document.getElementById("aboutP1").textContent = t.aboutP;
+    document.getElementById("howH").textContent = t.howH;
+    document.getElementById("howP").textContent = t.howP;
+    document.getElementById("muteLabel").textContent = muted ? t.soundOff : t.soundOn;
+  }
+
+  /* ---------------- Sound (WebAudio, no assets) ---------------- */
+  let muted = localStorage.getItem("nd_muted")==="1";
+  let actx = null;
+  function beep(freq, dur, type, vol){
+    if(muted) return;
+    try{
+      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type||"sine"; o.frequency.value = freq;
+      g.gain.value = vol||0.06;
+      o.connect(g); g.connect(actx.destination);
+      const now = actx.currentTime;
+      g.gain.setValueAtTime(g.gain.value, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + (dur||0.12));
+      o.start(now); o.stop(now + (dur||0.12));
+    }catch(e){}
+  }
+  const sOrb = ()=>beep(660,0.10,"triangle",0.07);
+  const sHit = ()=>{beep(120,0.35,"sawtooth",0.12); setTimeout(()=>beep(80,0.4,"sawtooth",0.1),60);};
+
+  /* ---------------- Canvas setup ---------------- */
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const frame = document.getElementById("frame");
+  let W=0,H=0,DPR=1;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    const r = frame.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = Math.round(W*DPR);
+    canvas.height = Math.round(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener("resize", resize);
+
+  /* ---------------- Game state ---------------- */
+  const BEST_KEY="nd_best";
+  let best = parseInt(localStorage.getItem(BEST_KEY)||"0",10);
+  let state="menu"; // menu | playing | over
+  let player=null, enemies=[], orbs=[], particles=[];
+  let score, multiplier, elapsed, spawnT, orbT, targetX, targetY, hasPointer;
+  let lastTime=0;
+
+  function reset(){
+    player={x:W/2,y:H/2,r:Math.max(8,Math.min(W,H)*0.018),tx:W/2,ty:H/2};
+    targetX=W/2; targetY=H/2; hasPointer=false;
+    enemies=[]; orbs=[]; particles=[];
+    score=0; multiplier=1; elapsed=0; spawnT=0; orbT=0;
+    updateHUD();
+  }
+
+  function spawnEnemy(){
+    // spawn from a random edge, aim across the field
+    const side=Math.floor(Math.random()*4);
+    let x,y;
+    if(side===0){x=Math.random()*W;y=-20;}
+    else if(side===1){x=W+20;y=Math.random()*H;}
+    else if(side===2){x=Math.random()*W;y=H+20;}
+    else {x=-20;y=Math.random()*H;}
+    // target somewhere near current player for pressure, with spread
+    const tx=player.x+(Math.random()-0.5)*W*0.5;
+    const ty=player.y+(Math.random()-0.5)*H*0.5;
+    const ang=Math.atan2(ty-y,tx-x);
+    const speed=(90+elapsed*7)* (0.6+Math.random()*0.7);
+    const r=Math.max(6,Math.min(W,H)*0.014)*(0.8+Math.random()*0.8);
+    enemies.push({x,y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,r,rot:Math.random()*6.28});
+  }
+  function spawnOrb(){
+    const pad=40;
+    orbs.push({x:pad+Math.random()*(W-2*pad),y:pad+Math.random()*(H-2*pad),r:Math.max(7,Math.min(W,H)*0.013),life:8,t:0});
+  }
+  function burst(x,y,color,n){
+    for(let i=0;i<n;i++){
+      const a=Math.random()*6.28,s=40+Math.random()*160;
+      particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:0.5+Math.random()*0.4,t:0,color,r:2+Math.random()*3});
+    }
+  }
+
+  /* ---------------- Input ---------------- */
+  function setTarget(cx,cy){
+    const r=frame.getBoundingClientRect();
+    targetX=Math.max(0,Math.min(W,cx-r.left));
+    targetY=Math.max(0,Math.min(H,cy-r.top));
+    hasPointer=true;
+  }
+  frame.addEventListener("mousemove",e=>setTarget(e.clientX,e.clientY));
+  frame.addEventListener("touchmove",e=>{if(e.touches[0]){setTarget(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();}},{passive:false});
+  frame.addEventListener("touchstart",e=>{if(e.touches[0]){setTarget(e.touches[0].clientX,e.touches[0].clientY);}},{passive:true});
+
+  /* ---------------- Loop ---------------- */
+  function update(dt){
+    if(state!=="playing") return;
+    elapsed+=dt;
+    score += dt*10*multiplier;
+
+    // smooth follow
+    const ease=Math.min(1,dt*14);
+    player.x += (targetX-player.x)*ease;
+    player.y += (targetY-player.y)*ease;
+
+    // spawn scaling with time
+    spawnT-=dt;
+    const spawnEvery=Math.max(0.28,0.9-elapsed*0.02);
+    if(spawnT<=0){spawnEnemy(); spawnT=spawnEvery;}
+    orbT-=dt;
+    if(orbT<=0){spawnOrb(); orbT=2.2+Math.random()*1.6;}
+
+    // enemies
+    for(let i=enemies.length-1;i>=0;i--){
+      const e=enemies[i];
+      e.x+=e.vx*dt; e.y+=e.vy*dt; e.rot+=dt*3;
+      if(e.x<-60||e.x>W+60||e.y<-60||e.y>H+60){enemies.splice(i,1);continue;}
+      const dx=e.x-player.x,dy=e.y-player.y;
+      if(dx*dx+dy*dy < (e.r+player.r)*(e.r+player.r)*0.75){ gameOver(); return; }
+    }
+    // orbs
+    for(let i=orbs.length-1;i>=0;i--){
+      const o=orbs[i]; o.t+=dt; o.life-=dt;
+      if(o.life<=0){orbs.splice(i,1);continue;}
+      const dx=o.x-player.x,dy=o.y-player.y;
+      if(dx*dx+dy*dy < (o.r+player.r)*(o.r+player.r)){
+        orbs.splice(i,1);
+        multiplier=Math.min(20,multiplier+1);
+        score+=25*multiplier;
+        burst(o.x,o.y,"57,230,255",14);
+        sOrb(); updateHUD();
+      }
+    }
+    // particles
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i]; p.t+=dt;
+      if(p.t>=p.life){particles.splice(i,1);continue;}
+      p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=0.94; p.vy*=0.94;
+    }
+    updateHUD();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // subtle grid
+    ctx.strokeStyle="rgba(90,120,200,0.06)";ctx.lineWidth=1;
+    const g=48;
+    for(let x=0;x<W;x+=g){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=g){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    // orbs
+    for(const o of orbs){
+      const pulse=1+Math.sin(o.t*6)*0.12;
+      const a=Math.max(0.3,Math.min(1,o.life/2));
+      ctx.save();ctx.globalAlpha=a;
+      ctx.shadowColor="rgba(57,230,255,0.9)";ctx.shadowBlur=18;
+      ctx.fillStyle="#39e6ff";
+      ctx.beginPath();ctx.arc(o.x,o.y,o.r*pulse,0,6.283);ctx.fill();
+      ctx.restore();
+    }
+    // enemies (shards)
+    for(const e of enemies){
+      ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rot);
+      ctx.shadowColor="rgba(255,77,109,0.8)";ctx.shadowBlur=14;
+      ctx.fillStyle="#ff4d6d";
+      ctx.beginPath();
+      ctx.moveTo(0,-e.r);ctx.lineTo(e.r,0);ctx.lineTo(0,e.r);ctx.lineTo(-e.r,0);ctx.closePath();
+      ctx.fill();ctx.restore();
+    }
+    // particles
+    for(const p of particles){
+      const a=1-p.t/p.life;
+      ctx.globalAlpha=a;ctx.fillStyle="rgba("+p.color+",1)";
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.283);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    // player
+    if(state==="playing"&&player){
+      ctx.save();
+      ctx.shadowColor="rgba(124,255,107,0.9)";ctx.shadowBlur=22;
+      const grd=ctx.createRadialGradient(player.x,player.y,1,player.x,player.y,player.r);
+      grd.addColorStop(0,"#ffffff");grd.addColorStop(1,"#7cff6b");
+      ctx.fillStyle=grd;
+      ctx.beginPath();ctx.arc(player.x,player.y,player.r,0,6.283);ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function frameLoop(ts){
+    if(!lastTime) lastTime=ts;
+    let dt=(ts-lastTime)/1000; lastTime=ts;
+    if(dt>0.05) dt=0.05; // clamp
+    update(dt); draw();
+    requestAnimationFrame(frameLoop);
+  }
+
+  function updateHUD(){
+    document.getElementById("scoreVal").textContent=Math.floor(score);
+    document.getElementById("multiVal").textContent="x"+multiplier;
+    document.getElementById("bestVal").textContent=best;
+  }
+
+  /* ---------------- Flow ---------------- */
+  function startGame(){
+    resize(); reset();
+    document.getElementById("startOverlay").classList.add("hidden");
+    document.getElementById("overOverlay").classList.add("hidden");
+    frame.style.cursor="none";
+    state="playing";
+    if(actx && actx.state==="suspended") actx.resume();
+  }
+  function gameOver(){
+    state="over";
+    sHit();
+    burst(player.x,player.y,"255,77,109",26);
+    const finalScore=Math.floor(score);
+    document.getElementById("finalScore").textContent=finalScore;
+    const isBest=finalScore>best;
+    if(isBest){best=finalScore;localStorage.setItem(BEST_KEY,String(best));}
+    document.getElementById("newBest").classList.toggle("hidden",!isBest);
+    document.getElementById("overBest").textContent=best;
+    document.getElementById("overOverlay").classList.remove("hidden");
+    frame.style.cursor="default";
+    updateHUD();
+  }
+
+  function toast(msg){
+    const el=document.getElementById("toast");
+    el.textContent=msg;el.classList.add("show");
+    clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),2200);
+  }
+  async function share(){
+    const finalScore=Math.floor(score);
+    const text=I18N[lang].shareText(finalScore);
+    const url=location.href;
+    if(navigator.share){
+      try{await navigator.share({title:"Nexus Dash",text,url});return;}catch(e){}
+    }
+    try{await navigator.clipboard.writeText(text+" "+url);toast(I18N[lang].copied);}
+    catch(e){toast(text);}
+  }
+
+  /* ---------------- Wire UI ---------------- */
+  document.getElementById("startBtn").addEventListener("click",startGame);
+  document.getElementById("retryBtn").addEventListener("click",startGame);
+  document.getElementById("shareBtn").addEventListener("click",share);
+  document.getElementById("langBtn").addEventListener("click",()=>{
+    lang=lang==="en"?"de":"en";localStorage.setItem("nd_lang",lang);applyLang();
+  });
+  document.getElementById("muteBtn").addEventListener("click",()=>{
+    muted=!muted;localStorage.setItem("nd_muted",muted?"1":"0");
+    document.getElementById("muteBtn").firstChild.textContent=muted?"🔇 ":"🔊 ";
+    document.getElementById("muteLabel").textContent=muted?I18N[lang].soundOff:I18N[lang].soundOn;
+  });
+  document.getElementById("year").textContent=new Date().getFullYear();
+
+  // restore saved lang if present
+  const savedLang=localStorage.getItem("nd_lang");
+  if(savedLang) lang=savedLang;
+
+  // init
+  resize();
+  document.getElementById("bestVal").textContent=best;
+  if(muted) document.getElementById("muteBtn").firstChild.textContent="🔇 ";
+  applyLang();
+  requestAnimationFrame(frameLoop);
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>

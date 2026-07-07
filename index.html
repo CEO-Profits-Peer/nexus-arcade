@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nexus Arcade — Free Online Games, No Download | Kostenlose Browser-Spiele</title>
+<meta name="description" content="Play free online games instantly in your browser — no download, no signup. Arcade, racing, puzzle, RPG and 3D games. Level up and beat the highscores. Kostenlose Browser-Spiele, sofort spielbar." />
+<meta name="keywords" content="free online games, browser games, no download games, arcade game, idle rpg, racing game, 3d game, 2048, word game, kostenlose spiele, browserspiele, html5 games" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Arcade — Free Online Games" />
+<meta property="og:description" content="Free browser games, no download. Arcade, racing, puzzle, RPG, 3D. Play now." />
+<meta property="og:url" content="https://nexusarcade.vercel.app/" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Nexus Arcade","url":"https://nexusarcade.vercel.app/"}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.8);--neon:#39e6ff;--pink:#ff3ea5;--mag:#c77dff;--green:#7cff6b;--gold:#ffcf5c;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1200px 600px at 50% -10%,rgba(57,230,255,0.12),transparent 60%),radial-gradient(900px 500px at 90% 110%,rgba(255,62,165,0.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
+  header.top{width:100%;max-width:1000px;padding:16px 20px 4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:2px;}
+  .brand .dot{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 16px var(--neon),0 0 34px var(--neon);}
+  .brand span{font-size:22px;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;}
+  .chip:hover{border-color:var(--neon);}
+  .hero{max-width:820px;text-align:center;padding:22px 20px 6px;}
+  .hero h1{font-size:clamp(30px,6vw,52px);margin:0 0 10px;letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--mag),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p{color:var(--muted);font-size:17px;line-height:1.6;margin:0 auto;max-width:600px;}
+  .tools{width:100%;max-width:1000px;padding:14px 20px 4px;display:flex;flex-direction:column;gap:12px;}
+  .searchbar{position:relative;}
+  .searchbar input{width:100%;padding:13px 16px 13px 44px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;font-family:inherit;outline:none;}
+  .searchbar input:focus{border-color:var(--neon);box-shadow:0 0 16px rgba(57,230,255,0.2);}
+  .searchbar svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--muted);}
+  .cats{display:flex;gap:8px;flex-wrap:wrap;}
+  .cat{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.12s;font-family:inherit;}
+  .cat.active{background:linear-gradient(90deg,var(--neon),var(--green));color:#04121a;border-color:transparent;}
+  .cat:hover{border-color:var(--neon);color:var(--text);}
+  .cat.active:hover{color:#04121a;}
+  .ad-slot{width:100%;max-width:1000px;min-height:0;margin:6px 0;}
+  .grid{width:100%;max-width:1000px;padding:12px 20px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+  .game{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);text-decoration:none;color:var(--text);background:var(--panel);transition:.18s;display:flex;flex-direction:column;min-height:250px;}
+  .game:hover{transform:translateY(-4px);border-color:var(--neon);box-shadow:0 12px 40px rgba(57,230,255,0.18);}
+  .thumb{height:140px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,0.06),transparent 68%);}
+  .thumb svg{width:66px;height:66px;filter:drop-shadow(0 0 12px currentColor);}
+  .tag{position:absolute;top:12px;left:12px;font-size:11px;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,0.45);border:1px solid var(--line);padding:4px 10px;border-radius:999px;color:var(--muted);}
+  .bestbadge{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;background:rgba(0,0,0,0.45);border:1px solid var(--line);padding:4px 10px;border-radius:999px;color:var(--gold);}
+  .ginfo{padding:16px 18px 18px;flex:1;display:flex;flex-direction:column;gap:6px;}
+  .ginfo h3{margin:0;font-size:20px;}
+  .ginfo p{margin:0;color:var(--muted);font-size:14px;line-height:1.5;flex:1;}
+  .play{margin-top:0;font-weight:800;letter-spacing:1px;font-size:13px;padding:10px 20px;border-radius:999px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--green));}
+  .cardfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;}
+  .acts{display:flex;gap:6px;}
+  .iconbtn{border:1px solid var(--line);background:rgba(255,255,255,0.03);color:var(--muted);border-radius:999px;padding:7px 11px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:.12s;}
+  .iconbtn:hover{border-color:var(--neon);color:var(--text);}
+  .iconbtn.on-like{color:#ff5470;border-color:#ff5470;}
+  .iconbtn.on-fav{color:var(--gold);border-color:var(--gold);}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;color:var(--text);}
+  .toast.show{opacity:1;}
+  .noresult{grid-column:1/-1;text-align:center;color:var(--muted);padding:30px;}
+  .about{max-width:820px;padding:16px 22px 10px;color:var(--muted);line-height:1.7;}
+  .about h2{color:var(--text);font-size:19px;margin-top:20px;}
+  footer{color:var(--muted);font-size:12px;padding:14px 20px 30px;text-align:center;}
+  footer a{color:var(--neon);text-decoration:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer"><div class="dot"></div><span>NEXUS ARCADE</span></a>
+  <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+</header>
+
+<div class="hero">
+  <h1 id="h1">Free Games. Break Records.</h1>
+  <p id="sub">Jump in, climb the leaderboard and challenge your friends. No download, no signup — just play, level up and chase every achievement.</p>
+</div>
+
+<!-- ===== AD SLOT (oben) — AdSense-Code hier einfügen, dann sichtbar ===== -->
+<div class="ad-slot"></div>
+
+<div class="tools">
+  <div class="searchbar">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="search" type="text" placeholder="Search games…" autocomplete="off" />
+  </div>
+  <div class="cats" id="cats"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<section class="about">
+  <h2 id="aH">Free online games — no download needed</h2>
+  <p id="aP">Nexus Arcade is a growing collection of free browser games built to load fast and play instantly. There's nothing to install and no account required — just tap a game and play. Sign in (optional) to keep your level, achievements and progress across devices. Every game works on both mobile and desktop and lets you share your result to challenge a friend. New games are added regularly, so bookmark the page and check back.</p>
+</section>
+
+<footer>© <span id="year"></span> Nexus Arcade · Made for the open web.</footer>
+
+<script>
+(function(){
+  // ---- SVG pictograms (neon, currentColor) ----
+  const IC={
+    dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+    idle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M14 3l7 7-4 1-1 4-7-7"/><path d="M9 8l-6 6 3 3 6-6"/><path d="M5 17l-2 4 4-2"/></svg>',
+    words:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="6.5" height="6.5" rx="1.4"/><rect x="14.5" y="3" width="6.5" height="6.5" rx="1.4"/><rect x="3" y="14.5" width="6.5" height="6.5" rx="1.4"/><rect x="14.5" y="14.5" width="6.5" height="6.5" rx="1.4"/></svg>',
+    racer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M3 13l2-5a3 3 0 0 1 2.8-2h8.4A3 3 0 0 1 19 8l2 5v5h-3.5"/><path d="M3 13v5h3.5"/><path d="M6.5 18h11"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+    merge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h16M4 15h16M9 4v16M15 4v16"/></svg>',
+    run3d:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg>',
+    snake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h7a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h9"/><circle cx="19" cy="6" r="1.3" fill="currentColor" stroke="none"/></svg>',
+    breaker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="5" height="3" rx="1"/><rect x="10" y="4" width="5" height="3" rx="1"/><rect x="16" y="4" width="5" height="3" rx="1"/><circle cx="12" cy="13" r="1.6" fill="currentColor" stroke="none"/><rect x="8" y="19" width="8" height="2.4" rx="1.2"/></svg>',
+    tycoon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>',
+    stack:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="15" width="12" height="4" rx="1"/><rect x="4" y="10" width="12" height="4" rx="1"/><rect x="8" y="5" width="12" height="4" rx="1"/></svg>',
+    blocks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="10" width="5" height="5" rx="1"/><rect x="15.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="4" width="5" height="5" rx="1"/></svg>'
+  };
+  const GAMES=[
+    {id:"dash",href:"dash/",color:"var(--green)",cats:["arcade"],best:g=>bestNum("nd_best","",""),
+      name:"Nexus Dash",tag:{en:"Arcade · Highscore",de:"Arcade · Highscore"},
+      d:{en:"Dodge the shards, grab the orbs, survive as long as you can. A fast reflex arcade game with an addictive one-more-try loop.",de:"Weiche den Splittern aus, sammle Orbs, überlebe so lange wie möglich. Schnelles Reflex-Arcade mit süchtig machender Schleife."}},
+    {id:"idle",href:"idle/",color:"var(--mag)",cats:["rpg"],best:g=>bestRealm(),
+      name:"Nexus Realms",tag:{en:"Idle · RPG",de:"Idle · RPG"},
+      d:{en:"Slay monsters, level your hero, hire companions and ascend for permanent power. An idle RPG that even earns gold while you're away.",de:"Besiege Monster, level deinen Helden, heuere Gefährten an und steige auf. Ein Idle-RPG, das sogar offline Gold verdient."}},
+    {id:"words",href:"words/",color:"var(--neon)",cats:["puzzle","daily"],best:g=>bestStreak(),
+      name:"Nexus Words",tag:{en:"Daily · Word",de:"Täglich · Wort"},
+      d:{en:"Guess the 5-letter word of the day in six tries. A quick daily brain teaser with a shareable result and a streak to protect.",de:"Errate das 5-Buchstaben-Wort des Tages in sechs Versuchen. Tägliches Rätsel mit teilbarem Ergebnis und Serie."}},
+    {id:"racer",href:"racer/",color:"var(--neon)",cats:["racing","arcade"],best:g=>bestNum("nx_racer_best","","m"),
+      name:"Nexus Racer",tag:{en:"Racing · Arcade",de:"Rennen · Arcade"},
+      d:{en:"Weave through neon traffic, grab coins and hit the nitro for extra distance. A slick endless car racer that keeps speeding up.",de:"Schlängle dich durch Neon-Verkehr, sammle Münzen und zünde das Nitro. Ein flotter Endlos-Racer, der immer schneller wird."}},
+    {id:"merge",href:"merge/",color:"var(--gold)",cats:["puzzle"],best:g=>bestNum("nx_2048_best","",""),
+      name:"Nexus 2048",tag:{en:"Puzzle · Merge",de:"Puzzle · Merge"},
+      d:{en:"Slide and combine numbered tiles to reach 2048 and beyond. Easy to learn, very hard to put down.",de:"Schiebe und kombiniere Zahlen-Kacheln bis 2048 und weiter. Leicht zu lernen, schwer aufzuhören."}},
+    {id:"run3d",href:"run3d/",color:"var(--green)",cats:["3d","arcade"],best:g=>bestNum("nx_run3d_best","","m"),
+      name:"Nexus Run 3D",tag:{en:"3D · Runner",de:"3D · Runner"},
+      d:{en:"Sprint down a neon tunnel in real 3D, switch lanes and jump obstacles as the speed climbs. Built with Three.js.",de:"Sprinte in echtem 3D durch einen Neon-Tunnel, wechsle Spuren und springe über Hindernisse. Mit Three.js gebaut."}},
+    {id:"tycoon",href:"tycoon/",color:"var(--gold)",cats:["idle"],best:g=>bestMoney("nx_tycoon_best"),
+      name:"Nexus Tycoon",tag:{en:"Idle · Tycoon",de:"Idle · Tycoon"},
+      d:{en:"Build a business empire: buy companies, hire managers and earn money even while offline. Cash out for permanent boosts.",de:"Baue ein Imperium: Firmen kaufen, Manager anheuern und sogar offline Geld verdienen. Auszahlen für dauerhafte Boosts."}},
+    {id:"snake",href:"snake/",color:"var(--green)",cats:["arcade"],best:g=>bestNum("nx_snake_best","",""),
+      name:"Nexus Snake",tag:{en:"Arcade · Classic",de:"Arcade · Klassiker"},
+      d:{en:"The timeless snake — eat orbs, grow longer and don't crash into yourself. Gets faster the bigger you get.",de:"Der zeitlose Klassiker — Orbs fressen, wachsen und nicht in sich selbst crashen. Je größer, desto schneller."}},
+    {id:"blocks",href:"blocks/",color:"var(--mag)",cats:["puzzle"],best:g=>bestNum("nx_blocks_best","",""),
+      name:"Nexus Blocks",tag:{en:"Puzzle · Blocks",de:"Puzzle · Blöcke"},
+      d:{en:"The falling-blocks classic. Rotate the pieces, clear full lines and survive as the speed ramps up.",de:"Der Fallende-Blöcke-Klassiker. Steine drehen, volle Reihen räumen und überleben, während's schneller wird."}},
+    {id:"breaker",href:"breaker/",color:"var(--neon)",cats:["arcade"],best:g=>bestNum("nx_breaker_best","",""),
+      name:"Nexus Breaker",tag:{en:"Arcade · Breakout",de:"Arcade · Breakout"},
+      d:{en:"Bounce the ball, smash every brick and grab power-ups like multi-ball. Clear levels for a bigger score.",de:"Ball abprallen lassen, alle Steine zerschlagen und Power-ups wie Multiball fangen. Level schaffen für mehr Punkte."}},
+    {id:"stack",href:"stack/",color:"var(--neon)",cats:["arcade"],best:g=>bestNum("nx_stack_best","",""),
+      name:"Nexus Stack",tag:{en:"Arcade · Timing",de:"Arcade · Timing"},
+      d:{en:"Drop each block at the perfect moment to build the tallest tower. Miss and it gets narrower. Pure one-more-try.",de:"Setze jeden Block im perfekten Moment für den höchsten Turm. Daneben = schmaler. Pures Suchtpotenzial."}}
+  ];
+  const CATS=[
+    {id:"all",en:"All",de:"Alle"},{id:"arcade",en:"Arcade",de:"Arcade"},{id:"racing",en:"Racing",de:"Rennen"},
+    {id:"puzzle",en:"Puzzle",de:"Puzzle"},{id:"idle",en:"Idle",de:"Idle"},{id:"rpg",en:"RPG",de:"RPG"},{id:"3d",en:"3D",de:"3D"},{id:"daily",en:"Daily",de:"Täglich"}
+  ];
+  const TXT={en:{h1:"Free Games. Break Records.",sub:"Jump in, climb the leaderboard and challenge your friends. No download, no signup — just play, level up and chase every achievement.",search:"Search games…",play:"▶ PLAY",aH:"Free online games — no download needed",aP:"Nexus Arcade is a growing collection of free browser games built to load fast and play instantly. There's nothing to install and no account required — just tap a game and play. Sign in (optional) to keep your level, achievements and progress across devices. Every game works on both mobile and desktop and lets you share your result to challenge a friend. New games are added regularly, so bookmark the page and check back.",noresult:"No games match your search.",best:"Best",realm:"Realm",streak:"Streak",new:"NEW",likeLogin:"Sign in (top right) to like games.",likeNocfg:"Likes aren't available yet."},
+    de:{h1:"Kostenlose Spiele. Brich Rekorde.",sub:"Rein ins Spiel, klettere die Bestenliste hoch und fordere deine Freunde heraus. Kein Download, keine Anmeldung — einfach spielen, aufsteigen und alle Erfolge jagen.",search:"Spiele suchen…",play:"▶ SPIELEN",aH:"Kostenlose Online-Spiele — ohne Download",aP:"Nexus Arcade ist eine wachsende Sammlung kostenloser Browser-Spiele, die schnell laden und sofort spielbar sind. Nichts installieren, kein Konto nötig — einfach antippen und spielen. Melde dich (optional) an, um Level, Erfolge und Fortschritt geräteübergreifend zu behalten. Jedes Spiel läuft auf Handy und Desktop und lässt dich dein Ergebnis teilen. Es kommen regelmäßig neue Spiele dazu — Seite merken und wiederkommen.",noresult:"Keine Spiele passen zu deiner Suche.",best:"Best",realm:"Reich",streak:"Serie",new:"NEU",likeLogin:"Melde dich an (oben rechts), um Spiele zu liken.",likeNocfg:"Likes sind noch nicht verfügbar."}};
+  let lang=(localStorage.getItem("nr_lang")||localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const T=()=>TXT[lang];
+  let activeCat="all", query="";
+
+  function bestNum(key,pre,suf){const v=parseInt(localStorage.getItem(key)||"0",10)||0;return v>0?(T().best+": "+pre+v+suf):null;}
+  function bestMoney(key){let n=parseInt(localStorage.getItem(key)||"0",10)||0;if(n<=0)return null;const S=["","K","M","B","T"];let t=0;while(n>=1000&&t<S.length-1){n/=1000;t++;}return T().best+": $"+(n<10?n.toFixed(1):Math.floor(n))+S[t];}
+  function bestRealm(){try{const r=JSON.parse(localStorage.getItem("nr_save_v1")||"{}");if(r.maxZone>1)return T().realm+" "+r.maxZone;}catch(e){}return null;}
+  function bestStreak(){try{let mx=0;for(const l of["en","de"]){const w=JSON.parse(localStorage.getItem("nw_v1_"+l)||"null");if(w&&w.stats)mx=Math.max(mx,w.stats.max||0);}if(mx>0)return T().streak+" "+mx;}catch(e){}return null;}
+
+  function renderCats(){const c=document.getElementById("cats");c.innerHTML=CATS.map(x=>'<button class="cat'+(activeCat===x.id?' active':'')+'" data-c="'+x.id+'">'+x[lang]+'</button>').join("");
+    c.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{activeCat=b.getAttribute("data-c");renderCats();renderGrid();});}
+  function favList(){try{return JSON.parse(localStorage.getItem("nexus_favs")||"[]");}catch(e){return[];}}
+  function isFav(id){return favList().indexOf(id)>=0;}
+  function toggleFav(id){if(window.NexusSocial){window.NexusSocial.toggleFav(id);}else{const a=favList();const i=a.indexOf(id);if(i>=0)a.splice(i,1);else a.push(id);localStorage.setItem("nexus_favs",JSON.stringify(a));}}
+  function likeCount(id){return window.NexusSocial?window.NexusSocial.likeCount(id):0;}
+  function isLiked(id){return window.NexusSocial?window.NexusSocial.isLiked(id):false;}
+  function toast(m){let t=document.getElementById("nxtoast");if(!t){t=document.createElement("div");t.id="nxtoast";t.className="toast";document.body.appendChild(t);}t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+  function renderGrid(){
+    const g=document.getElementById("grid");const q=query.trim().toLowerCase();
+    let list=GAMES.map((gm,i)=>({gm:gm,i:i})).filter(o=>{const gm=o.gm;return (activeCat==="all"||gm.cats.indexOf(activeCat)>=0)&&(!q||gm.name.toLowerCase().indexOf(q)>=0||gm.tag[lang].toLowerCase().indexOf(q)>=0||gm.d[lang].toLowerCase().indexOf(q)>=0||gm.cats.join(" ").indexOf(q)>=0);});
+    list.sort((a,b)=>{const fa=isFav(a.gm.id)?1:0,fb=isFav(b.gm.id)?1:0;if(fa!==fb)return fb-fa;const la=likeCount(a.gm.id),lb=likeCount(b.gm.id);if(la!==lb)return lb-la;return a.i-b.i;});
+    if(!list.length){g.innerHTML='<div class="noresult">'+T().noresult+'</div>';return;}
+    g.innerHTML=list.map(function(o){const gm=o.gm;const b=gm.best();const fav=isFav(gm.id);const lk=isLiked(gm.id);const lc=likeCount(gm.id);
+      return '<a class="game" href="'+gm.href+'">'+
+      '<div class="thumb" style="color:'+gm.color+'">'+IC[gm.id]+
+      '<span class="tag">'+gm.tag[lang]+'</span>'+(b?'<span class="bestbadge">'+b+'</span>':'<span class="bestbadge" style="color:var(--muted)">'+T().new+'</span>')+'</div>'+
+      '<div class="ginfo"><h3>'+gm.name+'</h3><p>'+gm.d[lang]+'</p>'+
+      '<div class="cardfoot"><span class="play">'+T().play+'</span><span class="acts">'+
+        '<button class="iconbtn'+(fav?' on-fav':'')+'" data-fav="'+gm.id+'" title="Favorite">'+(fav?'★':'☆')+'</button>'+
+        '<button class="iconbtn'+(lk?' on-like':'')+'" data-like="'+gm.id+'" title="Like">♥ '+(lc||0)+'</button>'+
+      '</span></div></div></a>';}).join("");
+    g.querySelectorAll("[data-fav]").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();toggleFav(btn.getAttribute("data-fav"));renderGrid();});});
+    g.querySelectorAll("[data-like]").forEach(function(btn){btn.addEventListener("click",async function(e){e.preventDefault();e.stopPropagation();const S=window.NexusSocial;if(!S){toast(T().likeNocfg);return;}const r=await S.toggleLike(btn.getAttribute("data-like"));if(!r.ok){toast(r.reason==="login"?T().likeLogin:T().likeNocfg);}renderGrid();});});
+  }
+  function applyLang(){document.documentElement.lang=lang;const t=T();document.getElementById("h1").textContent=t.h1;document.getElementById("sub").textContent=t.sub;document.getElementById("search").placeholder=t.search;document.getElementById("aH").textContent=t.aH;document.getElementById("aP").textContent=t.aP;document.getElementById("langLabel").textContent=lang.toUpperCase();renderCats();renderGrid();}
+
+  document.getElementById("search").addEventListener("input",e=>{query=e.target.value;renderGrid();});
+  document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nr_lang",lang);localStorage.setItem("nx_lang",lang);applyLang();});
+  document.getElementById("year").textContent=new Date().getFullYear();
+  applyLang();
+  (function hookSocial(){ if(window.NexusSocial){ window.NexusSocial.ready(renderGrid); window.NexusSocial.onChange(renderGrid); } else setTimeout(hookSocial,250); })();
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/social.js"></script>
+</body>
+</html>

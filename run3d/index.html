@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nexus Run 3D — Free 3D Endless Runner Game | Kostenloses 3D-Spiel im Browser</title>
+<meta name="description" content="Nexus Run 3D is a free 3D endless runner. Switch lanes, jump obstacles, collect orbs and race down a neon tunnel. Play free in your browser — no download." />
+<meta name="keywords" content="3d game, endless runner, free 3d game, browser 3d game, three.js game, lane runner, 3d spiel, browsergame 3d" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/run3d/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Run 3D — Free 3D Endless Runner" />
+<meta property="og:description" content="Switch lanes, jump, survive. A free 3D runner in your browser. Play now." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Nexus Run 3D","genre":["Arcade","Runner"],"gamePlatform":"Web Browser","applicationCategory":"Game","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.82);--neon:#39e6ff;--pink:#ff3ea5;--accent:#7cff6b;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100%;overflow-x:hidden;}
+  header.top{width:100%;max-width:720px;padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:1px;}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 12px var(--neon);}
+  .brand span{font-size:19px;background:linear-gradient(90deg,var(--neon),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  .hud{width:100%;max-width:720px;display:flex;gap:10px;padding:4px 16px;}
+  .hud .box{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;text-align:center;}
+  .hud .l{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .hud .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .hud .v.neon{color:var(--neon);} .hud .v.green{color:var(--accent);}
+  .stage{width:100%;max-width:720px;padding:8px 16px 14px;}
+  .frame{position:relative;width:100%;aspect-ratio:16/11;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 0 40px rgba(57,230,255,0.08);touch-action:none;cursor:pointer;background:#05060f;}
+  canvas{display:block;width:100%;height:100%;}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;gap:12px;background:rgba(5,6,15,0.72);}
+  .overlay.hidden{display:none;}
+  .overlay h1{margin:0;font-size:clamp(26px,6vw,44px);letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .overlay p{margin:0;color:var(--muted);max-width:420px;line-height:1.5;font-size:14px;}
+  .overlay .big{font-size:clamp(36px,9vw,60px);font-weight:900;color:var(--neon);text-shadow:0 0 20px rgba(57,230,255,0.6);}
+  .sub{font-size:13px;color:var(--muted);}
+  .btn{border:none;cursor:pointer;font-weight:800;letter-spacing:1px;font-size:16px;padding:13px 28px;border-radius:999px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));box-shadow:0 0 22px rgba(57,230,255,0.4);transition:.15s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn.sec{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none;}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .new-best{color:var(--accent);font-weight:800;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .about{max-width:720px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
+  .about h2{color:var(--text);font-size:17px;}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS RUN 3D</span></a>
+  <div class="controls">
+    <a class="chip" href="/">← <span data-i18n="hub">Games</span></a>
+    <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+  </div>
+</header>
+
+<div class="hud">
+  <div class="box"><div class="l" data-i18n="dist">Distance</div><div class="v neon" id="distVal">0</div></div>
+  <div class="box"><div class="l" data-i18n="orbs">Orbs</div><div class="v green" id="orbVal">0</div></div>
+  <div class="box"><div class="l" data-i18n="best">Best</div><div class="v" id="bestVal">0</div></div>
+</div>
+
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="overlay" id="startO">
+      <h1>NEXUS RUN 3D</h1>
+      <p data-i18n="intro">Switch lanes with ← → or A/D (or swipe), jump with Space / ↑ / tap. Dodge the red blocks, grab the orbs, run as far as you can.</p>
+      <button class="btn" id="startBtn" data-i18n="play">▶ RUN</button>
+      <div class="sub" data-i18n="hint">← → move · Space jump · swipe on mobile</div>
+    </div>
+    <div class="overlay hidden" id="overO">
+      <div class="sub" data-i18n="crash">GAME OVER</div>
+      <div class="big" id="finalScore">0</div>
+      <div class="new-best hidden" id="newBest" data-i18n="newbest">★ NEW RECORD ★</div>
+      <div class="sub"><span data-i18n="best">Best</span>: <b id="overBest">0</b></div>
+      <div class="btnrow">
+        <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
+        <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="about">
+  <h2 id="aboutH">About Nexus Run 3D</h2>
+  <p id="aboutP">Nexus Run 3D is a free 3D endless runner you can play right in your browser — no download, no signup. Sprint down a glowing neon tunnel, switch between three lanes, jump over obstacles and scoop up energy orbs. The speed keeps climbing, so your reflexes have to keep up. Beat your distance record and challenge your friends. Runs on desktop and mobile.</p>
+</section>
+<footer>© <span id="year"></span> Nexus Run 3D · part of Nexus Arcade · built with Three.js.</footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+(function(){
+  const I={en:{hub:"Games",dist:"Distance",orbs:"Orbs",best:"Best",play:"▶ RUN",retry:"↻ RETRY",share:"⤴ SHARE",crash:"GAME OVER",newbest:"★ NEW RECORD ★",
+    intro:"Switch lanes with ← → or A/D (or swipe), jump with Space / ↑ / tap. Dodge the red blocks, grab the orbs, run as far as you can.",
+    hint:"← → move · Space jump · swipe on mobile",aboutH:"About Nexus Run 3D",
+    aboutP:"Nexus Run 3D is a free 3D endless runner you can play right in your browser — no download, no signup. Sprint down a glowing neon tunnel, switch between three lanes, jump over obstacles and scoop up energy orbs. The speed keeps climbing, so your reflexes have to keep up. Beat your distance record and challenge your friends. Runs on desktop and mobile.",
+    shareText:s=>`I ran ${s}m in Nexus Run 3D! Can you go further?`,copied:"Copied — paste anywhere!",noWebGL:"Your browser could not start 3D graphics."},
+  de:{hub:"Spiele",dist:"Distanz",orbs:"Orbs",best:"Bestwert",play:"▶ LOS",retry:"↻ NOCHMAL",share:"⤴ TEILEN",crash:"GAME OVER",newbest:"★ NEUER REKORD ★",
+    intro:"Spur wechseln mit ← → oder A/D (oder wischen), springen mit Leertaste / ↑ / tippen. Weiche den roten Blöcken aus, sammle Orbs, lauf so weit du kannst.",
+    hint:"← → Spur · Leertaste Sprung · wischen am Handy",aboutH:"Über Nexus Run 3D",
+    aboutP:"Nexus Run 3D ist ein kostenloser 3D-Endless-Runner direkt im Browser — kein Download, keine Anmeldung. Sprinte durch einen leuchtenden Neon-Tunnel, wechsle zwischen drei Spuren, springe über Hindernisse und sammle Energie-Orbs. Das Tempo steigt stetig, deine Reflexe müssen mithalten. Knacke deinen Distanz-Rekord und fordere Freunde heraus. Läuft auf Desktop und Handy.",
+    shareText:s=>`Ich bin ${s}m in Nexus Run 3D gelaufen! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",noWebGL:"Dein Browser konnte die 3D-Grafik nicht starten."}};
+  let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const T=()=>I[lang];
+  const $=id=>document.getElementById(id);
+  const BEST="nx_run3d_best";
+  let best=parseInt(localStorage.getItem(BEST)||"0",10);
+  const LANES=[-2.4,0,2.4];
+  const frame=$("frame");
+  let renderer,scene,camera,player,ground,obstacles=[],orbs=[],decos=[];
+  let state="menu",lane=1,py=0,vy=0,onGround=true,speed=14,dist=0,orbCount=0,spawnZ,last=0,elapsed=0;
+
+  function init(){
+    try{
+      renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+    }catch(e){ $("startO").innerHTML='<p style="color:#ff5470">'+T().noWebGL+'</p>'; return false; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    frame.insertBefore(renderer.domElement,frame.firstChild);
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x05060f);
+    scene.fog=new THREE.Fog(0x05060f,18,52);
+    camera=new THREE.PerspectiveCamera(70,16/11,0.1,120);
+    camera.position.set(0,4.2,8.5);camera.lookAt(0,1.2,-6);
+    scene.add(new THREE.AmbientLight(0x6070a0,0.9));
+    const dl=new THREE.DirectionalLight(0xffffff,0.8);dl.position.set(3,10,6);scene.add(dl);
+    const p1=new THREE.PointLight(0x39e6ff,1.1,40);p1.position.set(0,6,2);scene.add(p1);
+    // ground
+    const ggeo=new THREE.PlaneGeometry(9,240);
+    const gmat=new THREE.MeshStandardMaterial({color:0x0a0e1e,metalness:0.4,roughness:0.6});
+    ground=new THREE.Mesh(ggeo,gmat);ground.rotation.x=-Math.PI/2;ground.position.z=-100;scene.add(ground);
+    // side rails (glowing)
+    for(const sx of [-4.4,4.4]){
+      const rgeo=new THREE.BoxGeometry(0.25,0.5,240);
+      const rmat=new THREE.MeshStandardMaterial({color:0x39e6ff,emissive:0x1b6f88,emissiveIntensity:1});
+      const rail=new THREE.Mesh(rgeo,rmat);rail.position.set(sx,0.25,-100);scene.add(rail);
+    }
+    // lane dashes (recycled deco boxes)
+    for(let i=0;i<40;i++){
+      const dgeo=new THREE.BoxGeometry(0.12,0.02,1.4);
+      const dmat=new THREE.MeshStandardMaterial({color:0x2b3358,emissive:0x141a33,emissiveIntensity:0.6});
+      for(const lx of [-1.2,1.2]){
+        const d=new THREE.Mesh(dgeo,dmat.clone());d.position.set(lx,0.02,-i*3);scene.add(d);decos.push(d);
+      }
+    }
+    // player
+    const pgeo=new THREE.BoxGeometry(1.1,1.1,1.1);
+    const pmat=new THREE.MeshStandardMaterial({color:0x7cff6b,emissive:0x2a6b1f,emissiveIntensity:0.9,metalness:0.3,roughness:0.3});
+    player=new THREE.Mesh(pgeo,pmat);player.position.set(0,0.55,0);scene.add(player);
+    window.addEventListener("resize",onResize);onResize();
+    return true;
+  }
+  function onResize(){const r=frame.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();}
+
+  function makeObstacle(z){
+    const geo=new THREE.BoxGeometry(1.4,1.4,1.2);
+    const mat=new THREE.MeshStandardMaterial({color:0xff4d6d,emissive:0x7a1020,emissiveIntensity:1});
+    const m=new THREE.Mesh(geo,mat);m.userData.lane=(Math.random()*3)|0;m.position.set(LANES[m.userData.lane],0.7,z);scene.add(m);obstacles.push(m);
+  }
+  function makeOrb(z){
+    const geo=new THREE.SphereGeometry(0.45,16,16);
+    const mat=new THREE.MeshStandardMaterial({color:0x39e6ff,emissive:0x1b6f88,emissiveIntensity:1.2});
+    const m=new THREE.Mesh(geo,mat);m.userData.lane=(Math.random()*3)|0;m.position.set(LANES[m.userData.lane],1.0,z);scene.add(m);orbs.push(m);
+  }
+  function clearWorld(){for(const o of obstacles)scene.remove(o);for(const o of orbs)scene.remove(o);obstacles=[];orbs=[];}
+
+  function reset(){clearWorld();lane=1;py=0;vy=0;onGround=true;speed=14;dist=0;orbCount=0;elapsed=0;spawnZ=-30;player.position.set(0,0.55,0);hud();
+    for(let z=-30;z>-120;z-=Math.random()*6+5){ if(Math.random()<0.72)makeObstacle(z); else makeOrb(z); }
+  }
+  function hud(){$("distVal").textContent=Math.floor(dist);$("orbVal").textContent=orbCount;$("bestVal").textContent=best;}
+
+  function moveLane(d){lane=Math.max(0,Math.min(2,lane+d));}
+  function jump(){if(onGround){vy=9.2;onGround=false;}}
+
+  // input
+  document.addEventListener("keydown",e=>{if(state!=="playing")return;const k=e.key;if(k==="ArrowLeft"||k==="a"||k==="A"){moveLane(-1);e.preventDefault();}else if(k==="ArrowRight"||k==="d"||k==="D"){moveLane(1);e.preventDefault();}else if(k===" "||k==="ArrowUp"||k==="w"||k==="W"){jump();e.preventDefault();}});
+  let sx,sy,st;
+  frame.addEventListener("touchstart",e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now();},{passive:true});
+  frame.addEventListener("touchend",e=>{if(sx==null||state!=="playing")return;const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<20){jump();}else if(Math.abs(dx)>Math.abs(dy)){moveLane(dx>0?1:-1);}else if(dy<0){jump();}sx=null;},{passive:true});
+
+  function update(dt){
+    if(state!=="playing")return;
+    elapsed+=dt;speed=14+elapsed*0.5;
+    dist+=speed*dt*0.1;
+    // player lane + jump physics
+    const tx=LANES[lane];player.position.x+=(tx-player.position.x)*Math.min(1,dt*14);
+    vy-=26*dt;py+=vy*dt;if(py<=0){py=0;vy=0;onGround=true;}player.position.y=0.55+py;
+    player.rotation.x-=speed*dt*0.3;player.rotation.z=(tx-player.position.x)*0.4;
+    // move world toward camera
+    const dz=speed*dt;
+    for(const d of decos){d.position.z+=dz;if(d.position.z>10)d.position.z-=120;}
+    for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.position.z+=dz;o.rotation.y+=dt;if(o.position.z>10){scene.remove(o);obstacles.splice(i,1);continue;}
+      if(o.position.z>-0.9&&o.position.z<1.1&&Math.abs(o.position.x-player.position.x)<1.15&&player.position.y<1.4){crash();return;}}
+    for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];o.position.z+=dz;o.rotation.y+=dt*2;if(o.position.z>10){scene.remove(o);orbs.splice(i,1);continue;}
+      if(o.position.z>-1.2&&o.position.z<1.2&&Math.abs(o.position.x-player.position.x)<1.1&&Math.abs(player.position.y-1.0)<1.1){scene.remove(o);orbs.splice(i,1);orbCount++;hud();}}
+    // spawn ahead
+    spawnZ-=dz;
+    while(spawnZ<-30){ const z=-120-(Math.random()*4); if(Math.random()<0.72)makeObstacle(z); else makeOrb(z); spawnZ+= (Math.random()*4+5); }
+    // actually keep a steady stream:
+    if(obstacles.length+orbs.length<26){ const z=-120; if(Math.random()<0.72)makeObstacle(z); else makeOrb(z); }
+    hud();
+  }
+  function render(){renderer.render(scene,camera);}
+  function loop(ts){if(!last)last=ts;let dt=(ts-last)/1000;last=ts;if(dt>0.05)dt=0.05;update(dt);if(renderer)render();requestAnimationFrame(loop);}
+
+  function start(){reset();$("startO").classList.add("hidden");$("overO").classList.add("hidden");state="playing";}
+  function crash(){
+    state="over";
+    const fs=Math.floor(dist);$("finalScore").textContent=fs;
+    const isBest=fs>best;if(isBest){best=fs;localStorage.setItem(BEST,String(best));}
+    $("newBest").classList.toggle("hidden",!isBest);$("overBest").textContent=best;$("overO").classList.remove("hidden");hud();
+    if(window.NexusArcade){try{window.NexusArcade.addXP(Math.floor(fs/6)+orbCount*3);}catch(e){}}
+  }
+  function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+  async function share(){const fs=Math.floor(dist),txt=T().shareText(fs),url=location.origin+location.pathname;if(navigator.share){try{await navigator.share({title:"Nexus Run 3D",text:txt,url});return;}catch(e){}}try{await navigator.clipboard.writeText(txt+" "+url);toast(T().copied);}catch(e){toast(txt);}}
+  function applyLang(){document.documentElement.lang=lang;$("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});$("aboutH").textContent=T().aboutH;$("aboutP").textContent=T().aboutP;}
+
+  $("startBtn").addEventListener("click",start);
+  $("retryBtn").addEventListener("click",start);
+  $("shareBtn").addEventListener("click",share);
+  $("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
+  $("year").textContent=new Date().getFullYear();
+  $("bestVal").textContent=best;applyLang();
+  if(typeof THREE!=="undefined" && init()){ requestAnimationFrame(loop); }
+  else if(typeof THREE==="undefined"){ $("startO").innerHTML='<p style="color:#ff5470">'+T().noWebGL+'</p>'; }
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>

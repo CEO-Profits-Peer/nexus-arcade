@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nexus Words — Free Daily Word Puzzle | Tägliches Wort-Rätsel (kostenlos)</title>
+<meta name="description" content="Nexus Words is a free daily word puzzle you play in your browser — guess the 5-letter word in 6 tries and share your result. New puzzle every day. Tägliches Wort-Rätsel, kostenlos, ohne Download." />
+<meta name="keywords" content="daily word puzzle, word game, wordle, guess the word, 5 letter word game, tägliches wortspiel, wort raten, kostenloses wortspiel" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/words/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Words — Free Daily Word Puzzle" />
+<meta property="og:description" content="Guess the 5-letter word of the day in 6 tries. New puzzle daily. Play free, share your streak." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Nexus Words","genre":["Word","Puzzle"],"gamePlatform":"Web Browser","applicationCategory":"Game","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.82);--neon:#39e6ff;--green:#3aa76d;--yellow:#c9a227;--gray:#3a4166;--empty:#141a33;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1000px 500px at 50% -10%,rgba(57,230,255,0.12),transparent 60%),radial-gradient(800px 500px at 90% 110%,rgba(58,167,109,0.12),transparent 60%),var(--bg);
+    color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
+  header.top{width:100%;max-width:520px;padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:1px;}
+  .brand .gem{width:13px;height:13px;transform:rotate(45deg);background:linear-gradient(135deg,#fff,var(--neon));box-shadow:0 0 12px var(--neon);}
+  .brand span{font-size:19px;background:linear-gradient(90deg,var(--neon),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  .ad-slot{width:100%;max-width:520px;min-height:60px;margin:6px 0;border-radius:12px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:1px;background:rgba(255,255,255,0.02);}
+  .ad-slot:empty{display:none;}
+  .sub{color:var(--muted);font-size:13px;text-align:center;padding:2px 16px 6px;}
+
+  .board{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;padding:10px;width:min(94vw,340px);}
+  .brow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+  .tile{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,7vw,32px);font-weight:800;text-transform:uppercase;
+    border:2px solid var(--gray);border-radius:8px;background:var(--empty);color:var(--text);transition:transform .1s;}
+  .tile.filled{border-color:#5a6187;animation:pop .12s;}
+  .tile.correct{background:var(--green);border-color:var(--green);color:#fff;}
+  .tile.present{background:var(--yellow);border-color:var(--yellow);color:#fff;}
+  .tile.absent{background:var(--gray);border-color:var(--gray);color:#cfd6f2;}
+  .tile.reveal{animation:flip .5s ease forwards;}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+  @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+  .brow.shake{animation:shake .4s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+  .kb{width:min(96vw,500px);padding:6px 4px 14px;display:flex;flex-direction:column;gap:6px;}
+  .krow{display:flex;justify-content:center;gap:5px;}
+  .key{flex:1;max-width:42px;height:52px;border:none;border-radius:7px;background:#2b3358;color:var(--text);font-weight:700;font-size:15px;cursor:pointer;text-transform:uppercase;transition:.1s;}
+  .key:hover{filter:brightness(1.15);}
+  .key.wide{max-width:66px;font-size:12px;}
+  .key.correct{background:var(--green);color:#fff;} .key.present{background:var(--yellow);color:#fff;} .key.absent{background:#20263f;color:#6b73a0;}
+
+  .modal{position:fixed;inset:0;background:rgba(5,6,15,0.82);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;}
+  .modal.hidden{display:none;}
+  .card{background:var(--panel);border:1px solid var(--neon);border-radius:18px;padding:24px;max-width:360px;width:100%;text-align:center;box-shadow:0 0 40px rgba(57,230,255,0.2);}
+  .card h2{margin:0 0 4px;color:var(--neon);} .card .word{font-size:22px;font-weight:900;letter-spacing:3px;text-transform:uppercase;margin:6px 0;}
+  .stats{display:flex;justify-content:space-around;margin:14px 0;}
+  .stats .b{text-align:center;} .stats .n{font-size:24px;font-weight:900;} .stats .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .dist{text-align:left;margin:10px 0;font-size:12px;}
+  .dbar{display:flex;align-items:center;gap:6px;margin:3px 0;}
+  .dbar .idx{width:12px;color:var(--muted);} .dbar .fill{background:var(--gray);height:18px;border-radius:4px;min-width:20px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-size:11px;font-weight:700;color:#fff;}
+  .dbar .fill.cur{background:var(--green);}
+  .count{font-size:13px;color:var(--muted);margin-top:8px;}
+  .count b{color:var(--neon);font-variant-numeric:tabular-nums;}
+  .card button{margin-top:12px;border:none;padding:13px 26px;border-radius:999px;cursor:pointer;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--green));color:#04121a;width:100%;}
+
+  .about{max-width:520px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
+  .about h2{color:var(--text);font-size:17px;} .about a{color:var(--neon);}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 26px;text-align:center;}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer" title="Nexus Arcade — Home"><div class="gem"></div><span>NEXUS WORDS</span></a>
+  <div class="controls">
+    <a class="chip" href="../">← <span data-i18n="hub">Games</span></a>
+    <div class="chip" id="statsBtn">📊</div>
+    <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+  </div>
+</header>
+
+<!-- ===== AD SLOT (top) ===== -->
+<div class="ad-slot"></div>
+
+<div class="sub" id="sub">Guess the 5-letter word in 6 tries. A new puzzle every day.</div>
+
+<div class="board" id="board"></div>
+<div class="kb" id="kb"></div>
+
+<!-- ===== AD SLOT (bottom) ===== -->
+<div class="ad-slot"></div>
+
+<section class="about">
+  <h2 id="aboutH">About Nexus Words</h2>
+  <p id="aboutP">Nexus Words is a free daily word puzzle you can play right in your browser — no download, no signup. Every day there's one new 5-letter word to guess in six tries. Green means the letter is correct and in the right spot, yellow means it's in the word but in a different spot, and gray means it isn't in the word. Solve it, keep your streak alive, and share your result with friends. There's a fresh puzzle every day in both English and German.</p>
+</section>
+
+<footer>© <span id="year"></span> Nexus Words · one new puzzle every day.</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  /* ---------- word lists (answers = also the valid-guess pool) ---------- */
+  const WORDS={
+    en:["about","above","actor","acute","admit","adopt","adult","agent","agree","ahead","alarm","album","alert","alike","alive","allow","alone","along","alter","amber","angel","anger","angle","apart","apple","apply","arena","argue","arise","armor","array","arrow","aside","asset","audio","audit","avoid","awake","award","aware","badly","baker","basic","beach","began","begin","being","below","bench","birth","black","blade","blame","blank","blast","blaze","blind","block","blood","board","boost","booth","bound","brain","brand","brave","bread","break","breed","brick","bride","brief","bring","broad","brown","brush","build","built","bunch","burst","cabin","cable","candy","cargo","carry","catch","cause","chain","chair","chalk","charm","chart","chase","cheap","check","cheer","chess","chest","chief","child","chill","choir","chose","civic","civil","claim","class","clean","clear","click","cliff","climb","clock","close","cloth","cloud","coach","coast","could","count","court","cover","crack","craft","crane","crash","crazy","cream","creek","crime","crisp","cross","crowd","crown","crude","cruel","crush","curve","cycle","daily","dairy","dance","dealt","death","debut","delay","delta","dense","depth","doubt","dozen","draft","drama","drank","dream","dress","dried","drink","drive","drove","eager","eagle","early","earth","eaten","elbow","elder","elect","elite","empty","enemy","enjoy","enter","entry","equal","error","essay","event","every","exact","exist","extra","fault","favor","feast","fence","fever","fiber","field","fiery","fifth","fifty","fight","final","first","flame","flash","fleet","flesh","float","flood","floor","flour","focus","force","forge","forth","forty","forum","found","frame","frank","fraud","fresh","front","frost","fruit","fully","funny","ghost","giant","given","glass","globe","glory","glove","grace","grade","grain","grand","grant","grape","graph","grasp","grass","grave","great","greed","green","greet","grief","grill","gross","group","grown","guard","guess","guest","guide","habit","happy","harsh","heart","heavy","hedge","hello","hobby","honey","honor","horse","hotel","house","human","humor","ideal","image","index","inner","input","ivory","jelly","jewel","joint","judge","juice","knife","knock","known","label","labor","large","laser","later","laugh","layer","learn","lease","least","leave","legal","lemon","level","light","limit","linen","liver","lobby","local","logic","loose","loser","lower","loyal","lucky","lunar","lunch","lyric","magic","major","maker","march","match","maybe","mayor","meant","medal","media","melon","mercy","merit","metal","meter","might","minor","minus","mixed","model","money","month","moral","motor","mount","mouse","mouth","movie","music","naked","nasty","naval","nerve","never","newly","night","noble","noise","north","novel","nurse","ocean","offer","often","olive","onion","order","other","ought","outer","owner","paint","panel","panic","paper","party","pasta","patch","pause","peace","pearl","phase","phone","photo","piano","piece","pilot","pitch","pixel","place","plain","plane","plant","plate","plaza","point","polar","porch","pound","power","press","price","pride","prime","print","prior","prize","proof","proud","prove","pulse","punch","pupil","purse","queen","query","quest","queue","quick","quiet","quite","quota","quote","radar","radio","raise","rally","ranch","range","rapid","ratio","razor","reach","ready","realm","rebel","refer","relax","relay","renew","reply","rifle","right","rigid","river","roast","robot","rough","round","route","royal","rugby","ruler","rural","salad","sauce","scale","scare","scarf","scene","scent","scope","score","scout","scrap","screw","sense","serve","seven","shade","shake","shall","shame","shape","share","shark","sharp","sheep","sheet","shelf","shell","shift","shine","shirt","shock","shoot","shore","short","shown","sight","silly","since","siren","sixth","sixty","skill","slate","sleep","slice","slide","slope","small","smart","smile","smoke","snake","sneak","solar","solid","solve","sorry","sound","south","space","spare","spark","speak","speed","spell","spend","spice","spike","spine","split","spoke","sport","spray","squad","stack","staff","stage","stain","stair","stake","stamp","stand","stare","start","state","steal","steam","steel","steep","steer","stern","stick","stiff","still","stock","stone","stood","store","storm","story","stove","straw","strip","study","stuff","style","sugar","suite","sunny","super","surge","sweat","sweep","sweet","swing","sword","table","taken","tally","taste","teach","tempo","tenth","thank","theft","their","theme","there","these","thick","thief","thing","think","third","those","three","threw","throw","thumb","tiger","tight","timer","title","toast","today","token","topic","torch","total","touch","tough","tower","toxic","trace","track","trade","trail","train","trait","trash","treat","trend","trial","tribe","trick","tried","troop","truck","truly","trunk","trust","truth","tumor","tutor","twice","twist","ultra","uncle","under","union","unite","unity","upper","upset","urban","usage","usual","valid","value","valve","vapor","vault","verse","video","villa","vinyl","virus","visit","vital","vivid","vocal","voice","voter","wagon","waist","waste","watch","water","weary","weird","whale","wheat","wheel","where","which","while","white","whole","whose","width","witch","woman","world","worry","worse","worst","worth","would","wound","wrist","write","wrong","wrote","yacht","yield","young","youth","zebra"],
+    de:["abend","apfel","augen","autos","basis","bauer","beere","beten","biene","blatt","blume","boden","boote","boxen","braun","brief","brote","bruch","buche","damen","dampf","decke","dosen","draht","druck","engel","enkel","erbse","essen","feder","feier","ferne","feste","feuer","fisch","fluss","folge","forum","frage","frist","frost","fuchs","gabel","gasse","gebet","geist","gerne","glanz","gleis","gnade","gramm","grund","gurke","hafen","hallo","haube","hecke","heide","herde","hobby","honig","humor","hunde","insel","jacke","jahre","jeans","jubel","kabel","kamin","karte","katze","kegel","kette","kiste","klage","klang","klein","klima","klotz","knabe","koala","kohle","komet","kraft","kranz","kreis","krieg","krone","kugel","kunde","kunst","kurve","lachs","laden","lampe","lager","laune","leben","leder","lehre","leine","liebe","lilie","linie","links","liste","lotus","luchs","magen","magie","maler","mango","mauer","meile","meise","milch","minze","mitte","mixer","monat","moral","motor","musik","nabel","nadel","natur","nebel","neffe","noten","nudel","onkel","opfer","orgel","otter","palme","panik","pause","pferd","pflug","pilot","pizza","platz","pluto","pokal","porto","preis","probe","punkt","quark","quell","radio","rampe","rasen","raten","regen","reich","reise","rente","riese","rille","rinde","rippe","rosen","rubin","ruder","ruhig","runde","sache","saite","salat","salbe","samen","sauna","schaf","schal","scheu","schuh","segel","seife","seite","sicht","silbe","sonne","spatz","speer","spiel","sport","stadt","stall","stamm","stand","stein","stern","stich","stiel","stift","stirn","stock","stoff","stolz","strom","stube","stuhl","sturm","suppe","szene","tafel","tante","tasse","taste","teich","tempo","thron","tiere","tinte","tisch","titel","torte","traum","treue","trick","trieb","tulpe","tuten","tutor","untat","vater","vogel","wache","wagen","wange","wanne","warze","weber","weide","weite","welle","wende","werft","werke","wesen","weste","wiese","wille","winde","wolke","wonne","wurst","zange","zebra","zeder","zehen","zeile","zelle","ziege","zitat","zunge","zweig"]
+  };
+  const LAYOUT={en:["qwertyuiop","asdfghjkl","zxcvbnm"],de:["qwertzuiop","asdfghjkl","yxcvbnm"]};
+
+  let lang=(localStorage.getItem("nw_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const I18N={
+    en:{hub:"Games",sub:"Guess the 5-letter word in 6 tries. A new puzzle every day.",
+      aboutH:"About Nexus Words",
+      aboutP:"Nexus Words is a free daily word puzzle you can play right in your browser — no download, no signup. Every day there's one new 5-letter word to guess in six tries. Green means the letter is correct and in the right spot, yellow means it's in the word but in a different spot, and gray means it isn't in the word. Solve it, keep your streak alive, and share your result with friends. There's a fresh puzzle every day in both English and German.",
+      win:["Genius!","Magnificent!","Impressive!","Splendid!","Great!","Phew!"],lose:"Next time!",
+      notenough:"Not enough letters",played:"Played",winp:"Win %",streak:"Streak",maxstreak:"Max",
+      share:"Share",next:"Next puzzle in",copied:"Result copied — paste anywhere!",already:"You already played today's puzzle."},
+    de:{hub:"Spiele",sub:"Errate das 5-Buchstaben-Wort in 6 Versuchen. Jeden Tag ein neues Rätsel.",
+      aboutH:"Über Nexus Words",
+      aboutP:"Nexus Words ist ein kostenloses tägliches Wort-Rätsel direkt im Browser — kein Download, keine Anmeldung. Jeden Tag gibt es ein neues 5-Buchstaben-Wort, das du in sechs Versuchen erraten musst. Grün heißt: der Buchstabe stimmt und steht an der richtigen Stelle, Gelb heißt: er kommt vor, aber woanders, Grau heißt: er kommt nicht vor. Löse es, halte deine Serie am Leben und teile dein Ergebnis mit Freunden. Jeden Tag ein frisches Rätsel auf Deutsch und Englisch.",
+      win:["Genial!","Großartig!","Beeindruckend!","Stark!","Gut!","Puh!"],lose:"Nächstes Mal!",
+      notenough:"Zu wenige Buchstaben",played:"Gespielt",winp:"Gewinn %",streak:"Serie",maxstreak:"Max",
+      share:"Teilen",next:"Nächstes Rätsel in",copied:"Ergebnis kopiert — überall einfügen!",already:"Du hast das heutige Rätsel schon gespielt."}
+  };
+  const T=()=>I18N[lang];
+
+  /* ---------- daily puzzle ---------- */
+  const START=new Date(2025,0,1); START.setHours(0,0,0,0);
+  function dayNum(){const t=new Date();t.setHours(0,0,0,0);return Math.floor((t-START)/86400000);}
+  function answer(){const l=WORDS[lang];return l[((dayNum()%l.length)+l.length)%l.length];}
+
+  /* ---------- state ---------- */
+  let ANS, guesses, cur, done, won;
+  const key=()=>"nw_v1_"+lang;
+  function loadState(){
+    ANS=answer();
+    let st;try{st=JSON.parse(localStorage.getItem(key())||"null");}catch(e){st=null;}
+    const stats=(st&&st.stats)||{played:0,wins:0,streak:0,max:0,dist:[0,0,0,0,0,0]};
+    if(st && st.day===dayNum()){guesses=st.guesses||[];done=!!st.done;won=!!st.won;}
+    else {guesses=[];done=false;won=false;}
+    STATS=stats;cur="";
+  }
+  let STATS;
+  function saveState(){localStorage.setItem(key(),JSON.stringify({day:dayNum(),guesses,done,won,stats:STATS}));}
+
+  /* ---------- render ---------- */
+  const $=id=>document.getElementById(id);
+  const board=$("board"),kb=$("kb");
+  function buildBoard(){
+    board.innerHTML="";
+    for(let r=0;r<6;r++){
+      const row=document.createElement("div");row.className="brow";row.id="row"+r;
+      for(let c=0;c<5;c++){const t=document.createElement("div");t.className="tile";t.id="t"+r+c;row.appendChild(t);}
+      board.appendChild(row);
+    }
+    // fill past guesses
+    guesses.forEach((g,r)=>{const ev=evaluate(g,ANS);for(let c=0;c<5;c++){const t=$("t"+r+c);t.textContent=g[c];t.classList.add("filled",ev[c]);}});
+  }
+  function buildKb(){
+    kb.innerHTML="";const rows=LAYOUT[lang];
+    rows.forEach((rw,i)=>{
+      const row=document.createElement("div");row.className="krow";
+      if(i===2){const e=mkKey("↵","enter",true);row.appendChild(e);}
+      for(const ch of rw){row.appendChild(mkKey(ch,ch,false));}
+      if(i===2){const b=mkKey("⌫","back",true);row.appendChild(b);}
+      kb.appendChild(row);
+    });
+    colorKeys();
+  }
+  function mkKey(label,val,wide){const b=document.createElement("button");b.className="key"+(wide?" wide":"");b.textContent=label;b.dataset.k=val;b.addEventListener("click",()=>press(val));return b;}
+  function colorKeys(){
+    const best={};
+    guesses.forEach(g=>{const ev=evaluate(g,ANS);for(let c=0;c<5;c++){const ch=g[c],s=ev[c];const rank={absent:1,present:2,correct:3};if(!best[ch]||rank[s]>rank[best[ch]])best[ch]=s;}});
+    kb.querySelectorAll(".key").forEach(k=>{const ch=k.dataset.k;k.classList.remove("correct","present","absent");if(best[ch])k.classList.add(best[ch]);});
+  }
+
+  /* ---------- logic ---------- */
+  function evaluate(guess,ans){
+    const res=Array(5).fill("absent"),a=ans.split(""),cnt={};
+    for(const c of a)cnt[c]=(cnt[c]||0)+1;
+    for(let i=0;i<5;i++)if(guess[i]===a[i]){res[i]="correct";cnt[guess[i]]--;}
+    for(let i=0;i<5;i++){if(res[i]==="correct")continue;const c=guess[i];if(cnt[c]>0){res[i]="present";cnt[c]--;}}
+    return res;
+  }
+  function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+  function press(k){
+    if(done)return;
+    if(k==="enter")return submit();
+    if(k==="back"){cur=cur.slice(0,-1);return paint();}
+    if(/^[a-z]$/.test(k)&&cur.length<5){cur+=k;paint();}
+  }
+  function paint(){
+    const r=guesses.length;
+    for(let c=0;c<5;c++){const t=$("t"+r+c);if(!t)continue;t.textContent=cur[c]||"";t.classList.toggle("filled",!!cur[c]);}
+  }
+  function submit(){
+    const r=guesses.length;
+    if(cur.length<5){shake(r);toast(T().notenough);return;}
+    const ev=evaluate(cur,ANS);
+    for(let c=0;c<5;c++){const t=$("t"+r+c);t.classList.add("reveal",ev[c]);t.style.animationDelay=(c*0.12)+"s";}
+    guesses.push(cur);
+    const guess=cur;cur="";
+    colorKeys();
+    if(guess===ANS){won=true;done=true;finish(true,guesses.length);}
+    else if(guesses.length>=6){done=true;finish(false,0);}
+    saveState();
+  }
+  function shake(r){const row=$("row"+r);row.classList.add("shake");setTimeout(()=>row.classList.remove("shake"),420);}
+
+  function finish(w,tries){
+    STATS.played++;
+    if(w){STATS.wins++;STATS.streak++;STATS.max=Math.max(STATS.max,STATS.streak);STATS.dist[tries-1]++;}
+    else STATS.streak=0;
+    saveState();
+    setTimeout(()=>showStats(true),900);
+  }
+
+  /* ---------- stats / share modal ---------- */
+  function showStats(withResult){
+    const t=T();
+    const winp=STATS.played?Math.round(STATS.wins/STATS.played*100):0;
+    let head="",word="";
+    if(done && withResult){
+      head= won? t.win[Math.min(guesses.length-1,5)] : t.lose;
+      word= won? "" : ANS.toUpperCase();
+    }else{head="📊 "+t.played;}
+    const maxd=Math.max(1,...STATS.dist);
+    let dist="";for(let i=0;i<6;i++){const cur=won&&guesses.length===i+1;dist+=`<div class="dbar"><span class="idx">${i+1}</span><div class="fill${cur?" cur":""}" style="width:${20+STATS.dist[i]/maxd*100}px">${STATS.dist[i]}</div></div>`;}
+    const modal=$("modal");
+    modal.querySelector(".card").innerHTML=`
+      <h2>${head}</h2>
+      ${word?`<div class="word">${word}</div>`:""}
+      <div class="stats">
+        <div class="b"><div class="n">${STATS.played}</div><div class="l">${t.played}</div></div>
+        <div class="b"><div class="n">${winp}</div><div class="l">${t.winp}</div></div>
+        <div class="b"><div class="n">${STATS.streak}</div><div class="l">${t.streak}</div></div>
+        <div class="b"><div class="n">${STATS.max}</div><div class="l">${t.maxstreak}</div></div>
+      </div>
+      <div class="dist">${dist}</div>
+      ${done?`<div class="count">${t.next} <b id="cd">--:--:--</b></div>`:""}
+      <button id="shareBtn2">⤴ ${t.share}</button>`;
+    modal.classList.remove("hidden");
+    const sb=$("shareBtn2");if(sb)sb.onclick=share;
+    if(done)startCountdown();
+  }
+  let cdTimer;
+  function startCountdown(){
+    clearInterval(cdTimer);
+    function upd(){const n=new Date();const e=new Date();e.setHours(24,0,0,0);let s=Math.floor((e-n)/1000);const h=String(Math.floor(s/3600)).padStart(2,"0");s%=3600;const m=String(Math.floor(s/60)).padStart(2,"0");const ss=String(s%60).padStart(2,"0");const el=$("cd");if(el)el.textContent=`${h}:${m}:${ss}`;}
+    upd();cdTimer=setInterval(upd,1000);
+  }
+  async function share(){
+    const emo={correct:"🟩",present:"🟨",absent:"⬛"};
+    let grid=guesses.map(g=>evaluate(g,ANS).map(s=>emo[s]).join("")).join("\n");
+    const n=dayNum();const tries=won?guesses.length:"X";
+    const txt=`Nexus Words #${n} ${tries}/6\n${grid}`;
+    const url=location.origin+location.pathname;
+    if(navigator.share){try{await navigator.share({title:"Nexus Words",text:txt+"\n"+url});return;}catch(e){}}
+    try{await navigator.clipboard.writeText(txt+"\n"+url);toast(T().copied);}catch(e){toast(T().copied);}
+  }
+
+  /* ---------- physical keyboard ---------- */
+  document.addEventListener("keydown",e=>{
+    if(!$("modal").classList.contains("hidden"))return;
+    if(e.key==="Enter")press("enter");
+    else if(e.key==="Backspace")press("back");
+    else{const k=e.key.toLowerCase();if(/^[a-z]$/.test(k))press(k);}
+  });
+
+  /* ---------- language / UI ---------- */
+  function applyLang(){
+    document.documentElement.lang=lang;$("langLabel").textContent=lang.toUpperCase();
+    document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});
+    $("sub").textContent=T().sub;$("aboutH").textContent=T().aboutH;$("aboutP").textContent=T().aboutP;
+    loadState();buildBoard();buildKb();
+  }
+  $("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nw_lang",lang);applyLang();});
+  $("statsBtn").addEventListener("click",()=>showStats(false));
+  $("modal") && $("modal").addEventListener("click",e=>{if(e.target.id==="modal")e.currentTarget.classList.add("hidden");});
+  $("year").textContent=new Date().getFullYear();
+
+  /* ---------- boot ---------- */
+  loadState();buildBoard();buildKb();applyLang();
+  if(done)setTimeout(()=>showStats(true),300);
+})();
+</script>
+<div class="modal hidden" id="modal"><div class="card"></div></div>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>

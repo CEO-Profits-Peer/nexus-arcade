@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nexus Stack — Free Tower Stacking Game | Kostenloses Stapelspiel im Browser</title>
+<meta name="description" content="Nexus Stack is a free timing-based tower stacking game. Drop each block perfectly to build the tallest neon tower. Play free in your browser — no download." />
+<meta name="keywords" content="stack game, tower game, timing game, free arcade game, browser game, stapelspiel, geschicklichkeitsspiel" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/stack/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Stack — Free Tower Stacking Game" />
+<meta property="og:description" content="Drop blocks, build high, don't miss. Play free." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Nexus Stack","genre":["Arcade"],"gamePlatform":"Web Browser","applicationCategory":"Game","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.82);--neon:#39e6ff;--pink:#ff3ea5;--accent:#ffcf5c;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1000px 500px at 50% -10%,rgba(57,230,255,0.12),transparent 60%),radial-gradient(800px 500px at 90% 110%,rgba(255,62,165,0.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;touch-action:none;}
+  header.top{width:100%;max-width:440px;padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:1px;}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 12px var(--neon);}
+  .brand span{font-size:19px;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  .hud{width:100%;max-width:440px;display:flex;gap:10px;padding:4px 16px;}
+  .hud .box{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;text-align:center;}
+  .hud .l{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .hud .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .hud .v.neon{color:var(--neon);}
+  .wrap{width:100%;max-width:440px;padding:8px 16px 14px;}
+  .frame{position:relative;width:100%;aspect-ratio:3/4.6;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 0 40px rgba(57,230,255,0.08),inset 0 0 60px rgba(0,0,0,0.6);cursor:pointer;}
+  canvas{display:block;width:100%;height:100%;}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;gap:12px;background:rgba(5,6,15,0.72);}
+  .overlay.hidden{display:none;}
+  .overlay h1{margin:0;font-size:clamp(26px,7vw,42px);letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .overlay p{margin:0;color:var(--muted);max-width:360px;line-height:1.5;font-size:14px;}
+  .overlay .big{font-size:clamp(34px,9vw,56px);font-weight:900;color:var(--neon);text-shadow:0 0 20px rgba(57,230,255,0.6);}
+  .sub{font-size:13px;color:var(--muted);}
+  .btn{border:none;cursor:pointer;font-weight:800;letter-spacing:1px;font-size:16px;padding:13px 28px;border-radius:999px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));box-shadow:0 0 22px rgba(57,230,255,0.4);}
+  .btn.sec{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none;}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .new-best{color:var(--accent);font-weight:800;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .about{max-width:440px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;} .about h2{color:var(--text);font-size:17px;}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS STACK</span></a>
+  <div class="controls">
+    <a class="chip" href="/">← <span data-i18n="hub">Games</span></a>
+    <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+  </div>
+</header>
+<div class="hud">
+  <div class="box"><div class="l" data-i18n="height">Height</div><div class="v neon" id="scoreVal">0</div></div>
+  <div class="box"><div class="l" data-i18n="best">Best</div><div class="v" id="bestVal">0</div></div>
+</div>
+<div class="wrap">
+  <div class="frame" id="frame">
+    <canvas id="game"></canvas>
+    <div class="overlay" id="startO">
+      <h1>NEXUS STACK</h1>
+      <p data-i18n="intro">A block slides back and forth. Tap, click or press Space to drop it right on top of the tower. Perfect drops keep it wide — misses trim it down. Build as high as you can!</p>
+      <div id="modeSel" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div>
+      <button class="btn" id="startBtn" data-i18n="play">▶ STACK</button>
+      <div class="sub" data-i18n="hint">Tap / click / Space to drop</div>
+    </div>
+    <div class="overlay hidden" id="overO">
+      <div class="sub" data-i18n="gameover">TOPPLED</div>
+      <div class="big" id="finalScore">0</div>
+      <div class="new-best hidden" id="newBest" data-i18n="newbest">★ NEW RECORD ★</div>
+      <div class="sub"><span data-i18n="best">Best</span>: <b id="overBest">0</b></div>
+      <div class="btnrow">
+        <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
+        <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+      </div>
+    </div>
+  </div>
+</div>
+<section class="about">
+  <h2 id="aboutH">About Nexus Stack</h2>
+  <p id="aboutP">Nexus Stack is a free timing and precision game you play right in your browser — no download, no signup. A glowing block slides across the top; drop it as perfectly as you can onto the growing tower. Any part that hangs over the edge gets sliced off, so nail your timing to keep your blocks wide. Perfect drops even earn a little width back. It gets faster the higher you climb. How tall can your neon tower get?</p>
+</section>
+<footer>© <span id="year"></span> Nexus Stack · part of Nexus Arcade.</footer>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+(function(){
+  const I={en:{hub:"Games",height:"Height",best:"Best",play:"▶ STACK",retry:"↻ RETRY",share:"⤴ SHARE",gameover:"TOPPLED",newbest:"★ NEW RECORD ★",perfect:"PERFECT!",
+    intro:"A block slides back and forth. Tap, click or press Space to drop it right on top of the tower. Perfect drops keep it wide — misses trim it down. Build as high as you can!",hint:"Tap / click / Space to drop",aboutH:"About Nexus Stack",
+    aboutP:"Nexus Stack is a free timing and precision game you play right in your browser — no download, no signup. A glowing block slides across the top; drop it as perfectly as you can onto the growing tower. Any part that hangs over the edge gets sliced off, so nail your timing to keep your blocks wide. Perfect drops even earn a little width back. It gets faster the higher you climb. How tall can your neon tower get?",
+    shareText:s=>`I stacked ${s} blocks in Nexus Stack! Can you go higher?`,copied:"Copied — paste anywhere!"},
+  de:{hub:"Spiele",height:"Höhe",best:"Bestwert",play:"▶ STAPELN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",gameover:"UMGEKIPPT",newbest:"★ NEUER REKORD ★",perfect:"PERFEKT!",
+    intro:"Ein Block gleitet hin und her. Tippe, klicke oder drücke Leertaste, um ihn genau auf den Turm zu setzen. Perfekte Drops bleiben breit — Fehler schneiden ihn ab. Bau so hoch du kannst!",hint:"Tippen / Klick / Leertaste zum Ablegen",aboutH:"Über Nexus Stack",
+    aboutP:"Nexus Stack ist ein kostenloses Timing- und Präzisionsspiel direkt im Browser — kein Download, keine Anmeldung. Ein leuchtender Block gleitet oben vorbei; setze ihn so perfekt wie möglich auf den wachsenden Turm. Was übersteht, wird abgeschnitten — also triff das Timing, damit deine Blöcke breit bleiben. Perfekte Drops geben sogar etwas Breite zurück. Je höher, desto schneller. Wie hoch wird dein Neon-Turm?",
+    shareText:s=>`Ich habe ${s} Blöcke in Nexus Stack gestapelt! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!"}};
+  let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const T=()=>I[lang];
+  const canvas=document.getElementById("game"),ctx=canvas.getContext("2d"),frame=document.getElementById("frame");
+  let W=0,H=0,DPR=1,BH=0;
+  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);const r=frame.getBoundingClientRect();W=r.width;H=r.height;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);BH=H*0.075;}
+  window.addEventListener("resize",()=>{resize();draw();});
+  const BEST="nx_stack_best";let best=parseInt(localStorage.getItem(BEST)||"0",10);
+  let mode=localStorage.getItem("nx_stack_mode")||"classic";
+  const MODES=[{id:"classic",en:"Classic",de:"Klassisch"},{id:"chill",en:"Chill (wide)",de:"Chill (breit)"}];
+  let tower=[],cur=null,dir=1,speed=0,score=0,state="menu",falls=[],camY=0,hue=190;
+  const DROPY=()=>H*0.34;
+  function reset(){const chill=mode==="chill";const w=W*(chill?0.78:0.62);tower=[{x:W/2-w/2,w:w}];score=0;speed=W*(chill?0.55:0.9);hue=190;falls=[];camY=0;spawn();hud();}
+  function spawn(){hue=(hue+18)%360;const top=tower[tower.length-1];cur={x:0,w:top.w,dir:1,hue};dir=1;}
+  function hud(){document.getElementById("scoreVal").textContent=score;document.getElementById("bestVal").textContent=best;}
+  function drop(){
+    if(state!=="playing")return;
+    const top=tower[tower.length-1];
+    const l=Math.max(cur.x,top.x),r=Math.min(cur.x+cur.w,top.x+top.w);
+    const ov=r-l;
+    if(ov<=0){gameOver();return;}
+    // cut piece
+    if(cur.x<top.x)falls.push({x:cur.x,w:top.x-cur.x,y:0,vy:0,hue:cur.hue});
+    if(cur.x+cur.w>top.x+top.w)falls.push({x:top.x+top.w,w:(cur.x+cur.w)-(top.x+top.w),y:0,vy:0,hue:cur.hue});
+    let nx=l,nw=ov;
+    if(ov>top.w-4){ // near perfect: regrow a touch
+      nw=Math.min(W*(mode==="chill"?0.78:0.62),top.w+6);nx=top.x-(nw-top.w)/2;nx=Math.max(0,Math.min(W-nw,nx));toast(T().perfect);if(window.NexusArcade){try{window.NexusArcade.addXP(3);}catch(e){}}
+    }
+    tower.push({x:nx,w:nw,hue:cur.hue});
+    score++;speed+=W*0.02;hud();
+    if(window.NexusArcade){try{window.NexusArcade.addXP(1);}catch(e){}}
+    spawn();
+  }
+  frame.addEventListener("mousedown",drop);
+  frame.addEventListener("touchstart",e=>{drop();e.preventDefault();},{passive:false});
+  document.addEventListener("keydown",e=>{if(e.key===" "){drop();e.preventDefault();}});
+  function update(dt){
+    if(state==="playing"){
+      cur.x+=dir*speed*dt;
+      if(cur.x<0){cur.x=0;dir=1;}if(cur.x+cur.w>W){cur.x=W-cur.w;dir=-1;}
+      const targetCam=Math.max(0,(tower.length-4)*BH);camY+=(targetCam-camY)*Math.min(1,dt*6);
+    }
+    for(let i=falls.length-1;i>=0;i--){const f=falls[i];f.vy+=1600*dt;f.y+=f.vy*dt;if(f.y>H*1.2)falls.splice(i,1);}
+  }
+  function blockColor(h){return "hsl("+h+",70%,55%)";}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const baseY=H-BH*0.5;
+    for(let i=0;i<tower.length;i++){const b=tower[i];const y=baseY-i*BH+camY;if(y>H+BH||y<-BH)continue;
+      ctx.save();ctx.shadowColor=blockColor(b.hue||190);ctx.shadowBlur=10;ctx.fillStyle=blockColor(b.hue||190);roundRect(b.x,y-BH,b.w,BH-3,6);ctx.fill();ctx.restore();}
+    if(state==="playing"&&cur){const y=baseY-tower.length*BH+camY;ctx.save();ctx.shadowColor=blockColor(cur.hue);ctx.shadowBlur=16;ctx.fillStyle=blockColor(cur.hue);roundRect(cur.x,y-BH,cur.w,BH-3,6);ctx.fill();ctx.restore();}
+    for(const f of falls){ctx.save();ctx.globalAlpha=0.85;ctx.fillStyle=blockColor(f.hue);const y=baseY-tower.length*BH+camY+f.y;roundRect(f.x,y-BH,f.w,BH-3,6);ctx.fill();ctx.restore();}
+  }
+  function roundRect(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  let last=0;function loop(ts){if(!last)last=ts;let dt=(ts-last)/1000;last=ts;if(dt>0.05)dt=0.05;update(dt);draw();requestAnimationFrame(loop);}
+  function start(){resize();reset();document.getElementById("startO").classList.add("hidden");document.getElementById("overO").classList.add("hidden");state="playing";}
+  function gameOver(){state="over";const fs=score;document.getElementById("finalScore").textContent=fs;const isBest=fs>best;if(isBest){best=fs;localStorage.setItem(BEST,String(best));}document.getElementById("newBest").classList.toggle("hidden",!isBest);document.getElementById("overBest").textContent=best;document.getElementById("overO").classList.remove("hidden");hud();if(window.NexusArcade){try{window.NexusArcade.addXP(Math.floor(fs/2));window.NexusArcade.submitScore&&window.NexusArcade.submitScore("stack",best);}catch(e){}}}
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1000);}
+  async function share(){const txt=T().shareText(score),url=location.origin+location.pathname;if(navigator.share){try{await navigator.share({title:"Nexus Stack",text:txt,url});return;}catch(e){}}try{await navigator.clipboard.writeText(txt+" "+url);toast(T().copied);}catch(e){toast(txt);}}
+  function applyAspect(){frame.style.aspectRatio=mode==="chill"?"16 / 10":"3 / 4.6";resize();draw();}
+  function renderModes(){const el=document.getElementById("modeSel");if(!el)return;el.innerHTML=MODES.map(m=>'<button class="btn sec" data-mode="'+m.id+'" style="padding:8px 14px;font-size:13px;'+(mode===m.id?'border-color:var(--neon);color:var(--neon)':'')+'">'+m[lang]+'</button>').join("");el.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{mode=b.getAttribute("data-mode");localStorage.setItem("nx_stack_mode",mode);renderModes();applyAspect();});}
+  function applyLang(){document.documentElement.lang=lang;document.getElementById("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});document.getElementById("aboutH").textContent=T().aboutH;document.getElementById("aboutP").textContent=T().aboutP;renderModes();}
+  document.getElementById("startBtn").addEventListener("click",start);
+  document.getElementById("retryBtn").addEventListener("click",start);
+  document.getElementById("shareBtn").addEventListener("click",share);
+  document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
+  document.getElementById("year").textContent=new Date().getFullYear();
+  resize();document.getElementById("bestVal").textContent=best;applyLang();applyAspect();draw();requestAnimationFrame(loop);
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>

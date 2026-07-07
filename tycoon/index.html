@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nexus Tycoon — Free Idle Business Tycoon Game | Kostenloses Tycoon-Spiel</title>
+<meta name="description" content="Nexus Tycoon is a free idle business tycoon game. Buy businesses, hire managers, upgrade in the shop and earn money even while offline. Play free in your browser." />
+<meta name="keywords" content="tycoon game, idle game, business game, incremental game, money game, free tycoon, idle tycoon, wirtschaftsspiel" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/tycoon/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Tycoon — Free Idle Business Tycoon" />
+<meta property="og:description" content="Build businesses, hire managers, get rich — even offline. Play free." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Nexus Tycoon","genre":["Idle","Simulation","Tycoon"],"gamePlatform":"Web Browser","applicationCategory":"Game","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(20,26,52,0.82);--panel2:rgba(30,38,70,0.6);--neon:#39e6ff;--gold:#ffcf5c;--green:#7cff6b;--mag:#c77dff;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1000px 500px at 50% -10%,rgba(255,207,92,0.10),transparent 60%),radial-gradient(800px 500px at 90% 110%,rgba(57,230,255,0.10),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+  header.top{width:100%;max-width:560px;padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:1px;}
+  .brand .dot{width:13px;height:13px;transform:rotate(45deg);background:linear-gradient(135deg,#fff,var(--gold));box-shadow:0 0 12px var(--gold);}
+  .brand span{font-size:19px;background:linear-gradient(90deg,var(--gold),var(--neon));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  .cashbar{width:100%;max-width:560px;padding:6px 16px;text-align:center;}
+  .cash{font-size:30px;font-weight:900;color:var(--gold);text-shadow:0 0 16px rgba(255,207,92,0.4);font-variant-numeric:tabular-nums;}
+  .persec{font-size:13px;color:var(--muted);}
+  .wrap{width:100%;max-width:560px;padding:6px 16px 20px;}
+  .biz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+  .biz.locked{opacity:0.6;}
+  .icon{width:46px;height:46px;flex:none;border-radius:11px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;position:relative;overflow:hidden;}
+  .icon .prog{position:absolute;left:0;bottom:0;width:100%;background:rgba(57,230,255,0.35);height:0%;}
+  @keyframes hintp{0%,100%{box-shadow:0 0 0 0 rgba(255,207,92,.6)}50%{box-shadow:0 0 0 9px rgba(255,207,92,0)}}
+  .hintpulse{animation:hintp 1.15s infinite;}
+  .buybtn.bestbuy{outline:2px solid var(--gold);animation:hintp 1.15s infinite;}
+  .hint{width:100%;max-width:560px;text-align:center;color:var(--gold);font-size:13px;padding:0 16px 4px;min-height:18px;}
+  .mid{flex:1;min-width:0;}
+  .biz .name{font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:6px;}
+  .biz .name .owned{color:var(--neon);}
+  .bar{height:16px;background:rgba(0,0,0,0.4);border-radius:6px;overflow:hidden;margin:5px 0;}
+  .bar .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),#ff9a3a);transition:width .1s linear;}
+  .biz .rev{font-size:12px;color:var(--muted);}
+  .buys{display:flex;flex-direction:column;gap:5px;}
+  .buybtn{border:none;cursor:pointer;font-weight:700;font-size:12px;padding:8px 10px;border-radius:9px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--green));min-width:96px;text-align:center;}
+  .buybtn:disabled{opacity:0.4;cursor:not-allowed;filter:grayscale(1);}
+  .mgr{background:var(--panel2);color:var(--text);border:1px solid var(--line);}
+  .mgr.owned{background:rgba(124,255,107,0.15);border-color:var(--green);color:var(--green);cursor:default;}
+  .foot{display:flex;gap:8px;margin-top:6px;}
+  .foot .chip{flex:1;text-align:center;justify-content:center;}
+  .prestige{width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--mag),var(--gold));color:#160a24;}
+  .prestige.dis{opacity:0.4;cursor:not-allowed;}
+  .prestige small{display:block;font-weight:600;font-size:11px;opacity:0.85;margin-top:2px;}
+  .modal{position:fixed;inset:0;background:rgba(5,6,15,0.82);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .modal.hidden{display:none;}
+  .card{background:var(--panel);border:1px solid var(--gold);border-radius:18px;padding:24px;max-width:360px;text-align:center;box-shadow:0 0 40px rgba(255,207,92,0.25);}
+  .card h2{margin:0 0 6px;color:var(--gold);} .card p{color:var(--muted);line-height:1.5;} .card .big{font-size:30px;font-weight:900;color:var(--gold);}
+  .card button{margin-top:14px;border:none;padding:12px 26px;border-radius:999px;cursor:pointer;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--neon));color:#160a24;}
+  .about{max-width:560px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;} .about h2{color:var(--text);font-size:17px;}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--gold);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS TYCOON</span></a>
+  <div class="controls">
+    <a class="chip" href="/">← <span data-i18n="hub">Games</span></a>
+    <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+  </div>
+</header>
+<div class="cashbar">
+  <div class="cash" id="cash">$0</div>
+  <div class="persec"><span id="persec">$0</span> <span data-i18n="persec">/ sec</span> · <span data-i18n="investors">Investors</span>: <b id="inv" style="color:var(--mag)">0</b></div>
+</div>
+<div class="hint" id="hint"></div>
+<div class="wrap" id="bizList"></div>
+<section class="about">
+  <h2 id="aboutH">About Nexus Tycoon</h2>
+  <p id="aboutP">Nexus Tycoon is a free idle business tycoon game right in your browser — no download, no signup. Start with a tiny data node, tap to earn, then reinvest in the shop to buy more businesses and unlock new ones. Hire managers so everything runs automatically — even while you're away, thanks to offline earnings. When growth slows, cash out to investors for a permanent multiplier and start a faster run. How big can your Nexus empire get?</p>
+</section>
+<footer>© <span id="year"></span> Nexus Tycoon · part of Nexus Arcade.</footer>
+
+<div class="modal hidden" id="modal"><div class="card">
+  <h2 id="modalTitle"></h2><p id="modalBody"></p><div class="big" id="modalBig"></div>
+  <button id="modalBtn"></button>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+(function(){
+  const I={en:{hub:"Games",persec:"/ sec",investors:"Investors",buy:"Buy",manager:"Manager",hired:"✓ Auto",hint1:"👆 Buy your first business to start earning!",hint2:"💡 Tap a business to collect — or hire a Manager to automate it!",specBuy:"✦ HIRE SPECIALIST",specHired:"Specialist hired! Best buy is marked ★",specMaxed:"Specialist maxed",specTips:"tips left",
+    prestige:"✦ CASH OUT",prestigeInfo:i=>"Reset for +"+i+" investors (+"+(i*2)+"% forever)",prestigeNeed:"Earn $1M to cash out",
+    welcome:"Welcome back!",offline:"Your managers earned while you were away:",collect:"Collect",
+    cashout:"Cash out to investors?",confirm:"Reset your businesses & cash for",invUnit:"investors",permBoost:"Each gives +2% earnings forever.",doCashout:"Cash out",
+    aboutH:"About Nexus Tycoon",aboutP:"Nexus Tycoon is a free idle business tycoon game right in your browser — no download, no signup. Start with a tiny data node, tap to earn, then reinvest in the shop to buy more businesses and unlock new ones. Hire managers so everything runs automatically — even while you're away, thanks to offline earnings. When growth slows, cash out to investors for a permanent multiplier and start a faster run. How big can your Nexus empire get?"},
+  de:{hub:"Spiele",persec:"/ Sek",investors:"Investoren",buy:"Kaufen",manager:"Manager",hired:"✓ Auto",hint1:"👆 Kaufe deine erste Firma, um zu verdienen!",hint2:"💡 Tippe eine Firma zum Kassieren — oder heuere einen Manager an!",specBuy:"✦ SPEZIALIST ANHEUERN",specHired:"Spezialist angeheuert! Bester Kauf ist ★ markiert",specMaxed:"Spezialist max",specTips:"Tipps übrig",
+    prestige:"✦ AUSZAHLEN",prestigeInfo:i=>"Reset für +"+i+" Investoren (+"+(i*2)+"% dauerhaft)",prestigeNeed:"Verdiene $1M zum Auszahlen",
+    welcome:"Willkommen zurück!",offline:"Deine Manager haben verdient, während du weg warst:",collect:"Einsammeln",
+    cashout:"An Investoren auszahlen?",confirm:"Setze Firmen & Geld zurück für",invUnit:"Investoren",permBoost:"Jeder gibt +2% Einnahmen dauerhaft.",doCashout:"Auszahlen",
+    aboutH:"Über Nexus Tycoon",aboutP:"Nexus Tycoon ist ein kostenloses Idle-Business-Tycoon direkt im Browser — kein Download, keine Anmeldung. Starte mit einem kleinen Datenknoten, tippe zum Verdienen und investiere im Shop in mehr Firmen und schalte neue frei. Heuere Manager an, damit alles automatisch läuft — dank Offline-Einnahmen sogar, während du weg bist. Wenn es zäh wird, zahle an Investoren aus für einen dauerhaften Multiplikator und starte einen schnelleren Lauf. Wie groß wird dein Nexus-Imperium?"}};
+  let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const T=()=>I[lang];
+  const BIZ=[
+    {id:0,icon:"🔗",name:{en:"Data Node",de:"Datenknoten"},cost:5,rev:1,time:1},
+    {id:1,icon:"🖥️",name:{en:"Server Rack",de:"Server-Rack"},cost:60,rev:6,time:3},
+    {id:2,icon:"🧠",name:{en:"AI Cluster",de:"KI-Cluster"},cost:720,rev:45,time:6},
+    {id:3,icon:"⚛️",name:{en:"Quantum Core",de:"Quantenkern"},cost:8600,rev:250,time:12},
+    {id:4,icon:"🌐",name:{en:"Nexus Grid",de:"Nexus-Netz"},cost:100000,rev:1400,time:24},
+    {id:5,icon:"⭐",name:{en:"Star Forge",de:"Sternenschmiede"},cost:1200000,rev:7800,time:48}
+  ];
+  const COSTM=1.11, MGRM=18;
+  const SAVE="nx_tycoon";
+  let s;
+  function fresh(){return{cash:20,earned:0,inv:0,b:BIZ.map(()=>({owned:0,mgr:false,t:0,run:false})),spec:{tier:0,hints:0},last:Date.now()};}
+  function load(){try{const r=localStorage.getItem(SAVE);if(r){s=Object.assign(fresh(),JSON.parse(r));s.b=s.b&&s.b.length===BIZ.length?s.b:fresh().b;return true;}}catch(e){}s=fresh();return false;}
+  function save(){s.last=Date.now();localStorage.setItem(SAVE,JSON.stringify(s));localStorage.setItem("nx_tycoon_best",String(Math.floor(s.earned)));}
+  s=fresh(); const existed=load(); s.b.forEach(b=>{b.owned>0&&b.mgr?b.run=true:0;});
+  BIZ.forEach((d,i)=>{ if(!s.b[i]) s.b[i]={owned:0,mgr:false,t:0,run:false}; });
+  if(!s.spec) s.spec={tier:0,hints:0};
+  // unlock: business i visible if previous owned>=1 or i==0
+  const mult=()=>1+s.inv*0.02;
+  function buyCost(i){return BIZ[i].cost*Math.pow(COSTM,s.b[i].owned);}
+  function mgrCost(i){return BIZ[i].cost*MGRM;}
+  function rev(i){return BIZ[i].rev*s.b[i].owned*mult();}
+  function persec(){let t=0;for(let i=0;i<BIZ.length;i++){if(s.b[i].owned>0&&(s.b[i].mgr))t+=rev(i)/BIZ[i].time;}return t;}
+  const SPEC_TIERS=[{cost:500,hints:3},{cost:25000,hints:12},{cost:2000000,hints:9999}];
+  function bestBuyIndex(){let bi=-1,bv=-1;for(let i=0;i<BIZ.length;i++){if(!visible(i))continue;const marg=BIZ[i].rev*mult()/BIZ[i].time;const v=marg/buyCost(i);if(v>bv){bv=v;bi=i;}}return bi;}
+  function hireSpec(){const t=s.spec.tier;if(t>=SPEC_TIERS.length)return;const c=SPEC_TIERS[t].cost;if(s.cash>=c){s.cash-=c;s.spec.tier++;s.spec.hints+=SPEC_TIERS[t].hints;refresh();save();toast(T().specHired);}}
+  function fmt(n){n=Math.floor(n);if(n<1000)return "$"+n;const SUF=["","K","M","B","T","Qa","Qi","Sx","Sp"];let t=0;while(n>=1000&&t<SUF.length-1){n/=1000;t++;}return "$"+(n<10?n.toFixed(2):n<100?n.toFixed(1):Math.floor(n))+SUF[t];}
+
+  const $=id=>document.getElementById(id);
+  function visible(i){return i===0||s.b[i-1].owned>=1;}
+  function buildList(){
+    const wrap=$("bizList");wrap.innerHTML="";
+    for(let i=0;i<BIZ.length;i++){
+      if(!visible(i))continue;
+      const d=BIZ[i];
+      const el=document.createElement("div");el.className="biz";el.id="biz"+i;
+      el.innerHTML=
+        '<div class="icon" data-run="'+i+'">'+d.icon+'<div class="prog" id="prog'+i+'"></div></div>'+
+        '<div class="mid"><div class="name">'+d.name[lang]+' <span class="owned" id="own'+i+'"></span></div>'+
+        '<div class="bar"><div class="fill" id="fill'+i+'"></div></div>'+
+        '<div class="rev" id="rev'+i+'"></div></div>'+
+        '<div class="buys"><button class="buybtn" data-buy="'+i+'" id="buy'+i+'"></button>'+
+        '<button class="buybtn mgr" data-mgr="'+i+'" id="mgr'+i+'"></button></div>';
+      wrap.appendChild(el);
+    }
+    const sp=document.createElement("button");sp.className="prestige";sp.id="specBtn";sp.style.background="linear-gradient(90deg,var(--neon),var(--gold))";sp.style.marginTop="8px";sp.innerHTML='<span>'+T().specBuy+'</span><small id="specInfo"></small>';wrap.appendChild(sp);sp.onclick=hireSpec;
+    const pr=document.createElement("button");pr.className="prestige";pr.id="prestige";pr.innerHTML='<span>'+T().prestige+'</span><small id="prInfo"></small>';
+    wrap.appendChild(pr);
+    wrap.querySelectorAll("[data-run]").forEach(b=>b.onclick=()=>startBiz(+b.getAttribute("data-run")));
+    wrap.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>buy(+b.getAttribute("data-buy")));
+    wrap.querySelectorAll("[data-mgr]").forEach(b=>b.onclick=()=>hire(+b.getAttribute("data-mgr")));
+    pr.onclick=prestige;
+    refresh();
+  }
+  function startBiz(i){if(s.b[i].owned>0&&!s.b[i].run){s.b[i].run=true;s.b[i].t=0;}}
+  function buy(i){const c=buyCost(i);if(s.cash>=c){s.cash-=c;s.b[i].owned++;if(s.spec.hints>0)s.spec.hints--;if(s.b[i].mgr)s.b[i].run=true;const wasVis=visible(i+1);refresh();if(i+1<BIZ.length&&s.b[i].owned===1)buildList();if(window.NexusArcade){try{window.NexusArcade.addXP(1);}catch(e){}}save();}}
+  function hire(i){if(s.b[i].mgr)return;const c=mgrCost(i);if(s.cash>=c){s.cash-=c;s.b[i].mgr=true;if(s.b[i].owned>0)s.b[i].run=true;refresh();save();}}
+  const prestigeGain=()=>Math.floor(Math.sqrt(s.earned/1e6));
+  function prestige(){if(prestigeGain()<1)return;const g=prestigeGain();$("modalTitle").textContent=T().cashout;$("modalBody").textContent=T().confirm+" "+g+" "+T().invUnit+". "+T().permBoost;$("modalBig").textContent="✦ "+g;const btn=$("modalBtn");btn.textContent=T().doCashout;$("modal").classList.remove("hidden");btn.onclick=()=>{const inv=s.inv+g;s=fresh();s.inv=inv;$("modal").classList.add("hidden");buildList();save();if(window.NexusArcade){try{window.NexusArcade.addXP(120);}catch(e){}}};}
+
+  function refresh(){
+    $("cash").textContent=fmt(s.cash);$("persec").textContent=fmt(persec());$("inv").textContent=s.inv;
+    const bi=(s.spec&&s.spec.hints>0)?bestBuyIndex():-1;
+    for(let i=0;i<BIZ.length;i++){ if(!visible(i))continue;
+      const own=$("own"+i);if(own)own.textContent="x"+s.b[i].owned;
+      const rv=$("rev"+i);if(rv)rv.textContent=fmt(rev(i))+" / "+BIZ[i].time+"s";
+      const bb=$("buy"+i);if(bb){bb.innerHTML=(i===bi?"★ ":"")+T().buy+" · "+fmt(buyCost(i));bb.disabled=s.cash<buyCost(i);bb.classList.toggle("bestbuy",i===bi);}
+      const mb=$("mgr"+i);if(mb){if(s.b[i].mgr){mb.textContent=T().hired;mb.classList.add("owned");mb.disabled=true;}else{mb.innerHTML=T().manager+" · "+fmt(mgrCost(i));mb.disabled=s.cash<mgrCost(i);}}
+    }
+    const pr=$("prestige");if(pr){const g=prestigeGain();pr.classList.toggle("dis",g<1);$("prInfo").textContent=g<1?T().prestigeNeed:T().prestigeInfo(g);}
+    const sp=$("specBtn");if(sp){const st=s.spec.tier;if(st>=SPEC_TIERS.length){sp.classList.add("dis");$("specInfo").textContent=T().specMaxed+(s.spec.hints>0?" · "+s.spec.hints+" "+T().specTips:"");}else{const c=SPEC_TIERS[st].cost;sp.classList.toggle("dis",s.cash<c);$("specInfo").textContent=fmt(c)+(s.spec.hints>0?" · "+s.spec.hints+" "+T().specTips:"");}}
+    // --- Early-Game Hinweise ---
+    const noneOwned=s.b.every(b=>b.owned===0);
+    const anyMgr=s.b.some(b=>b.mgr&&b.owned>0);
+    const hint=$("hint");if(hint)hint.textContent=noneOwned?T().hint1:(!anyMgr?T().hint2:"");
+    for(let i=0;i<BIZ.length;i++){ if(!visible(i))continue;
+      const buyb=$("buy"+i);if(buyb)buyb.classList.toggle("hintpulse",noneOwned&&i===0&&!buyb.disabled);
+      const icon=document.querySelector('.icon[data-run="'+i+'"]');if(icon)icon.classList.toggle("hintpulse",s.b[i].owned>0&&!s.b[i].mgr&&!s.b[i].run);
+      const mgrb=$("mgr"+i);if(mgrb)mgrb.classList.toggle("hintpulse",!noneOwned&&!anyMgr&&s.b[i].owned>0&&!s.b[i].mgr&&!mgrb.disabled);
+    }
+  }
+  let acc=0;
+  function tick(dt){
+    for(let i=0;i<BIZ.length;i++){const b=s.b[i];if(b.owned<=0)continue;
+      if(b.run){b.t+=dt;if(b.t>=BIZ[i].time){const cycles=Math.floor(b.t/BIZ[i].time);b.t-=cycles*BIZ[i].time;const gain=rev(i)*cycles;s.cash+=gain;s.earned+=gain;if(b.mgr){b.run=true;}else{b.run=false;b.t=0;}}}
+    }
+    // progress bars
+    for(let i=0;i<BIZ.length;i++){if(!visible(i))continue;const b=s.b[i];const f=$("fill"+i);if(f)f.style.width=(b.owned>0&&b.run?Math.min(100,b.t/BIZ[i].time*100):0)+"%";}
+    acc+=dt;if(acc>=1){acc=0;refresh();save();}
+  }
+  let last=0;function loop(ts){if(!last)last=ts;let dt=(ts-last)/1000;last=ts;if(dt>0.2)dt=0.2;tick(dt);requestAnimationFrame(loop);}
+
+  function offline(existed){if(!existed)return;const el=(Date.now()-(s.last||Date.now()))/1000;if(el<60)return;const cap=Math.min(el,8*3600);let earn=0;for(let i=0;i<BIZ.length;i++){if(s.b[i].owned>0&&s.b[i].mgr)earn+=rev(i)/BIZ[i].time*cap;}earn=Math.floor(earn*0.7);if(earn<=0)return;s.cash+=earn;s.earned+=earn;$("modalTitle").textContent=T().welcome;$("modalBody").textContent=T().offline;$("modalBig").textContent=fmt(earn);const btn=$("modalBtn");btn.textContent=T().collect;btn.onclick=()=>$("modal").classList.add("hidden");$("modal").classList.remove("hidden");}
+
+  function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+  function applyLang(){document.documentElement.lang=lang;$("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});$("aboutH").textContent=T().aboutH;$("aboutP").textContent=T().aboutP;buildList();}
+  $("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
+  $("year").textContent=new Date().getFullYear();
+  window.addEventListener("beforeunload",save);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)save();});
+  applyLang();offline(existed);requestAnimationFrame(loop);
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>

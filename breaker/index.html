@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nexus Breaker — Free Brick Breaker Game | Kostenloses Breakout im Browser</title>
+<meta name="description" content="Nexus Breaker is a free neon brick breaker game. Bounce the ball, smash the bricks, grab power-ups and clear every level. Play free — no download." />
+<meta name="keywords" content="brick breaker, breakout game, free arcade game, ball game, browser game, breakout, klötzchen spiel" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/breaker/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Breaker — Free Brick Breaker" />
+<meta property="og:description" content="Bounce, smash, clear the board. A neon breakout. Play free." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Nexus Breaker","genre":["Arcade"],"gamePlatform":"Web Browser","applicationCategory":"Game","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.82);--neon:#39e6ff;--pink:#ff3ea5;--accent:#ffcf5c;--green:#7cff6b;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1000px 500px at 50% -10%,rgba(57,230,255,0.12),transparent 60%),radial-gradient(800px 500px at 90% 110%,rgba(255,62,165,0.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;touch-action:none;}
+  header.top{width:100%;max-width:520px;padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:1px;}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 12px var(--neon);}
+  .brand span{font-size:19px;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  .hud{width:100%;max-width:520px;display:flex;gap:10px;padding:4px 16px;}
+  .hud .box{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;text-align:center;}
+  .hud .l{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .hud .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .hud .v.neon{color:var(--neon);}
+  .wrap{width:100%;max-width:520px;padding:8px 16px 14px;}
+  .frame{position:relative;width:100%;aspect-ratio:3/3.6;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 0 40px rgba(57,230,255,0.08),inset 0 0 60px rgba(0,0,0,0.6);cursor:pointer;}
+  canvas{display:block;width:100%;height:100%;}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;gap:12px;background:rgba(5,6,15,0.72);}
+  .overlay.hidden{display:none;}
+  .overlay h1{margin:0;font-size:clamp(24px,6vw,40px);letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .overlay p{margin:0;color:var(--muted);max-width:400px;line-height:1.5;font-size:14px;}
+  .overlay .big{font-size:clamp(32px,9vw,52px);font-weight:900;color:var(--neon);text-shadow:0 0 20px rgba(57,230,255,0.6);}
+  .sub{font-size:13px;color:var(--muted);}
+  .btn{border:none;cursor:pointer;font-weight:800;letter-spacing:1px;font-size:16px;padding:13px 28px;border-radius:999px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));box-shadow:0 0 22px rgba(57,230,255,0.4);}
+  .btn.sec{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none;}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .new-best{color:var(--accent);font-weight:800;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .about{max-width:520px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
+  .about h2{color:var(--text);font-size:17px;}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS BREAKER</span></a>
+  <div class="controls">
+    <a class="chip" href="/">← <span data-i18n="hub">Games</span></a>
+    <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+  </div>
+</header>
+<div class="hud">
+  <div class="box"><div class="l" data-i18n="score">Score</div><div class="v neon" id="scoreVal">0</div></div>
+  <div class="box"><div class="l" data-i18n="level">Level</div><div class="v" id="lvlVal">1</div></div>
+  <div class="box"><div class="l" data-i18n="lives">Lives</div><div class="v" id="lifeVal">3</div></div>
+  <div class="box"><div class="l" data-i18n="best">Best</div><div class="v" id="bestVal">0</div></div>
+</div>
+<div class="wrap">
+  <div class="frame" id="frame">
+    <canvas id="game"></canvas>
+    <div class="overlay" id="startO">
+      <h1>NEXUS BREAKER</h1>
+      <p data-i18n="intro">Move the paddle with the mouse or finger. Bounce the ball, smash every brick and clear the level. Grab falling power-ups. You have 3 lives.</p>
+      <button class="btn" id="startBtn" data-i18n="play">▶ PLAY</button>
+      <div class="sub" data-i18n="hint">Move: mouse / drag · release ball: click / tap</div>
+    </div>
+    <div class="overlay hidden" id="overO">
+      <div class="sub" id="overLabel" data-i18n="gameover">GAME OVER</div>
+      <div class="big" id="finalScore">0</div>
+      <div class="new-best hidden" id="newBest" data-i18n="newbest">★ NEW RECORD ★</div>
+      <div class="sub"><span data-i18n="best">Best</span>: <b id="overBest">0</b></div>
+      <div class="btnrow">
+        <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
+        <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+      </div>
+    </div>
+  </div>
+</div>
+<section class="about">
+  <h2 id="aboutH">About Nexus Breaker</h2>
+  <p id="aboutP">Nexus Breaker is a free neon brick breaker (breakout) game you play right in your browser — no download, no signup. Slide your paddle to bounce the ball, smash through walls of glowing bricks, and catch falling power-ups like multi-ball and a wider paddle. Clear a level to jump to a tougher one, and keep your score climbing. Works on desktop and mobile.</p>
+</section>
+<footer>© <span id="year"></span> Nexus Breaker · part of Nexus Arcade.</footer>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+(function(){
+  const I={en:{hub:"Games",score:"Score",level:"Level",lives:"Lives",best:"Best",play:"▶ PLAY",retry:"↻ RETRY",share:"⤴ SHARE",gameover:"GAME OVER",cleared:"LEVEL CLEARED",newbest:"★ NEW RECORD ★",
+    intro:"Move the paddle with the mouse or finger. Bounce the ball, smash every brick and clear the level. Grab falling power-ups. You have 3 lives.",hint:"Move: mouse / drag · release ball: click / tap",aboutH:"About Nexus Breaker",
+    aboutP:"Nexus Breaker is a free neon brick breaker (breakout) game you play right in your browser — no download, no signup. Slide your paddle to bounce the ball, smash through walls of glowing bricks, and catch falling power-ups like multi-ball and a wider paddle. Clear a level to jump to a tougher one, and keep your score climbing. Works on desktop and mobile.",
+    shareText:s=>`I scored ${s} in Nexus Breaker! Can you beat me?`,copied:"Copied — paste anywhere!"},
+  de:{hub:"Spiele",score:"Punkte",level:"Level",lives:"Leben",best:"Bestwert",play:"▶ SPIELEN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",gameover:"GAME OVER",cleared:"LEVEL GESCHAFFT",newbest:"★ NEUER REKORD ★",
+    intro:"Bewege das Paddle mit Maus oder Finger. Lass den Ball abprallen, zerschlage alle Steine und schaffe das Level. Fang herabfallende Power-ups. Du hast 3 Leben.",hint:"Bewegen: Maus / ziehen · Ball starten: Klick / Tipp",aboutH:"Über Nexus Breaker",
+    aboutP:"Nexus Breaker ist ein kostenloses Neon-Breakout direkt im Browser — kein Download, keine Anmeldung. Schiebe dein Paddle, lass den Ball abprallen, zerschlage Wände aus leuchtenden Steinen und fange Power-ups wie Multiball und ein breiteres Paddle. Schaffe ein Level und komm ins nächste, schwerere — und treib deinen Score hoch. Läuft auf Desktop und Handy.",
+    shareText:s=>`Ich habe ${s} Punkte in Nexus Breaker! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!"}};
+  let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const T=()=>I[lang];
+  const canvas=document.getElementById("game"),ctx=canvas.getContext("2d"),frame=document.getElementById("frame");
+  let W=0,H=0,DPR=1;
+  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);const r=frame.getBoundingClientRect();W=r.width;H=r.height;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);if(paddle)paddle.y=H-30;}
+  window.addEventListener("resize",()=>{resize();});
+  const BEST="nx_breaker_best";let best=parseInt(localStorage.getItem(BEST)||"0",10);
+  let paddle=null,balls=[],bricks=[],powers=[],score=0,level=1,lives=3,state="menu",stuck=true,last=0;
+  const COLS=["#ff4d6d","#ffcf5c","#7cff6b","#39e6ff","#c77dff"];
+  function newLevel(){
+    bricks=[];const rows=Math.min(8,3+level);const cols=8;const pad=W*0.04;const bw=(W-2*pad)/cols;const bh=Math.max(16,H*0.035);
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(level>2&&Math.random()<0.12)continue;const hp=(r<Math.max(0,level-3))?2:1;bricks.push({x:pad+c*bw,y:pad+40+r*(bh+5),w:bw-5,h:bh,hp,col:COLS[r%COLS.length]});}
+    resetBall();
+  }
+  function resetBall(){const pw=Math.max(70,W*0.22);paddle={x:W/2-pw/2,y:H-30,w:pw,h:12};balls=[{x:W/2,y:H-44,vx:0,vy:0,r:Math.max(6,W*0.016)}];powers=[];stuck=true;}
+  function launch(){if(stuck){stuck=false;const sp=Math.max(300,W*0.9);balls[0].vx=(Math.random()<0.5?-1:1)*sp*0.5;balls[0].vy=-sp;}}
+  function reset(){score=0;level=1;lives=3;newLevel();hud();}
+  function hud(){document.getElementById("scoreVal").textContent=score;document.getElementById("lvlVal").textContent=level;document.getElementById("lifeVal").textContent=lives;document.getElementById("bestVal").textContent=best;}
+  function setPaddle(cx){const r=frame.getBoundingClientRect();let x=cx-r.left-paddle.w/2;paddle.x=Math.max(0,Math.min(W-paddle.w,x));if(stuck)balls[0].x=paddle.x+paddle.w/2;}
+  frame.addEventListener("mousemove",e=>{if(paddle)setPaddle(e.clientX);});
+  frame.addEventListener("touchmove",e=>{if(e.touches[0]){setPaddle(e.touches[0].clientX);e.preventDefault();}},{passive:false});
+  frame.addEventListener("mousedown",()=>{if(state==="playing")launch();});
+  frame.addEventListener("touchstart",e=>{if(e.touches[0])setPaddle(e.touches[0].clientX);if(state==="playing")launch();},{passive:true});
+  document.addEventListener("keydown",e=>{if(e.key===" "&&state==="playing"){launch();e.preventDefault();}});
+  function update(dt){
+    if(state!=="playing")return;
+    if(stuck){return;}
+    for(let bi=balls.length-1;bi>=0;bi--){const b=balls[bi];
+      b.x+=b.vx*dt;b.y+=b.vy*dt;
+      if(b.x<b.r){b.x=b.r;b.vx*=-1;}if(b.x>W-b.r){b.x=W-b.r;b.vx*=-1;}
+      if(b.y<b.r){b.y=b.r;b.vy*=-1;}
+      if(b.y>H+b.r){balls.splice(bi,1);if(!balls.length){lives--;hud();if(lives<=0){gameOver();return;}resetBall();}continue;}
+      // paddle
+      if(b.vy>0&&b.y+b.r>=paddle.y&&b.y-b.r<paddle.y+paddle.h&&b.x>paddle.x-b.r&&b.x<paddle.x+paddle.w+b.r){
+        const hit=(b.x-(paddle.x+paddle.w/2))/(paddle.w/2);const sp=Math.hypot(b.vx,b.vy);const ang=hit*1.05;b.vx=Math.sin(ang)*sp;b.vy=-Math.abs(Math.cos(ang)*sp);b.y=paddle.y-b.r;}
+      // bricks
+      for(let i=bricks.length-1;i>=0;i--){const k=bricks[i];if(b.x>k.x&&b.x<k.x+k.w&&b.y>k.y&&b.y<k.y+k.h){
+        const overL=b.x-k.x,overR=k.x+k.w-b.x,overT=b.y-k.y,overB=k.y+k.h-b.y;const m=Math.min(overL,overR,overT,overB);
+        if(m===overL||m===overR)b.vx*=-1;else b.vy*=-1;
+        k.hp--;score+=10;if(k.hp<=0){bricks.splice(i,1);score+=10;if(Math.random()<0.14)powers.push({x:k.x+k.w/2,y:k.y,vy:120,type:Math.random()<0.5?"multi":"wide"});}
+        if(window.NexusArcade){try{window.NexusArcade.addXP(1);}catch(e){}}
+        hud();break;
+      }}
+    }
+    // powers
+    for(let i=powers.length-1;i>=0;i--){const p=powers[i];p.y+=p.vy*dt;if(p.y>H){powers.splice(i,1);continue;}
+      if(p.y>paddle.y-8&&p.x>paddle.x&&p.x<paddle.x+paddle.w){powers.splice(i,1);if(p.type==="wide"){paddle.w=Math.min(W*0.5,paddle.w*1.35);}else{const src=balls[0];if(src){for(let n=0;n<2;n++){const sp=Math.hypot(src.vx,src.vy)||300;const a=(Math.random()-0.5)*1.2;balls.push({x:src.x,y:src.y,vx:Math.sin(a)*sp,vy:-Math.abs(Math.cos(a)*sp),r:src.r});}}}score+=20;hud();}}
+    if(!bricks.length){level++;if(window.NexusArcade){try{window.NexusArcade.addXP(50);}catch(e){}}newLevel();hud();}
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(const k of bricks){ctx.save();ctx.shadowColor=k.col;ctx.shadowBlur=8;ctx.fillStyle=k.hp>1?k.col:k.col;ctx.globalAlpha=k.hp>1?1:0.85;roundRect(k.x,k.y,k.w,k.h,5);ctx.fill();ctx.restore();}
+    for(const p of powers){ctx.fillStyle=p.type==="wide"?"#7cff6b":"#ffcf5c";ctx.save();ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,7,0,6.28);ctx.fill();ctx.restore();}
+    if(paddle){ctx.save();ctx.shadowColor="rgba(57,230,255,0.9)";ctx.shadowBlur=14;ctx.fillStyle="#39e6ff";roundRect(paddle.x,paddle.y,paddle.w,paddle.h,6);ctx.fill();ctx.restore();}
+    if(balls)for(const b of balls){ctx.save();ctx.shadowColor="rgba(255,255,255,0.9)";ctx.shadowBlur=12;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,6.28);ctx.fill();ctx.restore();}
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function loop(ts){if(!last)last=ts;let dt=(ts-last)/1000;last=ts;if(dt>0.04)dt=0.04;update(dt);draw();requestAnimationFrame(loop);}
+  function start(){resize();reset();document.getElementById("startO").classList.add("hidden");document.getElementById("overO").classList.add("hidden");state="playing";}
+  function gameOver(){state="over";const fs=score;document.getElementById("finalScore").textContent=fs;const isBest=fs>best;if(isBest){best=fs;localStorage.setItem(BEST,String(best));}document.getElementById("newBest").classList.toggle("hidden",!isBest);document.getElementById("overBest").textContent=best;document.getElementById("overO").classList.remove("hidden");hud();if(window.NexusArcade){try{window.NexusArcade.addXP(Math.floor(fs/40));window.NexusArcade.submitScore&&window.NexusArcade.submitScore("breaker",best);}catch(e){}}}
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+  async function share(){const txt=T().shareText(score),url=location.origin+location.pathname;if(navigator.share){try{await navigator.share({title:"Nexus Breaker",text:txt,url});return;}catch(e){}}try{await navigator.clipboard.writeText(txt+" "+url);toast(T().copied);}catch(e){toast(txt);}}
+  function applyLang(){document.documentElement.lang=lang;document.getElementById("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});document.getElementById("aboutH").textContent=T().aboutH;document.getElementById("aboutP").textContent=T().aboutP;}
+  document.getElementById("startBtn").addEventListener("click",start);
+  document.getElementById("retryBtn").addEventListener("click",start);
+  document.getElementById("shareBtn").addEventListener("click",share);
+  document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
+  document.getElementById("year").textContent=new Date().getFullYear();
+  resize();document.getElementById("bestVal").textContent=best;applyLang();requestAnimationFrame(loop);
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>

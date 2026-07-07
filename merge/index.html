@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Nexus 2048 — Free Merge Puzzle Game | Kostenloses 2048 im Browser</title>
+<meta name="description" content="Nexus 2048 is a free merge puzzle game. Slide and combine numbered tiles to reach 2048 and beyond. Play free in your browser — no download." />
+<meta name="keywords" content="2048, merge game, puzzle game, number puzzle, free 2048, browser puzzle, zahlenspiel, denkspiel" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/merge/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus 2048 — Free Merge Puzzle" />
+<meta property="og:description" content="Slide, merge, reach 2048. A polished free puzzle game. Play now." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"Nexus 2048","genre":["Puzzle"],"gamePlatform":"Web Browser","applicationCategory":"Game","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.82);--neon:#39e6ff;--mag:#c77dff;--accent:#ffcf5c;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);--grid:#141a33;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1000px 500px at 50% -10%,rgba(199,125,255,0.12),transparent 60%),radial-gradient(800px 500px at 90% 110%,rgba(57,230,255,0.10),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;touch-action:none;}
+  header.top{width:100%;max-width:460px;padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:1px;}
+  .brand .gem{width:13px;height:13px;transform:rotate(45deg);background:linear-gradient(135deg,#fff,var(--mag));box-shadow:0 0 12px var(--mag);}
+  .brand span{font-size:19px;background:linear-gradient(90deg,var(--mag),var(--neon));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  .hud{width:100%;max-width:460px;display:flex;gap:10px;padding:4px 16px;}
+  .hud .box{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;text-align:center;}
+  .hud .l{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .hud .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .hud .v.neon{color:var(--neon);}
+  .wrap{width:100%;max-width:460px;padding:8px 16px 14px;position:relative;}
+  .board{position:relative;width:100%;aspect-ratio:1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:3.5%;}
+  .cell{position:absolute;border-radius:9px;background:var(--grid);}
+  .tile{position:absolute;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;transition:left .12s ease,top .12s ease;will-change:left,top;}
+  .tile .num{font-variant-numeric:tabular-nums;}
+  .tile.pop{animation:pop .16s;}
+  @keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(5,6,15,0.82);border-radius:14px;text-align:center;padding:20px;}
+  .over.hidden{display:none;}
+  .over h2{margin:0;font-size:30px;color:var(--neon);}
+  .btn{border:none;cursor:pointer;font-weight:800;letter-spacing:1px;font-size:15px;padding:12px 24px;border-radius:999px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));}
+  .btn.sec{background:transparent;color:var(--text);border:1px solid var(--line);}
+  .row2{display:flex;gap:8px;justify-content:center;margin-top:10px;}
+  .about{max-width:460px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
+  .about h2{color:var(--text);font-size:17px;}
+  footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="gem"></div><span>NEXUS 2048</span></a>
+  <div class="controls">
+    <a class="chip" href="/">← <span data-i18n="hub">Games</span></a>
+    <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
+  </div>
+</header>
+
+<div class="hud">
+  <div class="box"><div class="l" data-i18n="score">Score</div><div class="v neon" id="scoreVal">0</div></div>
+  <div class="box"><div class="l" data-i18n="best">Best</div><div class="v" id="bestVal">0</div></div>
+</div>
+
+<div class="wrap">
+  <div class="board" id="board">
+    <div class="over hidden" id="over">
+      <h2 id="overTitle" data-i18n="gameover">GAME OVER</h2>
+      <div style="color:var(--muted);font-size:14px"><span data-i18n="score">Score</span>: <b id="overScore">0</b></div>
+      <div class="row2">
+        <button class="btn" id="retryBtn" data-i18n="retry">↻ NEW GAME</button>
+        <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:12px"><button class="btn sec" id="newBtn" data-i18n="newgame">↻ New Game</button></div>
+  <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px" data-i18n="hint">Swipe or use arrow keys · WASD</div>
+</div>
+
+<section class="about">
+  <h2 id="aboutH">About Nexus 2048</h2>
+  <p id="aboutP">Nexus 2048 is a free merge puzzle game you can play right in your browser — no download, no signup. Slide the tiles in any direction; when two tiles with the same number touch, they merge into one. Keep combining to reach the 2048 tile, then push for an even higher score. Easy to learn, hard to put down. Works on desktop and mobile, and your best score is saved.</p>
+</section>
+<footer>© <span id="year"></span> Nexus 2048 · part of Nexus Arcade.</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const I={en:{hub:"Games",score:"Score",best:"Best",gameover:"GAME OVER",retry:"↻ NEW GAME",share:"⤴ SHARE",newgame:"↻ New Game",win:"YOU REACHED 2048!",keepgoing:"Keep going",
+    hint:"Swipe or use arrow keys · WASD",aboutH:"About Nexus 2048",
+    aboutP:"Nexus 2048 is a free merge puzzle game you can play right in your browser — no download, no signup. Slide the tiles in any direction; when two tiles with the same number touch, they merge into one. Keep combining to reach the 2048 tile, then push for an even higher score. Easy to learn, hard to put down. Works on desktop and mobile, and your best score is saved.",
+    shareText:s=>`I scored ${s} in Nexus 2048! Can you beat me?`,copied:"Copied — paste anywhere!"},
+  de:{hub:"Spiele",score:"Punkte",best:"Bestwert",gameover:"GAME OVER",retry:"↻ NEUES SPIEL",share:"⤴ TEILEN",newgame:"↻ Neues Spiel",win:"2048 ERREICHT!",keepgoing:"Weiterspielen",
+    hint:"Wischen oder Pfeiltasten · WASD",aboutH:"Über Nexus 2048",
+    aboutP:"Nexus 2048 ist ein kostenloses Merge-Puzzle direkt im Browser — kein Download, keine Anmeldung. Schiebe die Kacheln in eine Richtung; berühren sich zwei mit derselben Zahl, verschmelzen sie. Kombiniere weiter bis zur 2048-Kachel und dann zu einem noch höheren Score. Leicht zu lernen, schwer aufzuhören. Läuft auf Desktop und Handy, dein Bestwert wird gespeichert.",
+    shareText:s=>`Ich habe ${s} Punkte in Nexus 2048! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!"}};
+  let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
+  const T=()=>I[lang];
+  const COLORS={2:"#2b3358",4:"#39506b",8:"#3a7bd5",16:"#39e6ff",32:"#5bbf4a",64:"#7cff6b",128:"#ffcf5c",256:"#ffb03a",512:"#ff7a3a",1024:"#ff4d6d",2048:"#c77dff",4096:"#ff3ea5",8192:"#fff"};
+  const N=4;
+  const BEST="nx_2048_best";
+  let best=parseInt(localStorage.getItem(BEST)||"0",10);
+  let grid,score,tiles,idc,won,dead;
+  const board=document.getElementById("board");
+  let cells=[];
+
+  function buildCells(){
+    for(const c of cells)c.remove();cells=[];
+    const p=3.5,gap=2.6;const size=(100-2*p-gap*(N-1))/N;
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++){const d=document.createElement("div");d.className="cell";d.style.width=size+"%";d.style.height=size+"%";d.style.left=(p+c*(size+gap))+"%";d.style.top=(p+r*(size+gap))+"%";board.appendChild(d);cells.push(d);}
+    return {size,gap,p};
+  }
+  let geom;
+  function pos(r,c){return{left:(geom.p+c*(geom.size+geom.gap))+"%",top:(geom.p+r*(geom.size+geom.gap))+"%"};}
+
+  function reset(){
+    grid=[];for(let r=0;r<N;r++){grid.push([]);for(let c=0;c<N;c++)grid[r].push(null);}
+    score=0;won=false;dead=false;idc=0;
+    board.querySelectorAll(".tile").forEach(t=>t.remove());
+    addRandom();addRandom();render();hud();
+    document.getElementById("over").classList.add("hidden");
+  }
+  function empties(){const e=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(!grid[r][c])e.push([r,c]);return e;}
+  function addRandom(){const e=empties();if(!e.length)return;const[r,c]=e[(Math.random()*e.length)|0];const v=Math.random()<0.9?2:4;const el=document.createElement("div");el.className="tile pop";el.dataset.id=++idc;const num=document.createElement("span");num.className="num";el.appendChild(num);board.appendChild(el);grid[r][c]={v,el,r,c,merged:false};styleTile(grid[r][c]);}
+  function styleTile(t){const{el,v}=t;const p=pos(t.r,t.c);el.style.width=geom.size+"%";el.style.height=geom.size+"%";el.style.left=p.left;el.style.top=p.top;const col=COLORS[v]||"#fff";el.style.background=col;el.style.boxShadow="0 0 14px "+col+"66";el.querySelector(".num").textContent=v;el.style.color=v<=8?"#eaf6ff":"#04121a";el.querySelector(".num").style.fontSize=(v<100?"clamp(20px,7vw,34px)":v<1000?"clamp(17px,6vw,28px)":"clamp(14px,5vw,22px)");}
+  function render(){for(let r=0;r<N;r++)for(let c=0;c<N;c++){const t=grid[r][c];if(t){t.r=r;t.c=c;const p=pos(r,c);t.el.style.left=p.left;t.el.style.top=p.top;}}}
+  function hud(){document.getElementById("scoreVal").textContent=score;document.getElementById("bestVal").textContent=best;}
+
+  function move(dir){ // dir: 0 up,1 right,2 down,3 left
+    if(dead)return;
+    let moved=false;
+    const order=[];
+    for(let i=0;i<N;i++)order.push(i);
+    const read=(r,c)=>grid[r][c];
+    // build traversal
+    const rows=[...order],cols=[...order];
+    if(dir===1)cols.reverse();if(dir===2)rows.reverse();
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(grid[r][c])grid[r][c].merged=false;}
+    const rr=(dir===2)?[...order].reverse():order;
+    const cc=(dir===1)?[...order].reverse():order;
+    for(const r of rr)for(const c of cc){
+      const t=grid[r][c];if(!t)continue;
+      let nr=r,nc=c;
+      while(true){const tr=nr+(dir===0?-1:dir===2?1:0),tc=nc+(dir===3?-1:dir===1?1:0);
+        if(tr<0||tr>=N||tc<0||tc>=N)break;
+        const dest=grid[tr][tc];
+        if(!dest){grid[tr][tc]=t;grid[nr][nc]=null;nr=tr;nc=tc;moved=true;}
+        else if(dest.v===t.v&&!dest.merged&&!t.merged){dest.v*=2;dest.merged=true;score+=dest.v;grid[nr][nc]=null;t.el.remove();grid[tr][tc]=dest;styleTile(dest);dest.el.classList.remove("pop");void dest.el.offsetWidth;dest.el.classList.add("pop");moved=true;if(dest.v===2048&&!won){won=true;setTimeout(()=>toast("🎉 "+T().win),200);if(window.NexusArcade){try{window.NexusArcade.addXP(300);}catch(e){}}}break;}
+        else break;
+      }
+    }
+    if(moved){render();addRandom();hud();if(score>best){best=score;localStorage.setItem(BEST,String(best));}if(window.NexusArcade){try{window.NexusArcade.addXP(2);}catch(e){}}if(!canMove())gameOver();}
+  }
+  function canMove(){if(empties().length)return true;for(let r=0;r<N;r++)for(let c=0;c<N;c++){const v=grid[r][c].v;if(c<N-1&&grid[r][c+1].v===v)return true;if(r<N-1&&grid[r+1][c].v===v)return true;}return false;}
+  function gameOver(){dead=true;document.getElementById("overScore").textContent=score;document.getElementById("overTitle").textContent=T().gameover;document.getElementById("over").classList.remove("hidden");if(window.NexusArcade){try{window.NexusArcade.addXP(Math.floor(score/50));}catch(e){}}}
+
+  // input
+  document.addEventListener("keydown",e=>{const k=e.key;let d=-1;if(k==="ArrowUp"||k==="w"||k==="W")d=0;else if(k==="ArrowRight"||k==="d"||k==="D")d=1;else if(k==="ArrowDown"||k==="s"||k==="S")d=2;else if(k==="ArrowLeft"||k==="a"||k==="A")d=3;if(d>=0){e.preventDefault();move(d);}});
+  let sx,sy;
+  board.addEventListener("touchstart",e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;},{passive:true});
+  board.addEventListener("touchend",e=>{if(sx==null)return;const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<24)return;if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:3);else move(dy>0?2:0);sx=null;},{passive:true});
+
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+  async function share(){const txt=T().shareText(score),url=location.origin+location.pathname;if(navigator.share){try{await navigator.share({title:"Nexus 2048",text:txt,url});return;}catch(e){}}try{await navigator.clipboard.writeText(txt+" "+url);toast(T().copied);}catch(e){toast(txt);}}
+  function applyLang(){document.documentElement.lang=lang;document.getElementById("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});document.getElementById("aboutH").textContent=T().aboutH;document.getElementById("aboutP").textContent=T().aboutP;}
+
+  document.getElementById("retryBtn").addEventListener("click",reset);
+  document.getElementById("newBtn").addEventListener("click",reset);
+  document.getElementById("shareBtn").addEventListener("click",share);
+  document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
+  document.getElementById("year").textContent=new Date().getFullYear();
+  window.addEventListener("resize",()=>{geom=buildCells();for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(grid&&grid[r][c])styleTile(grid[r][c]);});
+
+  geom=buildCells();applyLang();reset();
+})();
+</script>
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script src="/game-ui.js"></script>
+</body>
+</html>
