@@ -8,6 +8,9 @@
 <meta name="keywords" content="free online games, browser games, no download games, arcade game, idle rpg, racing game, 3d game, 2048, word game, kostenlose spiele, browserspiele, html5 games" />
 <meta name="theme-color" content="#05060f" />
 <link rel="canonical" href="https://nexusarcade.vercel.app/" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="icon" type="image/svg+xml" href="/icon.svg" />
+<link rel="apple-touch-icon" href="/icon.svg" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Nexus Arcade — Free Online Games" />
 <meta property="og:description" content="Free browser games, no download. Arcade, racing, puzzle, RPG, 3D. Play now." />
@@ -64,6 +67,24 @@
   .about h2{color:var(--text);font-size:19px;margin-top:20px;}
   footer{color:var(--muted);font-size:12px;padding:14px 20px 30px;text-align:center;}
   footer a{color:var(--neon);text-decoration:none;}
+  /* Leaderboard-Preview (Portal) / Portal leaderboard preview */
+  .lb-preview{width:100%;max-width:1000px;padding:6px 20px 20px;}
+  .lb-preview h2{color:var(--text);font-size:19px;margin:6px 0 12px;letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
+  .lb-preview h2 .live{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:nxPulseGlow 1.6s ease-in-out infinite;}
+  @keyframes nxPulseGlow{0%,100%{opacity:.5}50%{opacity:1}}
+  .lb-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .lb-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;transition:.2s;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;}
+  .lb-card:hover{border-color:var(--neon);transform:translateY(-2px);box-shadow:0 8px 24px rgba(57,230,255,.14);}
+  .lb-card .lbh{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;letter-spacing:.5px;}
+  .lb-card .lbh svg{width:20px;height:20px;color:var(--neon);}
+  .lb-row{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 0;border-top:1px dashed rgba(255,255,255,.04);}
+  .lb-row:first-of-type{border-top:none;padding-top:2px;}
+  .lb-row .rk{width:20px;font-weight:800;color:var(--muted);text-align:center;}
+  .lb-row .rk.g{color:var(--gold);} .lb-row .rk.s{color:#c9d3f2;} .lb-row .rk.b{color:#c98a3a;}
+  .lb-row .nm{flex:1;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+  .lb-row .nm.me{color:var(--neon);}
+  .lb-row .sc{font-weight:800;color:var(--neon);}
+  .lb-empty{color:var(--muted);font-size:12px;padding:6px 0;text-align:center;}
 </style>
 </head>
 <body>
@@ -89,6 +110,11 @@
 </div>
 
 <div class="grid" id="grid"></div>
+
+<section class="lb-preview" id="lbPreview" hidden>
+  <h2><span class="live"></span><span id="lbTitle">Top players right now</span></h2>
+  <div class="lb-cards" id="lbCards"></div>
+</section>
 
 <section class="about">
   <h2 id="aH">Free online games — no download needed</h2>
@@ -152,8 +178,8 @@
     {id:"all",en:"All",de:"Alle"},{id:"arcade",en:"Arcade",de:"Arcade"},{id:"racing",en:"Racing",de:"Rennen"},
     {id:"puzzle",en:"Puzzle",de:"Puzzle"},{id:"idle",en:"Idle",de:"Idle"},{id:"rpg",en:"RPG",de:"RPG"},{id:"3d",en:"3D",de:"3D"},{id:"daily",en:"Daily",de:"Täglich"}
   ];
-  const TXT={en:{h1:"Free Games. Break Records.",sub:"Jump in, climb the leaderboard and challenge your friends. No download, no signup — just play, level up and chase every achievement.",search:"Search games…",play:"▶ PLAY",aH:"Free online games — no download needed",aP:"Nexus Arcade is a growing collection of free browser games built to load fast and play instantly. There's nothing to install and no account required — just tap a game and play. Sign in (optional) to keep your level, achievements and progress across devices. Every game works on both mobile and desktop and lets you share your result to challenge a friend. New games are added regularly, so bookmark the page and check back.",noresult:"No games match your search.",best:"Best",realm:"Realm",streak:"Streak",new:"NEW",likeLogin:"Sign in (top right) to like games.",likeNocfg:"Likes aren't available yet."},
-    de:{h1:"Kostenlose Spiele. Brich Rekorde.",sub:"Rein ins Spiel, klettere die Bestenliste hoch und fordere deine Freunde heraus. Kein Download, keine Anmeldung — einfach spielen, aufsteigen und alle Erfolge jagen.",search:"Spiele suchen…",play:"▶ SPIELEN",aH:"Kostenlose Online-Spiele — ohne Download",aP:"Nexus Arcade ist eine wachsende Sammlung kostenloser Browser-Spiele, die schnell laden und sofort spielbar sind. Nichts installieren, kein Konto nötig — einfach antippen und spielen. Melde dich (optional) an, um Level, Erfolge und Fortschritt geräteübergreifend zu behalten. Jedes Spiel läuft auf Handy und Desktop und lässt dich dein Ergebnis teilen. Es kommen regelmäßig neue Spiele dazu — Seite merken und wiederkommen.",noresult:"Keine Spiele passen zu deiner Suche.",best:"Best",realm:"Reich",streak:"Serie",new:"NEU",likeLogin:"Melde dich an (oben rechts), um Spiele zu liken.",likeNocfg:"Likes sind noch nicht verfügbar."}};
+  const TXT={en:{h1:"Free Games. Break Records.",sub:"Jump in, climb the leaderboard and challenge your friends. No download, no signup — just play, level up and chase every achievement.",search:"Search games…",play:"▶ PLAY",aH:"Free online games — no download needed",aP:"Nexus Arcade is a growing collection of free browser games built to load fast and play instantly. There's nothing to install and no account required — just tap a game and play. Sign in (optional) to keep your level, achievements and progress across devices. Every game works on both mobile and desktop and lets you share your result to challenge a friend. New games are added regularly, so bookmark the page and check back.",noresult:"No games match your search.",best:"Best",realm:"Realm",streak:"Streak",new:"NEW",likeLogin:"Sign in (top right) to like games.",likeNocfg:"Likes aren't available yet.",lbTitle:"Top players right now",lbEmpty:"Be the first to set a score",lbYou:"you"},
+    de:{h1:"Kostenlose Spiele. Brich Rekorde.",sub:"Rein ins Spiel, klettere die Bestenliste hoch und fordere deine Freunde heraus. Kein Download, keine Anmeldung — einfach spielen, aufsteigen und alle Erfolge jagen.",search:"Spiele suchen…",play:"▶ SPIELEN",aH:"Kostenlose Online-Spiele — ohne Download",aP:"Nexus Arcade ist eine wachsende Sammlung kostenloser Browser-Spiele, die schnell laden und sofort spielbar sind. Nichts installieren, kein Konto nötig — einfach antippen und spielen. Melde dich (optional) an, um Level, Erfolge und Fortschritt geräteübergreifend zu behalten. Jedes Spiel läuft auf Handy und Desktop und lässt dich dein Ergebnis teilen. Es kommen regelmäßig neue Spiele dazu — Seite merken und wiederkommen.",noresult:"Keine Spiele passen zu deiner Suche.",best:"Best",realm:"Reich",streak:"Serie",new:"NEU",likeLogin:"Melde dich an (oben rechts), um Spiele zu liken.",likeNocfg:"Likes sind noch nicht verfügbar.",lbTitle:"Top-Spieler gerade jetzt",lbEmpty:"Sei der erste mit einem Score",lbYou:"du"}};
   let lang=(localStorage.getItem("nr_lang")||localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>TXT[lang];
   let activeCat="all", query="";
@@ -188,13 +214,44 @@
     g.querySelectorAll("[data-fav]").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();toggleFav(btn.getAttribute("data-fav"));renderGrid();});});
     g.querySelectorAll("[data-like]").forEach(function(btn){btn.addEventListener("click",async function(e){e.preventDefault();e.stopPropagation();const S=window.NexusSocial;if(!S){toast(T().likeNocfg);return;}const r=await S.toggleLike(btn.getAttribute("data-like"));if(!r.ok){toast(r.reason==="login"?T().likeLogin:T().likeNocfg);}renderGrid();});});
   }
-  function applyLang(){document.documentElement.lang=lang;const t=T();document.getElementById("h1").textContent=t.h1;document.getElementById("sub").textContent=t.sub;document.getElementById("search").placeholder=t.search;document.getElementById("aH").textContent=t.aH;document.getElementById("aP").textContent=t.aP;document.getElementById("langLabel").textContent=lang.toUpperCase();renderCats();renderGrid();}
+  function applyLang(){document.documentElement.lang=lang;const t=T();document.getElementById("h1").textContent=t.h1;document.getElementById("sub").textContent=t.sub;document.getElementById("search").placeholder=t.search;document.getElementById("aH").textContent=t.aH;document.getElementById("aP").textContent=t.aP;document.getElementById("langLabel").textContent=lang.toUpperCase();const lt=document.getElementById("lbTitle");if(lt)lt.textContent=t.lbTitle;renderCats();renderGrid();renderLbPreview();}
 
   document.getElementById("search").addEventListener("input",e=>{query=e.target.value;renderGrid();});
   document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nr_lang",lang);localStorage.setItem("nx_lang",lang);applyLang();});
   document.getElementById("year").textContent=new Date().getFullYear();
   applyLang();
   (function hookSocial(){ if(window.NexusSocial){ window.NexusSocial.ready(renderGrid); window.NexusSocial.onChange(renderGrid); } else setTimeout(hookSocial,250); })();
+
+  /* ---------- Leaderboard-Preview (Portal) / Portal leaderboard preview ---------- */
+  const LB_GAME_KEYS=["dash","racer","merge","run3d","snake","breaker","tycoon","stack","blocks","idle","words"];
+  const LB_LABELS={dash:"Nexus Dash",racer:"Nexus Racer",merge:"Nexus 2048",run3d:"Nexus Run 3D",snake:"Nexus Snake",breaker:"Nexus Breaker",tycoon:"Nexus Tycoon",stack:"Nexus Stack",blocks:"Nexus Blocks",idle:"Nexus Realms",words:"Nexus Words"};
+  const LB_HREF={dash:"dash/",racer:"racer/",merge:"merge/",run3d:"run3d/",snake:"snake/",breaker:"breaker/",tycoon:"tycoon/",stack:"stack/",blocks:"blocks/",idle:"idle/",words:"words/"};
+  let lbOffset=0;
+  function shuffled(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function pickLbGames(){const rot=shuffled(LB_GAME_KEYS);return rot.slice(lbOffset%rot.length,(lbOffset%rot.length)+3).concat(rot).slice(0,3);}
+  async function renderLbPreview(){
+    const sec=document.getElementById("lbPreview"), box=document.getElementById("lbCards");
+    if(!sec||!box) return;
+    const A=window.NexusArcade;
+    if(!A||typeof A.fetchLeaderboard!=="function"){ sec.hidden=true; return; }
+    const games=pickLbGames();
+    const t=T();
+    box.innerHTML=games.map(g=>'<a class="lb-card" href="'+LB_HREF[g]+'"><div class="lbh">'+(IC[g]||"")+'<span>'+LB_LABELS[g]+'</span></div><div class="lb-body" data-lb="'+g+'"><div class="lb-empty">…</div></div></a>').join("");
+    sec.hidden=false;
+    let myName=null; try{ const p=A.getProfile&&A.getProfile(); myName=(p&&(p.name||"").trim())||null; }catch(e){}
+    const results=await Promise.all(games.map(g=>A.fetchLeaderboard(g).catch(()=>null)));
+    results.forEach((rows,i)=>{
+      const g=games[i]; const body=box.querySelector('[data-lb="'+g+'"]'); if(!body) return;
+      if(!rows||!rows.length){ body.innerHTML='<div class="lb-empty">'+t.lbEmpty+'</div>'; return; }
+      body.innerHTML=rows.slice(0,3).map((r,idx)=>{
+        const cls=idx===0?"g":idx===1?"s":idx===2?"b":"";
+        const mine=myName&&r.name===myName;
+        return '<div class="lb-row"><div class="rk '+cls+'">'+(idx+1)+'</div><div class="nm'+(mine?" me":"")+'">'+esc(r.name||"Player")+(mine?' ('+t.lbYou+')':'')+'</div><div class="sc">'+r.score+'</div></div>';
+      }).join("");
+    });
+  }
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+  (function hookLb(){ if(window.NexusArcade&&window.NexusArcade.ready){ window.NexusArcade.ready(function(){ renderLbPreview(); setInterval(function(){ lbOffset+=3; renderLbPreview(); }, 15000); }); } else setTimeout(hookLb,250); })();
 })();
 </script>
 <script src="/account-config.js"></script>
@@ -203,5 +260,11 @@
 <script src="/nexus-data.js"></script>
 <script src="/account.js"></script>
 <script src="/social.js"></script>
+<script>
+  /* PWA: Service Worker registrieren (nur produktion / https) — vermeidet Fehler bei file:// oder localhost-http */
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    window.addEventListener("load", function(){ navigator.serviceWorker.register("/sw.js").catch(function(){}); });
+  }
+</script>
 </body>
 </html>

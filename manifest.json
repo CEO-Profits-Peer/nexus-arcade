@@ -1,0 +1,16 @@
+{
+  "name": "Nexus Arcade",
+  "short_name": "Nexus",
+  "description": "Free browser games — arcade, racing, puzzle, RPG, 3D. No download. / Kostenlose Browser-Spiele ohne Download.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05060f",
+  "theme_color": "#05060f",
+  "categories": ["games", "entertainment"],
+  "lang": "en",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
