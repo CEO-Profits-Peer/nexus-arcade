@@ -145,6 +145,9 @@ window.NEXUS_DATA=(function(){
   addTier("stack","stack","🏢","stack_best",[10,25,50,100,150,250],"Tower","Turm","Stack {n} blocks in Nexus Stack","{n} Blöcke in Nexus Stack stapeln",false);
   addTier("blocks","blocks","🟪","blocks_best",[500,2000,5000,10000,25000,50000],"Blocks","Blocks","Score {n} in Nexus Blocks","{n} Punkte in Nexus Blocks",false);
   addTier("finance","finance","💹","finance_best",[1500,2500,4000,6000,10000,20000],"Net Worth","Nettovermögen","Reach ${n} net worth in Nexus Finance","{n}$ Nettovermögen in Nexus Finance erreichen",true);
+  ACH.push({id:"finance_flip1",game:"finance",icon:"🏠",xp:60,name:{en:"First Flip",de:"Erster Flip"},desc:{en:"Sell your first renovated property in Nexus Empire",de:"Dein erstes renoviertes Objekt in Nexus Empire verkaufen"},cond:{stat:"finance_flips",gte:1}});
+  addTier("financeflips","finance","🏠","finance_flips",[5,15,40,100],"Flips","Flips","Sell {n} properties in Nexus Empire","{n} Objekte in Nexus Empire verkaufen",false);
+  addTier("financeprofit","finance","💰","finance_career_profit",[5000,25000,100000,500000],"Realtor","Makler","Earn ${n} career profit in Nexus Empire","{n}$ Karriere-Gewinn in Nexus Empire erreichen",true);
 
   /* ---------- Taegliche Quests ---------- */
   const QUESTS = [

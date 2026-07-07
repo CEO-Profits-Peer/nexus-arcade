@@ -35,7 +35,7 @@ Live: `https://nexusarcade.vercel.app`
 - **localStorage-Keys** (Bestwerte/Speicherstände):
   Dash `nd_best`, Racer `nx_racer_best`, 2048 `nx_2048_best`, Run3D `nx_run3d_best`, Snake `nx_snake_best`,
   Breaker `nx_breaker_best`, Tycoon `nx_tycoon` (State) + `nx_tycoon_best` (lifetime), Stack `nx_stack_best`,
-  Blocks `nx_blocks_best`, Finance `nx_finance_best` (bester Nettovermögen-Endstand), Realms `nr_save_v1` (Feld `maxZone`=Region, `gems`, `heroLv`, `gold`, …),
+  Blocks `nx_blocks_best`, Finance `nx_finance_best` (bester Nettovermögen-Endstand der 75s-Runde) + `nx_finance_empire` (State des persistenten Empire-Immobilien-Modus: `capital`, `xp`, `stats.flips/careerProfit`, `owned[]`, `market[]`), Realms `nr_save_v1` (Feld `maxZone`=Region, `gems`, `heroLv`, `gold`, …),
   Words `nw_v1_en`/`nw_v1_de` (`.stats.max`=Streak). Meta: `nexus_profile`, `nexus_ach`, `nexus_quests`, `nexus_favs`.
 - **Konto-Anbindung aus Spielen** (immer defensiv, `if(window.NexusArcade)`):
   - `window.NexusArcade.addXP(n)` bei Fortschritt/Game-Over.

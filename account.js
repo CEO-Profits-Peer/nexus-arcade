@@ -18,7 +18,7 @@
   const t = TXT[L] || TXT.en || {};
 
   /* ---------- Sync-Keys (alle Spielstände + Einstellungen + Profil) ---------- */
-  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_lang","nx_muted"];
+  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_lang","nx_muted"];
 
   /* ---------- Level-Kurve ---------- */
   // Kumulierte XP bis Level L: 50*(L-1)*L  -> Lv2=100, Lv3=300, Lv4=600, Lv5=1000 ...
@@ -40,7 +40,7 @@
   function saveAch(){ localStorage.setItem("nexus_ach", JSON.stringify(achieved)); }
 
   /* ---------- XP & Erfolge ---------- */
-  const GAME_KEYS = ["nd_best","nr_save_v1","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best"];
+  const GAME_KEYS = ["nd_best","nr_save_v1","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire"];
   let quiet=false, evalTimer=null;
   function grantXP(n){
     if(!n) return;
@@ -74,6 +74,9 @@
     st.stack_best=parseInt(localStorage.getItem("nx_stack_best")||"0",10)||0;
     st.blocks_best=parseInt(localStorage.getItem("nx_blocks_best")||"0",10)||0;
     st.finance_best=parseInt(localStorage.getItem("nx_finance_best")||"0",10)||0;
+    try{ const e=JSON.parse(localStorage.getItem("nx_finance_empire")||"{}");
+      st.finance_flips=(e.stats&&e.stats.flips)||0; st.finance_career_profit=(e.stats&&e.stats.careerProfit)||0;
+    }catch(e){ st.finance_flips=0; st.finance_career_profit=0; }
     try{ const r=JSON.parse(localStorage.getItem("nr_save_v1")||"{}");
       st.idle_zone=r.maxZone||1; st.idle_hero=r.heroLv||1; st.idle_shards=r.gems||0;
       st.idle_dps=(r.up&&r.up.dps)||0; st.idle_gold=r.gold||0;
@@ -372,6 +375,7 @@
   }
   function numMerge(a,b){ const x=parseInt(a||"0",10)||0,y=parseInt(b||"0",10)||0; return String(Math.max(x,y)); }
   function progScore(sv){ try{const o=JSON.parse(sv)||{}; return (o.gems||0)*1e9+(o.maxZone||0)*1e6+(o.heroLv||0)*1e3+(o.gold||0);}catch(e){return -1;} }
+  function empProgScore(sv){ try{const o=JSON.parse(sv)||{}; return (o.capital||0)+((o.stats&&o.stats.careerProfit)||0)*2+((o.owned&&o.owned.length)||0)*5000+(o.xp||0)*10;}catch(e){return -1;} }
   const NUM_BESTS=["nd_best","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best"];
   function mergeKey(k,local,cloud){
     if(cloud==null) return local;
@@ -381,6 +385,7 @@
     if(k==="nexus_ach"){ try{return JSON.stringify(Object.assign({},JSON.parse(cloud)||{},JSON.parse(local)||{}));}catch(e){return local;} }
     if(k==="nexus_favs"){ try{const a=JSON.parse(local)||[],b=JSON.parse(cloud)||[];return JSON.stringify(Array.from(new Set(a.concat(b))));}catch(e){return local;} }
     if(k==="nr_save_v1"){ return progScore(cloud)>progScore(local)?cloud:local; }
+    if(k==="nx_finance_empire"){ return empProgScore(cloud)>empProgScore(local)?cloud:local; }
     if(k==="nw_v1_en"||k==="nw_v1_de"){ try{const a=JSON.parse(local),b=JSON.parse(cloud);const as=(a&&a.stats)||{},bs=(b&&b.stats)||{};return ((bs.played||0)+(bs.wins||0))>((as.played||0)+(as.wins||0))?cloud:local;}catch(e){return local;} }
     return local; // Einstellungen/Quests: lokal bevorzugen
   }

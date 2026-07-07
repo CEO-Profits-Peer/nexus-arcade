@@ -68,6 +68,35 @@
   footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:88vw;text-align:center;}
   .toast.show{opacity:1;}
+  .hidden{display:none !important;}
+  .modeTabs{display:flex;gap:8px;width:100%;max-width:480px;padding:8px 16px 0;}
+  .modeTab{flex:1;padding:9px 4px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+  .modeTab.active{background:linear-gradient(90deg,var(--green),var(--neon));color:#04121a;border-color:transparent;}
+  .secH{font-size:12px;color:var(--neon);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;}
+  .xpbar{height:8px;background:rgba(0,0,0,.4);border-radius:6px;overflow:hidden;margin:8px 0 3px;}
+  .xpfill{height:100%;background:linear-gradient(90deg,var(--neon),var(--green));width:0%;}
+  .xplabel{font-size:11px;color:var(--muted);text-align:right;}
+  .nextunlock{font-size:12px;color:var(--gold);text-align:center;margin:2px 0 4px;}
+  .pcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px;}
+  .pcard .phead{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;}
+  .pcard .pname{font-weight:800;font-size:14px;}
+  .pcard .pstars{color:var(--gold);font-size:12px;letter-spacing:1px;}
+  .pcard .pprice{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .pcard .pbuy,.pcard .psell{width:100%;border:none;padding:10px;border-radius:9px;font-weight:800;cursor:pointer;font-size:13px;font-family:inherit;}
+  .pcard .pbuy{background:linear-gradient(90deg,var(--neon),var(--green));color:#04121a;}
+  .pcard .pbuy:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(0.4);}
+  .pconds{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+  .pcat{flex:1;min-width:68px;background:var(--panel2);border-radius:9px;padding:6px 6px;text-align:center;}
+  .pcat .pcicon{font-size:15px;}
+  .pcat .pcdots{display:flex;gap:3px;justify-content:center;margin:4px 0;}
+  .pcat .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);display:inline-block;}
+  .pcat .dot.on{background:var(--green);}
+  .pcat .pcmax{font-size:10px;color:var(--green);font-weight:700;}
+  .pcat button{border:none;background:var(--panel);color:var(--text);border-radius:7px;padding:4px 7px;font-size:11px;cursor:pointer;font-weight:700;font-family:inherit;}
+  .pcat button:disabled{opacity:.35;cursor:not-allowed;}
+  .psell.profit{background:linear-gradient(90deg,var(--green),var(--neon));color:#04121a;}
+  .psell.loss{background:var(--panel2);color:var(--pink);border:1px solid var(--pink);}
+  .portEmpty{color:var(--muted);font-size:13px;text-align:center;padding:14px 0;}
 </style>
 </head>
 <body>
@@ -78,6 +107,11 @@
     <div class="chip" id="langBtn">🌐 <span id="langLabel">EN</span></div>
   </div>
 </header>
+<div class="modeTabs" id="modeTabs">
+  <button class="modeTab active" data-mode="trade">🎲 <span data-i18n="modeTrade">Trading Floor</span></button>
+  <button class="modeTab" data-mode="empire">🏙️ <span data-i18n="modeEmpire">Empire</span></button>
+</div>
+<div id="tradeMode">
 <div class="hud">
   <div class="box"><div class="l" data-i18n="cash">Cash</div><div class="v cash" id="cashVal">$0</div></div>
   <div class="box"><div class="l" data-i18n="networth">Net Worth</div><div class="v net" id="netVal">$0</div></div>
@@ -106,6 +140,28 @@
   <h2 id="aboutH">About Nexus Finance</h2>
   <p id="aboutP">Nexus Finance is a free trading simulator you play right in your browser — no download, no signup. Start with $1,000 and 75 seconds on the clock, across four markets: a steady bond, two mid-risk stocks and one wild, high-volatility coin. Buy into dips, ride the news spikes, and sell before a crash wipes you out. When the bell rings, every position is cashed out automatically. How big can you grow your net worth?</p>
 </section>
+</div>
+<div id="empireMode" class="hidden">
+  <div class="hud">
+    <div class="box"><div class="l" data-i18n="capital">Capital</div><div class="v cash" id="capVal">$0</div></div>
+    <div class="box"><div class="l" data-i18n="realtorLvl">Realtor Lv</div><div class="v net" id="lvlVal">1</div></div>
+    <div class="box"><div class="l" data-i18n="properties">Properties</div><div class="v time" id="propCountVal">0</div></div>
+  </div>
+  <div class="wrap" style="min-height:0">
+    <div class="xpbar"><div class="xpfill" id="xpFill"></div></div>
+    <div class="xplabel" id="xpLabel">0 / 100 XP</div>
+    <div class="nextunlock" id="nextUnlockHint"></div>
+    <h2 class="secH" data-i18n="marketH">🏘️ Market</h2>
+    <div id="marketList"></div>
+    <h2 class="secH" data-i18n="portfolioH">📁 My Properties</h2>
+    <div id="portfolioList"></div>
+    <div class="portEmpty" id="portfolioEmpty" data-i18n="portfolioEmpty">No properties yet — buy one from the market above.</div>
+  </div>
+  <section class="about">
+    <h2 id="empAboutH">About Nexus Empire</h2>
+    <p id="empAboutP"></p>
+  </section>
+</div>
 <footer>© <span id="year"></span> Nexus Finance · part of Nexus Arcade.</footer>
 <div class="toast" id="toast"></div>
 <script>
@@ -116,13 +172,25 @@
     hint:"$1,000 starting cash · 75 seconds",aboutH:"About Nexus Finance",
     aboutP:"Nexus Finance is a free trading simulator you play right in your browser — no download, no signup. Start with $1,000 and 75 seconds on the clock, across four markets: a steady bond, two mid-risk stocks and one wild, high-volatility coin. Buy into dips, ride the news spikes, and sell before a crash wipes you out. When the bell rings, every position is cashed out automatically. How big can you grow your net worth?",
     shareText:s=>`I grew $1,000 into $${s} in Nexus Finance! Can you beat that?`,copied:"Copied — paste anywhere!",
-    up:n=>"📈 "+n+" surges!",down:n=>"📉 "+n+" plunges!"},
+    up:n=>"📈 "+n+" surges!",down:n=>"📉 "+n+" plunges!",
+    modeTrade:"Trading Floor",modeEmpire:"Empire",capital:"Capital",realtorLvl:"Realtor Lv",properties:"Properties",
+    marketH:"🏘️ Market",portfolioH:"📁 My Properties",portfolioEmpty:"No properties yet — buy one from the market above.",
+    askingPrice:"Asking price",estValue:"Est. value",nextUnlock:(n,l)=>"🔒 "+n+" unlocks at Realtor Lv "+l,allUnlocked:"All neighborhoods unlocked",
+    flipProfit:s=>"🏠 Sold for a "+s+" profit!",flipLoss:s=>"📉 Sold at a "+s+" loss.",
+    empAboutH:"About Nexus Empire",
+    empAboutP:"Nexus Empire is the long-term investing side of Nexus Finance. Unlike the 75-second Trading Floor, your capital and progress here are permanent. Buy undervalued properties, renovate them — kitchen, bathroom, flooring, curb appeal — and sell for a profit. Every flip builds your Realtor Level, which unlocks better neighborhoods, cheaper renovations and sharper deals. How big can your real estate empire grow?"},
   de:{hub:"Spiele",cash:"Cash",networth:"Nettovermögen",time:"Zeit",best:"Bestwert",play:"▶ HANDELN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",gameover:"MARKT GESCHLOSSEN",newbest:"★ NEUER REKORD ★",buy:"Kaufen",sell:"Verkaufen",low:"Niedriges Risiko",mid:"Mittel",high:"Hohes Risiko",
     intro:"Vier volatile Neon-Märkte, eine 75-Sekunden-Runde. Tippe Kaufen, um einen Teil deines Cash zu investieren, tippe Verkaufen zum Kassieren. Reite die Kurssprünge, meide die Crashs — steigere dein Nettovermögen so hoch du kannst.",
     hint:"$1.000 Startkapital · 75 Sekunden",aboutH:"Über Nexus Finance",
     aboutP:"Nexus Finance ist ein kostenloser Trading-Simulator direkt im Browser — kein Download, keine Anmeldung. Starte mit $1.000 und 75 Sekunden auf der Uhr, über vier Märkte: eine stabile Anleihe, zwei Aktien mit mittlerem Risiko und eine wilde, hochvolatile Coin. Kaufe Tiefs, reite Kurssprünge und verkaufe vor dem Crash. Wenn die Glocke läutet, wird alles automatisch ausgezahlt. Wie hoch wird dein Nettovermögen?",
     shareText:s=>`Ich habe aus $1.000 satte $${s} in Nexus Finance gemacht! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
-    up:n=>"📈 "+n+" schießt hoch!",down:n=>"📉 "+n+" stürzt ab!"}};
+    up:n=>"📈 "+n+" schießt hoch!",down:n=>"📉 "+n+" stürzt ab!",
+    modeTrade:"Trading-Runde",modeEmpire:"Empire",capital:"Kapital",realtorLvl:"Makler-Lv",properties:"Objekte",
+    marketH:"🏘️ Markt",portfolioH:"📁 Meine Objekte",portfolioEmpty:"Noch keine Objekte — kaufe eins oben im Markt.",
+    askingPrice:"Angebotspreis",estValue:"Gesch. Wert",nextUnlock:(n,l)=>"🔒 "+n+" ab Makler-Lv "+l,allUnlocked:"Alle Viertel freigeschaltet",
+    flipProfit:s=>"🏠 Mit "+s+" Gewinn verkauft!",flipLoss:s=>"📉 Mit "+s+" Verlust verkauft.",
+    empAboutH:"Über Nexus Empire",
+    empAboutP:"Nexus Empire ist die Langzeit-Investment-Seite von Nexus Finance. Anders als die 75-Sekunden-Trading-Runde bleiben Kapital und Fortschritt hier dauerhaft erhalten. Kaufe unterbewertete Objekte, renoviere sie — Küche, Bad, Boden, Außenbereich — und verkaufe mit Gewinn. Jeder Flip steigert dein Makler-Level, das bessere Viertel, günstigere Renovierungen und schärfere Deals freischaltet. Wie groß wird dein Immobilien-Imperium?"}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const $=id=>document.getElementById(id);
@@ -233,11 +301,137 @@
 
   function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1600); }
   async function share(){ const txt=T().shareText(best), url=location.origin+location.pathname; if(navigator.share){ try{ await navigator.share({title:"Nexus Finance",text:txt,url}); return; }catch(e){} } try{ await navigator.clipboard.writeText(txt+" "+url); toast(T().copied); }catch(e){ toast(txt); } }
+
+  /* ============================================================
+     EMPIRE MODE — persistentes Immobilien-Flipping (Sidefeature)
+     Eigene Wirtschaft, getrennt von der Trading-Runde oben.
+     ============================================================ */
+  const HOODS=[
+    {id:"fixer",req:1, ceiling:8000,  name:{en:"Fixer Row",de:"Handwerkerzeile"}},
+    {id:"maple",req:3, ceiling:25000, name:{en:"Maple Heights",de:"Ahorn-Höhen"}},
+    {id:"sky",  req:6, ceiling:70000, name:{en:"Skyline District",de:"Skyline-Viertel"}},
+    {id:"nexus",req:10,ceiling:200000,name:{en:"Nexus Hills",de:"Nexus-Hügel"}}
+  ];
+  const CATS=[
+    {id:"kitchen",icon:"🍳",name:{en:"Kitchen",de:"Küche"}},
+    {id:"bath",   icon:"🛁",name:{en:"Bathroom",de:"Bad"}},
+    {id:"floor",  icon:"🪵",name:{en:"Flooring",de:"Boden"}},
+    {id:"curb",   icon:"🌿",name:{en:"Curb Appeal",de:"Außenbereich"}}
+  ];
+  const CAT_MAXLV=3, EMP_KEY="nx_finance_empire";
+  let emp;
+  function empFresh(){ return {capital:3000, xp:0, stats:{flips:0,careerProfit:0,bestFlip:0}, owned:[], market:[], nextId:1}; }
+  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({flips:0,careerProfit:0,bestFlip:0},emp.stats); return; } }catch(e){} emp=empFresh(); }
+  function empSave(){ localStorage.setItem(EMP_KEY, JSON.stringify(emp)); }
+  function empLevelXp(l){ return Math.pow(Math.max(0,l-1),2)*40; }
+  function empLevel(){ let l=1; while(empLevelXp(l+1)<=(emp.xp||0)) l++; return l; }
+  function empProgress(){ const l=empLevel(); const cur=empLevelXp(l), next=empLevelXp(l+1); return {level:l, into:(emp.xp||0)-cur, need:next-cur, pct:Math.min(100,((emp.xp||0)-cur)/(next-cur)*100)}; }
+  function unlockedHoods(){ const l=empLevel(); return HOODS.filter(h=>l>=h.req); }
+  function renoDiscount(){ return Math.min(0.30, (empLevel()-1)*0.02); }
+  function hoodName(id){ const h=HOODS.find(x=>x.id===id); return h?h.name[lang]:id; }
+  function starStr(q){ return "★".repeat(q)+"☆".repeat(5-q); }
+
+  function rollProperty(){
+    const hoods=unlockedHoods(); const h=hoods[Math.floor(Math.random()*hoods.length)];
+    const quality=1+Math.floor(Math.random()*3);
+    const ceilingValue=Math.round(h.ceiling*(0.85+Math.random()*0.3));
+    const condFactor=0.35+quality*0.1;
+    const dealFactor=Math.max(0.35, 0.55+Math.random()*0.15-renoDiscount()*0.3);
+    const askingPrice=Math.max(200, Math.round(ceilingValue*condFactor*dealFactor));
+    return {id:"p"+(emp.nextId++), hoodId:h.id, quality:quality, ceilingValue:ceilingValue, askingPrice:askingPrice};
+  }
+  function refillMarket(){ while(emp.market.length<5) emp.market.push(rollProperty()); }
+  function conditionScore(prop){
+    const renoPts=CATS.reduce((s,c)=>s+(prop.cond[c.id]||0),0), maxPts=CAT_MAXLV*CATS.length;
+    return Math.min(1, (prop.quality/5)*0.4 + (renoPts/maxPts)*0.6);
+  }
+  function estValue(prop){ return Math.round(prop.ceilingValue*conditionScore(prop)*(1+renoDiscount()*0.5)); }
+  function renoCost(prop,targetLevel){ const hood=HOODS.find(h=>h.id===prop.hoodId); return Math.round(hood.ceiling*0.02*targetLevel*(1-renoDiscount())); }
+
+  function buyProperty(pid){
+    const idx=emp.market.findIndex(p=>p.id===pid); if(idx<0) return;
+    const p=emp.market[idx]; if(emp.capital<p.askingPrice) return;
+    emp.capital-=p.askingPrice;
+    emp.owned.push({id:p.id, hoodId:p.hoodId, quality:p.quality, ceilingValue:p.ceilingValue, boughtFor:p.askingPrice, cond:{kitchen:0,bath:0,floor:0,curb:0}, renoSpent:0});
+    emp.market.splice(idx,1); refillMarket(); empSave(); renderEmpire();
+  }
+  function upgrade(propId,catId){
+    const prop=emp.owned.find(p=>p.id===propId); if(!prop) return;
+    const cur=prop.cond[catId]||0; if(cur>=CAT_MAXLV) return;
+    const cost=renoCost(prop,cur+1); if(emp.capital<cost) return;
+    emp.capital-=cost; prop.cond[catId]=cur+1; prop.renoSpent=(prop.renoSpent||0)+cost;
+    empSave(); renderEmpire();
+  }
+  function sellProperty(propId){
+    const idx=emp.owned.findIndex(p=>p.id===propId); if(idx<0) return;
+    const prop=emp.owned[idx]; const sellPrice=estValue(prop);
+    const profit=sellPrice-prop.boughtFor-(prop.renoSpent||0);
+    emp.capital+=sellPrice; emp.stats.flips++; emp.stats.careerProfit+=profit;
+    emp.stats.bestFlip=Math.max(emp.stats.bestFlip||0,profit);
+    emp.xp+=Math.max(10, Math.round(Math.max(0,profit)/20)+10);
+    emp.owned.splice(idx,1); empSave();
+    if(window.NexusArcade){ try{ window.NexusArcade.addXP(Math.max(3,Math.floor(Math.max(0,profit)/200))); }catch(e){} }
+    toast(profit>=0?T().flipProfit(fmt$(profit)):T().flipLoss(fmt$(Math.abs(profit))));
+    renderEmpire();
+  }
+  function renderEmpireHud(){
+    $("capVal").textContent=fmt$(emp.capital);
+    const pr=empProgress();
+    $("lvlVal").textContent=pr.level; $("propCountVal").textContent=emp.owned.length;
+    $("xpFill").style.width=pr.pct+"%"; $("xpLabel").textContent=pr.into+" / "+pr.need+" XP";
+    const hoods=unlockedHoods(), locked=HOODS.find(h=>!hoods.includes(h));
+    $("nextUnlockHint").textContent = locked ? T().nextUnlock(locked.name[lang],locked.req) : T().allUnlocked;
+  }
+  function renderMarket(){
+    const box=$("marketList");
+    box.innerHTML=emp.market.map(p=>{
+      const afford=emp.capital>=p.askingPrice;
+      return '<div class="pcard"><div class="phead"><span class="pname">'+hoodName(p.hoodId)+'</span><span class="pstars">'+starStr(p.quality)+'</span></div>'+
+        '<div class="pprice"><span>'+T().askingPrice+'</span><b style="color:var(--gold)">'+fmt$(p.askingPrice)+'</b></div>'+
+        '<button class="pbuy" data-buyp="'+p.id+'" '+(afford?'':'disabled')+'>'+T().buy+'</button></div>';
+    }).join("");
+    box.querySelectorAll("[data-buyp]").forEach(b=>b.onclick=()=>buyProperty(b.getAttribute("data-buyp")));
+  }
+  function renderPortfolio(){
+    const box=$("portfolioList");
+    $("portfolioEmpty").classList.toggle("hidden", emp.owned.length>0);
+    box.innerHTML=emp.owned.map(p=>{
+      const val=estValue(p), profit=val-p.boughtFor-(p.renoSpent||0);
+      const catsHtml=CATS.map(c=>{
+        const lv=p.cond[c.id]||0, maxed=lv>=CAT_MAXLV;
+        const cost=maxed?0:renoCost(p,lv+1), afford=!maxed&&emp.capital>=cost;
+        const dots=Array.from({length:CAT_MAXLV}).map((_,i)=>'<span class="dot'+(i<lv?' on':'')+'"></span>').join("");
+        return '<div class="pcat"><div class="pcicon">'+c.icon+'</div><div class="pcdots">'+dots+'</div>'+
+          (maxed?'<div class="pcmax">MAX</div>':'<button data-up="'+p.id+'|'+c.id+'" '+(afford?'':'disabled')+'>'+fmt$(cost)+'</button>')+'</div>';
+      }).join("");
+      return '<div class="pcard"><div class="phead"><span class="pname">'+hoodName(p.hoodId)+'</span><span class="pstars">'+starStr(p.quality)+'</span></div>'+
+        '<div class="pprice"><span>'+T().estValue+'</span><b style="color:var(--green)">'+fmt$(val)+'</b></div>'+
+        '<div class="pconds">'+catsHtml+'</div>'+
+        '<button class="pbuy psell '+(profit>=0?'profit':'loss')+'" data-sellp="'+p.id+'">'+T().sell+' ('+(profit>=0?'+':'')+fmt$(profit)+')</button></div>';
+    }).join("");
+    box.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{ const parts=b.getAttribute("data-up").split("|"); upgrade(parts[0],parts[1]); });
+    box.querySelectorAll("[data-sellp]").forEach(b=>b.onclick=()=>sellProperty(b.getAttribute("data-sellp")));
+  }
+  function renderEmpire(){ renderEmpireHud(); renderMarket(); renderPortfolio(); $("empAboutH").textContent=T().empAboutH; $("empAboutP").textContent=T().empAboutP; }
+
+  let mode="trade";
+  function setMode(m){
+    mode=m;
+    $("tradeMode").classList.toggle("hidden", m!=="trade");
+    $("empireMode").classList.toggle("hidden", m!=="empire");
+    document.querySelectorAll(".modeTab").forEach(b=>b.classList.toggle("active", b.getAttribute("data-mode")===m));
+    if(m==="empire") renderEmpire();
+  }
+  document.querySelectorAll(".modeTab").forEach(b=>b.addEventListener("click",()=>setMode(b.getAttribute("data-mode"))));
+  window.addEventListener("beforeunload",()=>{ if(emp) empSave(); });
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden && emp) empSave(); });
+
   function applyLang(){
     document.documentElement.lang=lang; $("langLabel").textContent=lang.toUpperCase();
     document.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); if(T()[k]) el.textContent=T()[k]; });
     $("aboutH").textContent=T().aboutH; $("aboutP").textContent=T().aboutP;
     if(state==="menu") buildBoard(); else { buildBoard(); render(); }
+    if(mode==="empire") renderEmpire();
   }
   $("startBtn").addEventListener("click",start);
   $("retryBtn").addEventListener("click",start);
@@ -245,6 +439,7 @@
   $("langBtn").addEventListener("click",()=>{ lang=lang==="en"?"de":"en"; localStorage.setItem("nx_lang",lang); applyLang(); });
   $("year").textContent=new Date().getFullYear();
   $("overBest").textContent=fmt$(best);
+  empLoad(); refillMarket();
   buildBoard(); applyLang(); requestAnimationFrame(loop);
 })();
 </script>
