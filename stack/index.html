@@ -106,7 +106,7 @@
   const T=()=>I[lang];
   const canvas=document.getElementById("game"),ctx=canvas.getContext("2d"),frame=document.getElementById("frame");
   let W=0,H=0,DPR=1,BH=0;
-  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);const r=frame.getBoundingClientRect();W=r.width;H=r.height;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);BH=H*0.075;}
+  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);const r=frame.getBoundingClientRect();W=r.width;H=r.height;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);BH=H*(mode==="chill"?0.16:0.075);}
   window.addEventListener("resize",()=>{resize();draw();});
   const BEST="nx_stack_best";let best=parseInt(localStorage.getItem(BEST)||"0",10);
   let mode=localStorage.getItem("nx_stack_mode")||"classic";
