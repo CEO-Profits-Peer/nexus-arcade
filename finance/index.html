@@ -125,6 +125,7 @@
   .newsdir.up{color:var(--green);}
   .newsdir.down{color:var(--pink);}
   .newshead2{font-size:13px;font-weight:600;margin-top:3px;}
+  .newsrow.newspending{border:1px dashed var(--gold);background:rgba(255,207,92,0.08);}
   #stockProfile{position:fixed;inset:0;z-index:50;overflow-y:auto;border-radius:0;}
   .pclose{position:absolute;top:14px;right:16px;cursor:pointer;font-size:20px;color:var(--muted);}
 </style>
@@ -243,7 +244,7 @@
     managerOffline:s=>"🤖 Your managers earned "+s+" while you were away!",
     tabStock:"Stocks",companiesH:"📈 Companies",newsH:"📰 Nexus Financial Times",
     youOwn:(q,v)=>"You own "+q+" · "+v,noNews:"No news yet — check back soon.",
-    justNow:"just now",minAgo:"m ago",hAgo:"h ago",dAgo:"d ago",
+    justNow:"just now",minAgo:"m ago",hAgo:"h ago",dAgo:"d ago",newsPending:"⏳ not priced in yet",
     dayTradeH:"Day Trading Session",dayTradeHint:"Commit real capital, trade for 75 fast-paced seconds, then it's auto cashed out — profit or loss.",
     dayStart:"Start Day Trading Session",dayActive:"Session Active",stakeLbl:"Stake",cashOut:"💵 Cash Out Now",
     dayWin:s=>"⚡ Session ended: +"+s+" to your Empire capital!",dayLoss:s=>"⚡ Session ended: -"+s+" from your Empire capital."},
@@ -266,7 +267,7 @@
     managerOffline:s=>"🤖 Deine Manager haben "+s+" verdient, während du weg warst!",
     tabStock:"Aktien",companiesH:"📈 Firmen",newsH:"📰 Nexus Finanz-Zeitung",
     youOwn:(q,v)=>"Du besitzt "+q+" · "+v,noNews:"Noch keine News — schau später vorbei.",
-    justNow:"gerade eben",minAgo:"m",hAgo:"h",dAgo:"d",
+    justNow:"gerade eben",minAgo:"m",hAgo:"h",dAgo:"d",newsPending:"⏳ noch nicht eingepreist",
     dayTradeH:"Day-Trading-Session",dayTradeHint:"Setze echtes Kapital ein, handle 75 rasante Sekunden lang, danach wird automatisch ausgezahlt — Gewinn oder Verlust.",
     dayStart:"Day-Trading-Session starten",dayActive:"Session läuft",stakeLbl:"Einsatz",cashOut:"💵 Jetzt auszahlen",
     dayWin:s=>"⚡ Session beendet: +"+s+" für dein Empire-Kapital!",dayLoss:s=>"⚡ Session beendet: -"+s+" von deinem Empire-Kapital."}};
@@ -688,7 +689,7 @@
   // hochgerechnet absurd (Zufallslauf-Varianz waechst mit sqrt(Anzahl Ticks) -> ueber 24h bei Sekundentakt
   // waeren das tausende Prozent). Deshalb im Normalbetrieb stark gedaempft ueber effVol()/effDrift().
   const STOCK_TICK_MS=6000, DAY_TICK_MS=200, STOCK_SLOW_FACTOR=0.03;
-  const STOCK_NEWS_CHANCE=0.0004, STOCK_OFFLINE_CAP_S=24*3600, STOCK_NEWS_MAXLEN=40;
+  const STOCK_NEWS_CHANCE=0.0015, STOCK_OFFLINE_CAP_S=24*3600, STOCK_NEWS_MAXLEN=40, NEWS_LEAD_MS=8000;
   function companyOf(id){ return COMPANIES.find(c=>c.id===id); }
   function effVol(c){ return emp.stocks.day ? c.vol : c.vol*STOCK_SLOW_FACTOR; }
   function effDrift(c){ return emp.stocks.day ? c.drift : c.drift*STOCK_SLOW_FACTOR; }
@@ -702,12 +703,30 @@
     if(emp.stocks.news.length>STOCK_NEWS_MAXLEN) emp.stocks.news.length=STOCK_NEWS_MAXLEN;
   }
   function fireNews(c, atTime){
+    // Sofort wirksam (bereits abgeschlossenes Ereignis) - genutzt fuer Offline-Aufholung (rueckdatiert, kein
+    // "gerade jetzt reagieren"-Fenster moeglich, da die Zeit schon vergangen ist).
     const n=c.newsPool[(Math.random()*c.newsPool.length)|0];
     const mag=n.mag[0]+Math.random()*(n.mag[1]-n.mag[0]);
     const newP=Math.max(0.5, emp.stocks.prices[c.id]*(1+n.dir*mag));
     emp.stocks.prices[c.id]=newP;
-    pushNews({companyId:c.id, headline:n.headline, dir:n.dir, mag:mag, t:atTime});
+    pushNews({companyId:c.id, headline:n.headline, dir:n.dir, mag:mag, t:atTime, applyAt:atTime, resolved:true});
     return newP;
+  }
+  function announceNews(c, baseTime){
+    // Live-Ticken: Schlagzeile erscheint SOFORT in der Zeitung, der Kurseffekt greift aber erst nach
+    // NEWS_LEAD_MS - aufmerksame Leser haben ein kurzes Fenster, um vor der Bewegung zu reagieren.
+    const n=c.newsPool[(Math.random()*c.newsPool.length)|0];
+    const mag=n.mag[0]+Math.random()*(n.mag[1]-n.mag[0]);
+    pushNews({companyId:c.id, headline:n.headline, dir:n.dir, mag:mag, t:baseTime, applyAt:baseTime+NEWS_LEAD_MS, resolved:false});
+  }
+  function resolvePendingNews(now){
+    for(const n of emp.stocks.news){
+      if(!n.resolved && now>=(n.applyAt||0)){
+        const c=companyOf(n.companyId);
+        if(c) emp.stocks.prices[c.id]=Math.max(0.5, emp.stocks.prices[c.id]*(1+n.dir*n.mag));
+        n.resolved=true;
+      }
+    }
   }
   let stockAcc=0, stockSaveAcc=0;
   function stockTick(dt){
@@ -718,13 +737,14 @@
     let moved=false;
     while(stockAcc>=tickMs){
       stockAcc-=tickMs;
+      resolvePendingNews(Date.now());
       for(const c of COMPANIES){
         let p=emp.stocks.prices[c.id];
         const r=(Math.random()-0.5)*2*effVol(c)+effDrift(c);
         p=Math.max(0.5, p*(1+r));
         emp.stocks.prices[c.id]=p;
         const h=emp.stocks.hist[c.id]; h.push(p); if(h.length>40) h.shift();
-        if(Math.random()<STOCK_NEWS_CHANCE) fireNews(c, Date.now());
+        if(Math.random()<STOCK_NEWS_CHANCE) announceNews(c, Date.now());
         moved=true;
       }
     }
@@ -863,10 +883,11 @@
   }
   function newsRowHtml(n, showCompany){
     const c=companyOf(n.companyId);
-    return '<div class="newsrow" data-newscompany="'+n.companyId+'">'+
+    const pending=!n.resolved;
+    return '<div class="newsrow'+(pending?' newspending':'')+'" data-newscompany="'+n.companyId+'">'+
       '<div class="newshead">'+(showCompany&&c?c.icon+' <b>'+c.sym+'</b> · ':'')+
         '<span class="newsdir '+(n.dir>0?'up':'down')+'">'+(n.dir>0?'▲':'▼')+' '+Math.round(n.mag*100)+'%</span>'+
-        '<span>'+timeAgo(n.t)+'</span></div>'+
+        '<span>'+(pending?T().newsPending:timeAgo(n.t))+'</span></div>'+
       '<div class="newshead2">'+n.headline[lang]+'</div>'+
     '</div>';
   }
