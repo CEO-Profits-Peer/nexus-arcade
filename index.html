@@ -221,7 +221,7 @@
         '<button class="iconbtn'+(lk?' on-like':'')+'" data-like="'+gm.id+'" title="Like">♥ '+(lc||0)+'</button>'+
       '</span></div></div></a>';}).join("");
     g.querySelectorAll("[data-fav]").forEach(function(btn){btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();toggleFav(btn.getAttribute("data-fav"));renderGrid();});});
-    g.querySelectorAll("[data-like]").forEach(function(btn){btn.addEventListener("click",async function(e){e.preventDefault();e.stopPropagation();const S=window.NexusSocial;if(!S){toast(T().likeNocfg);return;}const r=await S.toggleLike(btn.getAttribute("data-like"));if(!r.ok){toast(r.reason==="login"?T().likeLogin:T().likeNocfg);}renderGrid();});});
+    g.querySelectorAll("[data-like]").forEach(function(btn){btn.addEventListener("click",async function(e){e.preventDefault();e.stopPropagation();const S=window.NexusSocial;if(!S){toast(T().likeNocfg);return;}const r=await S.toggleLike(btn.getAttribute("data-like"));if(!r.ok){if(r.reason==="login"&&window.NexusArcade&&window.NexusArcade.openLogin){toast(T().likeLogin);window.NexusArcade.openLogin();}else{toast(r.reason==="login"?T().likeLogin:T().likeNocfg);}}renderGrid();});});
   }
   function applyLang(){document.documentElement.lang=lang;const t=T();document.getElementById("h1").textContent=t.h1;document.getElementById("sub").textContent=t.sub;document.getElementById("search").placeholder=t.search;document.getElementById("aH").textContent=t.aH;document.getElementById("aP").textContent=t.aP;document.getElementById("langLabel").textContent=lang.toUpperCase();const lt=document.getElementById("lbTitle");if(lt)lt.textContent=t.lbTitle;renderCats();renderGrid();renderLbPreview();}
 

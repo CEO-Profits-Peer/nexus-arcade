@@ -209,6 +209,7 @@
   let activeTab = "profile", lbGame="dash";
   function open(){ activeTab="profile"; renderModal(); dom.modal.classList.remove("hidden"); dom.modal.style.display="flex"; }
   function openRanks(){ activeTab="ranks"; renderModal(); dom.modal.classList.remove("hidden"); dom.modal.style.display="flex"; }
+  function openLogin(){ activeTab="acc"; renderModal(); dom.modal.classList.remove("hidden"); dom.modal.style.display="flex"; }
   function close(){ dom.modal.classList.add("hidden"); dom.modal.style.display="none"; }
 
   function renderModal(){
@@ -553,7 +554,7 @@
 
   /* ---------- öffentliche API ---------- */
   const api = {
-    addXP, unlock, open, openRanks, submitScore, fetchLeaderboard,
+    addXP, unlock, open, openRanks, openLogin, submitScore, fetchLeaderboard,
     getProfile: ()=>Object.assign({}, profile, levelProgress(profile.xp)),
     hasAchievement: id=>!!achieved[id],
     ready: cb=>{ if(typeof cb==="function") readyCbs.push(cb); }
