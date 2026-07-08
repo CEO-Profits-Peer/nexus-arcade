@@ -151,6 +151,10 @@ window.NEXUS_DATA=(function(){
   ACH.push({id:"finance_biz1",game:"finance",icon:"🏪",xp:60,name:{en:"Business Owner",de:"Unternehmer"},desc:{en:"Open your first business in Nexus Empire",de:"Dein erstes Unternehmen in Nexus Empire eröffnen"},cond:{stat:"finance_biz_count",gte:1}});
   ACH.push({id:"finance_manager1",game:"finance",icon:"🤖",xp:220,name:{en:"Hands Off",de:"Loslassen"},desc:{en:"Hire your first manager to automate a business",de:"Deinen ersten Manager anheuern, der ein Unternehmen automatisiert"},cond:{stat:"finance_managers",gte:1}});
   addTier("financebizprofit","finance","💼","finance_biz_profit",[5000,25000,100000],"Mogul","Mogul","Earn ${n} total business profit in Nexus Empire","{n}$ Unternehmensgewinn in Nexus Empire erreichen",true);
+  ACH.push({id:"finance_stock1",game:"finance",icon:"📈",xp:60,name:{en:"Market Debut",de:"Börsendebüt"},desc:{en:"Buy your first stock in Nexus Empire",de:"Deine erste Aktie in Nexus Empire kaufen"},cond:{stat:"finance_stock_trades",gte:1}});
+  addTier("financeportfolio","finance","📊","finance_stock_companies",[2,4,6],"Diversified","Diversifiziert","Own shares in {n} different companies at once","Aktien von {n} verschiedenen Firmen gleichzeitig besitzen",false);
+  ACH.push({id:"finance_day1",game:"finance",icon:"⚡",xp:80,name:{en:"Day Trader",de:"Day-Trader"},desc:{en:"Complete your first Day Trading session",de:"Deine erste Day-Trading-Session abschließen"},cond:{stat:"finance_day_trades",gte:1}});
+  addTier("financedaywin","finance","⚡","finance_day_profit",[1000,5000,20000],"High Roller","High Roller","Earn ${n} total from Day Trading sessions","{n}$ insgesamt durch Day-Trading-Sessions verdienen",true);
 
   /* ---------- Taegliche Quests ---------- */
   const QUESTS = [

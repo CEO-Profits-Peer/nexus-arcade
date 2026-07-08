@@ -405,8 +405,9 @@
   ];
   const CAT_MAXLV=3, EMP_KEY="nx_finance_empire";
   let emp;
-  function empFresh(){ return {capital:3000, xp:0, stats:{flips:0,careerProfit:0,bestFlip:0,bizProfit:0}, owned:[], market:[], nextId:1, founderXp:0, businesses:[], stocks:stockFresh()}; }
-  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({flips:0,careerProfit:0,bestFlip:0,bizProfit:0},emp.stats); emp.businesses=emp.businesses||[]; emp.stocks=Object.assign(stockFresh(),emp.stocks||{}); for(const c of COMPANIES){ if(emp.stocks.prices[c.id]==null) emp.stocks.prices[c.id]=c.price0; if(!emp.stocks.hist[c.id]) emp.stocks.hist[c.id]=[emp.stocks.prices[c.id]]; } return; } }catch(e){} emp=empFresh(); }
+  const EMP_STATS_DEFAULT={flips:0,careerProfit:0,bestFlip:0,bizProfit:0,stockTrades:0,dayTrades:0,dayWins:0,dayProfit:0};
+  function empFresh(){ return {capital:3000, xp:0, stats:Object.assign({},EMP_STATS_DEFAULT), owned:[], market:[], nextId:1, founderXp:0, businesses:[], stocks:stockFresh()}; }
+  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({},EMP_STATS_DEFAULT,emp.stats); emp.businesses=emp.businesses||[]; emp.stocks=Object.assign(stockFresh(),emp.stocks||{}); for(const c of COMPANIES){ if(emp.stocks.prices[c.id]==null) emp.stocks.prices[c.id]=c.price0; if(!emp.stocks.hist[c.id]) emp.stocks.hist[c.id]=[emp.stocks.prices[c.id]]; } return; } }catch(e){} emp=empFresh(); }
   function empSave(){ for(const b of emp.businesses||[]) if(b.manager) b.lastTick=Date.now(); if(emp.stocks) emp.stocks.lastTick=Date.now(); localStorage.setItem(EMP_KEY, JSON.stringify(emp)); }
   function empLevelXp(l){ return Math.pow(Math.max(0,l-1),2)*40; }
   function empLevel(){ let l=1; while(empLevelXp(l+1)<=(emp.xp||0)) l++; return l; }
@@ -766,6 +767,9 @@
     const finalValue=dayNetWorth(), profit=finalValue-d.stake;
     emp.capital+=finalValue;
     emp.stocks.day=null;
+    emp.stats.dayTrades=(emp.stats.dayTrades||0)+1;
+    emp.stats.dayProfit=(emp.stats.dayProfit||0)+profit;
+    if(profit>0) emp.stats.dayWins=(emp.stats.dayWins||0)+1;
     empSave();
     toast(profit>=0?T().dayWin(fmt$(profit)):T().dayLoss(fmt$(Math.abs(profit))));
     if(window.NexusArcade){ try{ window.NexusArcade.addXP(Math.max(3,Math.floor(finalValue/50))); }catch(e){} }
@@ -830,12 +834,14 @@
     const qty=Math.max(1, Math.floor(Math.min(budget, emp.capital)/price));
     const cost=qty*price; if(cost>emp.capital) return;
     emp.capital-=cost; emp.stocks.holdings[id]=(emp.stocks.holdings[id]||0)+qty;
+    emp.stats.stockTrades=(emp.stats.stockTrades||0)+1;
     empSave(); renderStock(); renderEmpireHud();
   }
   function stockSell(id){
     const held=emp.stocks.holdings[id]||0; if(held<=0) return;
     const price=emp.stocks.prices[id];
     emp.capital+=held*price; emp.stocks.holdings[id]=0;
+    emp.stats.stockTrades=(emp.stats.stockTrades||0)+1;
     empSave(); renderStock(); renderEmpireHud();
   }
   function drawSparkInto(cv, hist){
