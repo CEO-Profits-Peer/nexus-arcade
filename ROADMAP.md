@@ -155,10 +155,32 @@ nur als Haltung/Ambition festgehalten für spätere große Weichenstellungen.
 Das ist "Nexus Arcade", ein statisches Web-Projekt (Vanilla JS, kein Build) — siehe CLAUDE.md für Architektur &
 Konventionen und ROADMAP.md für Vision & offene Features. Bitte lies beide zuerst.
 
-Bitte starte mit Abschnitt "1. Bugs" aus ROADMAP.md (2048 Lose-Screen-Layering, Stack Widescreen-Bug, Leaderboard-
-Zuverlässigkeit), danach Abschnitt "2. Fehlendes Pause-/Escape-Menü" (2048/Dash/Racer).
+⚠️ ALLERERSTE PRIORITÄT — unbestätigter Bug-Report: Nutzer meldete direkt nach dem Ticker-Extraktion/Bottom-Nav-
+Deploy (Commit "Nexus Ticker als eigenes Mini-Game ausgelagert..."), dass auf Nexus Finance "Immobilien,
+Unternehmen, Long Term Aktien, alles weg" sei. Ich habe direkt danach nachgefragt, ob ein Hard-Refresh
+(Strg+Shift+R) das behoben hat — der Nutzer hat NICHT geantwortet, sondern ist zu anderem Feedback übergegangen.
+Status also ungeklärt! Wahrscheinlichste Ursache: die bekannte Vercel-Immutable-Cache-Falle (siehe Abschnitt
+"Bekannte Baustellen" in CLAUDE.md). Möglich aber auch: echter Rendering-Bug durch den Empire-Umbau (Bottom-Nav
++ Entfernen der Trading-Floor-Sektion), z. B. falls `emp.owned`/`emp.businesses`/`emp.stocks.holdings` bei
+NICHT-leeren Arrays anders rendern als im leeren Testzustand (nur der leere Zustand wurde beim Bauen getestet!).
+Bitte als Allererstes beim Nutzer nachfragen bzw. gemeinsam mit ihm live in `finance/index.html` prüfen (Konto
+einloggen lassen falls er einen hat, damit der echte Empire-Stand aus der Cloud kommt) — erst wenn das geklärt
+ist, mit anderer Arbeit weitermachen.
+
+Danach zwei offene Entscheidungen aus der letzten Session, auf die der Nutzer noch nicht geantwortet hat:
+1. Bottom-Nav-Bar (Immobilien/Unternehmen/Aktien) sieht laut Nutzer aus wie "Website-Navigation", sollte aber
+   klar als Teil des Spiels lesbar sein. Vorschlag (noch nicht umgesetzt): Breite auf die Spielspalte begrenzen
+   (max-width wie der Rest von Nexus Finance, zentriert) statt volle Viewport-Breite, plus grüner Akzent-Rahmen/
+   Glow (Finance-Farbe) — macht sofort klar "das ist Spiel-UI", nicht Seiten-Chrome.
+2. "Wo endet ein Spiel nach unten hin" — Nutzer will das klarer sehen. Vorschlag: dünne Akzentlinie (wie die
+   bereits vorhandene unter der Top-Bar) direkt nach dem eigentlichen Spielinhalt, vor About/Vorschlägen/Footer.
+   Hängt an der offenen Grundsatzfrage in Abschnitt 4 — erst an einem Spiel probieren, nicht überall auf einmal.
+
+Danach normal weiter mit den übrigen offenen Punkten in Abschnitt 5 (z. B. Nexus Dash Upgrade-Shop, Nexus Words
+mehrere Runden/Sprachen, Nexus Racer Strecken-Shop, Nexus Blocks Versus-Modus, Nexus Realms v2).
 
 Regeln: Spiele bleiben je eine eigenständige index.html; alles zweisprachig DE/EN; nichts an der Sync-Logik
-(mergeKey) kaputt machen; nach Änderungen im echten Browser testen; committe in sinnvollen Schritten mit klaren
-Messages. Antworte mir auf Deutsch.
+(mergeKey) kaputt machen; nach Änderungen im echten Browser testen — dabei nicht nur den LEEREN Zustand testen,
+sondern wenn möglich auch mit vorhandenen Daten (Immobilien/Unternehmen/Aktien-Bestand), das wurde beim
+Stocks-Umbau übersehen; committe in sinnvollen Schritten mit klaren Messages. Antworte mir auf Deutsch.
 ```
