@@ -436,17 +436,43 @@
     try{ const r=await sb.from("scores").select("name,score").eq("game",game).order("score",{ascending:false}).limit(10); if(r.error){syncErrToast(r.error);return[];} return r.data||[]; }
     catch(e){ syncErrToast(e); return []; }
   }
+  async function fetchMyRank(game){
+    if(!sb||!user) return null;
+    try{
+      const mine=await sb.from("scores").select("score").eq("game",game).eq("user_id",user.id).maybeSingle();
+      if(mine.error||!mine.data) return null;
+      const myScore=mine.data.score;
+      const higher=await sb.from("scores").select("user_id",{count:"exact",head:true}).eq("game",game).gt("score",myScore);
+      if(higher.error) return null;
+      return {score:myScore, rank:(higher.count||0)+1};
+    }catch(e){ return null; }
+  }
+  function lbRow(rankNum,name,score,mine,tt){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:8px;margin-bottom:4px;background:'+(mine?'rgba(57,230,255,.12)':'rgba(255,255,255,.02)')+'">'+
+      '<div style="width:26px;font-weight:800;color:'+(rankNum===1?"#ffcf5c":rankNum===2?"#c9d3f2":rankNum===3?"#c98a3a":"var(--muted,#8a97c2)")+'">'+rankNum+'</div>'+
+      '<div style="flex:1;font-weight:600">'+esc(name||"Player")+(mine?' <span style="color:var(--neon,#39e6ff);font-size:11px">('+tt.lbYou+')</span>':'')+'</div>'+
+      '<div style="font-weight:800;color:var(--neon,#39e6ff)">'+score+'</div></div>';
+  }
   async function loadLeaderboard(){
     const el=dom.card&&dom.card.querySelector("#nxLbList"); if(!el)return; const t=TXT[L]||{};
     if(!configured){ el.textContent=t.notcfg; return; }
-    const rows=await fetchLeaderboard(lbGame);
-    const el2=dom.card&&dom.card.querySelector("#nxLbList"); if(!el2)return;
-    if(!rows||!rows.length){ el2.innerHTML='<div style="padding:14px 0;text-align:center">'+t.lbEmpty+'</div>'; return; }
+    const game=lbGame;
+    const rows=await fetchLeaderboard(game);
+    const el2=dom.card&&dom.card.querySelector("#nxLbList"); if(!el2||game!==lbGame)return;
     const me=displayName();
-    el2.innerHTML=rows.map(function(r,i){const mine=!!user&&r.name===me;return '<div style="display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:8px;margin-bottom:4px;background:'+(mine?'rgba(57,230,255,.12)':'rgba(255,255,255,.02)')+'">'+
-      '<div style="width:22px;font-weight:800;color:'+(i===0?"#ffcf5c":i===1?"#c9d3f2":i===2?"#c98a3a":"var(--muted,#8a97c2)")+'">'+(i+1)+'</div>'+
-      '<div style="flex:1;font-weight:600">'+esc(r.name||"Player")+(mine?' <span style="color:var(--neon,#39e6ff);font-size:11px">('+t.lbYou+')</span>':'')+'</div>'+
-      '<div style="font-weight:800;color:var(--neon,#39e6ff)">'+r.score+'</div></div>';}).join("");
+    if(!rows||!rows.length){
+      el2.innerHTML='<div style="padding:14px 0;text-align:center">'+t.lbEmpty+'</div>';
+    } else {
+      el2.innerHTML=rows.map((r,i)=>lbRow(i+1,r.name,r.score,!!user&&r.name===me,t)).join("");
+    }
+    if(user){
+      const inTop=rows&&rows.some(r=>r.name===me);
+      if(!inTop){
+        const mineRank=await fetchMyRank(game);
+        const el3=dom.card&&dom.card.querySelector("#nxLbList"); if(!el3||game!==lbGame)return;
+        if(mineRank) el3.insertAdjacentHTML("beforeend",'<div style="text-align:center;color:var(--muted,#8a97c2);font-size:12px;margin:2px 0">···</div>'+lbRow(mineRank.rank,me,mineRank.score,true,t));
+      }
+    }
   }
 
   /* ---------- Start ---------- */
