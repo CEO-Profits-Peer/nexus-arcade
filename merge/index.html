@@ -42,6 +42,12 @@
   @keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
   .over{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(5,6,15,0.82);border-radius:14px;text-align:center;padding:20px;}
   .over.hidden{display:none;}
+  .pausebtn{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;
+    background:rgba(16,20,42,0.75);border:1px solid rgba(120,140,220,0.3);color:var(--text);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:.15s;}
+  .pausebtn:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(57,230,255,0.3);}
+  .pausebtn.hidden{display:none;}
+  a.btn{text-decoration:none;display:inline-block;}
   .over h2{margin:0;font-size:30px;color:var(--neon);}
   .btn{border:none;cursor:pointer;font-weight:800;letter-spacing:1px;font-size:15px;padding:12px 24px;border-radius:999px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));}
   .btn.sec{background:transparent;color:var(--text);border:1px solid var(--line);}
@@ -77,6 +83,19 @@
         <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
       </div>
     </div>
+
+    <!-- Pause button + overlay -->
+    <div class="pausebtn hidden" id="pauseBtn" title="Pause (Esc)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </div>
+    <div class="over hidden" id="pauseOver">
+      <h2 data-i18n="paused">PAUSED</h2>
+      <div class="row2">
+        <button class="btn" id="resumeBtn" data-i18n="resume">▶ RESUME</button>
+        <button class="btn sec" id="pauseRestartBtn" data-i18n="retry">↻ NEW GAME</button>
+      </div>
+      <a class="btn sec" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
+    </div>
   </div>
   <div style="text-align:center;margin-top:12px"><button class="btn sec" id="newBtn" data-i18n="newgame">↻ New Game</button></div>
   <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px" data-i18n="hint">Swipe or use arrow keys · WASD</div>
@@ -96,18 +115,20 @@
   const I={en:{hub:"Games",score:"Score",best:"Best",gameover:"GAME OVER",retry:"↻ NEW GAME",share:"⤴ SHARE",newgame:"↻ New Game",win:"YOU REACHED 2048!",keepgoing:"Keep going",
     hint:"Swipe or use arrow keys · WASD",aboutH:"About Nexus 2048",
     aboutP:"Nexus 2048 is a free merge puzzle game you can play right in your browser — no download, no signup. Slide the tiles in any direction; when two tiles with the same number touch, they merge into one. Keep combining to reach the 2048 tile, then push for an even higher score. Easy to learn, hard to put down. Works on desktop and mobile, and your best score is saved.",
-    shareText:s=>`I scored ${s} in Nexus 2048! Can you beat me?`,copied:"Copied — paste anywhere!"},
+    shareText:s=>`I scored ${s} in Nexus 2048! Can you beat me?`,copied:"Copied — paste anywhere!",
+    paused:"PAUSED",resume:"▶ RESUME",home:"🏠 HOME"},
   de:{hub:"Spiele",score:"Punkte",best:"Bestwert",gameover:"GAME OVER",retry:"↻ NEUES SPIEL",share:"⤴ TEILEN",newgame:"↻ Neues Spiel",win:"2048 ERREICHT!",keepgoing:"Weiterspielen",
     hint:"Wischen oder Pfeiltasten · WASD",aboutH:"Über Nexus 2048",
     aboutP:"Nexus 2048 ist ein kostenloses Merge-Puzzle direkt im Browser — kein Download, keine Anmeldung. Schiebe die Kacheln in eine Richtung; berühren sich zwei mit derselben Zahl, verschmelzen sie. Kombiniere weiter bis zur 2048-Kachel und dann zu einem noch höheren Score. Leicht zu lernen, schwer aufzuhören. Läuft auf Desktop und Handy, dein Bestwert wird gespeichert.",
-    shareText:s=>`Ich habe ${s} Punkte in Nexus 2048! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!"}};
+    shareText:s=>`Ich habe ${s} Punkte in Nexus 2048! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
+    paused:"PAUSIERT",resume:"▶ WEITER",home:"🏠 HUB"}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const COLORS={2:"#2b3358",4:"#39506b",8:"#3a7bd5",16:"#39e6ff",32:"#5bbf4a",64:"#7cff6b",128:"#ffcf5c",256:"#ffb03a",512:"#ff7a3a",1024:"#ff4d6d",2048:"#c77dff",4096:"#ff3ea5",8192:"#fff"};
   const N=4;
   const BEST="nx_2048_best";
   let best=parseInt(localStorage.getItem(BEST)||"0",10);
-  let grid,score,tiles,idc,won,dead;
+  let grid,score,tiles,idc,won,dead,paused=false;
   const board=document.getElementById("board");
   let cells=[];
 
@@ -122,10 +143,18 @@
 
   function reset(){
     grid=[];for(let r=0;r<N;r++){grid.push([]);for(let c=0;c<N;c++)grid[r].push(null);}
-    score=0;won=false;dead=false;idc=0;
+    score=0;won=false;dead=false;paused=false;idc=0;
     board.querySelectorAll(".tile").forEach(t=>t.remove());
     addRandom();addRandom();render();hud();
     document.getElementById("over").classList.add("hidden");
+    document.getElementById("pauseOver").classList.add("hidden");
+    document.getElementById("pauseBtn").classList.remove("hidden");
+  }
+  function togglePause(){
+    if(dead)return;
+    paused=!paused;
+    document.getElementById("pauseOver").classList.toggle("hidden",!paused);
+    document.getElementById("pauseBtn").classList.toggle("hidden",paused);
   }
   function empties(){const e=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(!grid[r][c])e.push([r,c]);return e;}
   function addRandom(){const e=empties();if(!e.length)return;const[r,c]=e[(Math.random()*e.length)|0];const v=Math.random()<0.9?2:4;const el=document.createElement("div");el.className="tile pop";el.dataset.id=++idc;const num=document.createElement("span");num.className="num";el.appendChild(num);board.appendChild(el);grid[r][c]={v,el,r,c,merged:false};styleTile(grid[r][c]);}
@@ -134,7 +163,7 @@
   function hud(){document.getElementById("scoreVal").textContent=score;document.getElementById("bestVal").textContent=best;}
 
   function move(dir){ // dir: 0 up,1 right,2 down,3 left
-    if(dead)return;
+    if(dead||paused)return;
     let moved=false;
     const order=[];
     for(let i=0;i<N;i++)order.push(i);
@@ -159,7 +188,7 @@
     if(moved){render();addRandom();hud();if(score>best){best=score;localStorage.setItem(BEST,String(best));}if(window.NexusArcade){try{window.NexusArcade.addXP(2);}catch(e){}}if(!canMove())gameOver();}
   }
   function canMove(){if(empties().length)return true;for(let r=0;r<N;r++)for(let c=0;c<N;c++){const v=grid[r][c].v;if(c<N-1&&grid[r][c+1].v===v)return true;if(r<N-1&&grid[r+1][c].v===v)return true;}return false;}
-  function gameOver(){dead=true;document.getElementById("overScore").textContent=score;document.getElementById("overTitle").textContent=T().gameover;document.getElementById("over").classList.remove("hidden");if(window.NexusArcade){try{window.NexusArcade.addXP(Math.floor(score/50));}catch(e){}}}
+  function gameOver(){dead=true;paused=false;document.getElementById("pauseBtn").classList.add("hidden");document.getElementById("pauseOver").classList.add("hidden");document.getElementById("overScore").textContent=score;document.getElementById("overTitle").textContent=T().gameover;document.getElementById("over").classList.remove("hidden");if(window.NexusArcade){try{window.NexusArcade.addXP(Math.floor(score/50));}catch(e){}}}
 
   // input
   document.addEventListener("keydown",e=>{const k=e.key;let d=-1;if(k==="ArrowUp"||k==="w"||k==="W")d=0;else if(k==="ArrowRight"||k==="d"||k==="D")d=1;else if(k==="ArrowDown"||k==="s"||k==="S")d=2;else if(k==="ArrowLeft"||k==="a"||k==="A")d=3;if(d>=0){e.preventDefault();move(d);}});
@@ -176,6 +205,10 @@
   document.getElementById("shareBtn").addEventListener("click",share);
   document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
   document.getElementById("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
+  document.getElementById("pauseBtn").addEventListener("click",togglePause);
+  document.getElementById("resumeBtn").addEventListener("click",togglePause);
+  document.getElementById("pauseRestartBtn").addEventListener("click",reset);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") togglePause(); });
   document.getElementById("year").textContent=new Date().getFullYear();
   window.addEventListener("resize",()=>{geom=buildCells();for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(grid&&grid[r][c])styleTile(grid[r][c]);});
 

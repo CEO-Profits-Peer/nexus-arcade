@@ -111,6 +111,11 @@
     text-align:center;padding:24px;gap:14px;background:rgba(5,6,15,0.72);backdrop-filter:blur(3px);
   }
   .overlay.hidden{display:none;}
+  .pausebtn{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;
+    background:rgba(16,20,42,0.75);border:1px solid rgba(120,140,220,0.3);color:var(--text);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:.15s;}
+  .pausebtn:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(57,230,255,0.3);}
+  .pausebtn.hidden{display:none;}
   .overlay h1{margin:0;font-size:clamp(28px,6vw,52px);letter-spacing:2px;
     background:linear-gradient(90deg,var(--neon),var(--neon2));-webkit-background-clip:text;background-clip:text;color:transparent;}
   .overlay p{margin:0;color:var(--muted);max-width:460px;line-height:1.5;font-size:15px;}
@@ -124,6 +129,7 @@
   }
   .btn:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(57,230,255,0.7);}
   .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(120,140,220,0.4);box-shadow:none;}
+  a.btn{text-decoration:none;display:inline-block;}
   .btn.secondary:hover{border-color:var(--neon);box-shadow:0 0 16px rgba(57,230,255,0.3);}
   .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
   .new-best{color:var(--accent);font-weight:800;letter-spacing:1px;animation:pulse 1s infinite;}
@@ -183,6 +189,19 @@
         <button class="btn secondary" id="shareBtn" data-i18n="share">⤴ SHARE</button>
       </div>
     </div>
+
+    <!-- Pause button + overlay -->
+    <div class="pausebtn hidden" id="pauseBtn" title="Pause (Esc)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </div>
+    <div class="overlay hidden" id="pauseOverlay">
+      <h1 data-i18n="paused">PAUSED</h1>
+      <div class="btn-row">
+        <button class="btn" id="resumeBtn" data-i18n="resume">▶ RESUME</button>
+        <button class="btn secondary" id="pauseRestartBtn" data-i18n="retry">↻ RETRY</button>
+      </div>
+      <a class="btn secondary" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
+    </div>
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
@@ -217,7 +236,8 @@
       howP:"Move your node with the mouse (desktop) or by dragging your finger (mobile). Avoid the red shards — a single hit ends your run. Collect the cyan orbs to raise your multiplier and score faster. The longer you survive, the faster and more crowded it gets. Share your score and challenge a friend to beat it.",
       shareText:(s)=>`I scored ${s} in Nexus Dash! Can you beat me?`,
       copied:"Score copied — paste it anywhere!",
-      soundOn:"On", soundOff:"Off"
+      soundOn:"On", soundOff:"Off",
+      paused:"PAUSED", resume:"▶ RESUME", home:"🏠 HOME"
     },
     de:{
       score:"Punkte", multi:"Multiplikator", best:"Bestwert", play:"▶ SPIELEN", retry:"↻ NOCHMAL",
@@ -230,7 +250,8 @@
       howP:"Bewege deinen Node mit der Maus (Desktop) oder ziehe mit dem Finger (Handy). Weiche den roten Splittern aus — eine Berührung beendet den Lauf. Sammle die cyanfarbenen Orbs, um deinen Multiplikator und deine Punkte schneller steigen zu lassen. Je länger du überlebst, desto schneller und voller wird es. Teile deinen Score und fordere Freunde heraus.",
       shareText:(s)=>`Ich habe ${s} Punkte in Nexus Dash! Schaffst du mehr?`,
       copied:"Score kopiert — überall einfügen!",
-      soundOn:"An", soundOff:"Aus"
+      soundOn:"An", soundOff:"Aus",
+      paused:"PAUSIERT", resume:"▶ WEITER", home:"🏠 HUB"
     }
   };
   let lang = (navigator.language||"en").toLowerCase().startsWith("de") ? "de" : "en";
@@ -289,6 +310,7 @@
   const BEST_KEY="nd_best";
   let best = parseInt(localStorage.getItem(BEST_KEY)||"0",10);
   let state="menu"; // menu | playing | over
+  let paused=false;
   let player=null, enemies=[], orbs=[], particles=[];
   let score, multiplier, elapsed, spawnT, orbT, targetX, targetY, hasPointer;
   let lastTime=0;
@@ -341,7 +363,7 @@
 
   /* ---------------- Loop ---------------- */
   function update(dt){
-    if(state!=="playing") return;
+    if(state!=="playing"||paused) return;
     elapsed+=dt;
     score += dt*10*multiplier;
 
@@ -452,12 +474,22 @@
     resize(); reset();
     document.getElementById("startOverlay").classList.add("hidden");
     document.getElementById("overOverlay").classList.add("hidden");
+    document.getElementById("pauseOverlay").classList.add("hidden");
     frame.style.cursor="none";
-    state="playing";
+    state="playing"; paused=false;
+    document.getElementById("pauseBtn").classList.remove("hidden");
     if(actx && actx.state==="suspended") actx.resume();
   }
+  function togglePause(){
+    if(state!=="playing") return;
+    paused=!paused;
+    document.getElementById("pauseOverlay").classList.toggle("hidden",!paused);
+    document.getElementById("pauseBtn").classList.toggle("hidden",paused);
+  }
   function gameOver(){
-    state="over";
+    state="over"; paused=false;
+    document.getElementById("pauseBtn").classList.add("hidden");
+    document.getElementById("pauseOverlay").classList.add("hidden");
     sHit();
     burst(player.x,player.y,"255,77,109",26);
     const finalScore=Math.floor(score);
@@ -495,6 +527,10 @@
     lang=lang==="en"?"de":"en";localStorage.setItem("nd_lang",lang);applyLang();
   });
   document.getElementById("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
+  document.getElementById("pauseBtn").addEventListener("click",togglePause);
+  document.getElementById("resumeBtn").addEventListener("click",togglePause);
+  document.getElementById("pauseRestartBtn").addEventListener("click",startGame);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") togglePause(); });
   document.getElementById("muteBtn").addEventListener("click",()=>{
     muted=!muted;localStorage.setItem("nd_muted",muted?"1":"0");
     document.getElementById("muteBtn").firstChild.textContent=muted?"🔇 ":"🔊 ";

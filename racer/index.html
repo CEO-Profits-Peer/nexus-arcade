@@ -38,6 +38,12 @@
   canvas{display:block;width:100%;height:100%;}
   .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;gap:12px;background:rgba(5,6,15,0.72);backdrop-filter:blur(3px);}
   .overlay.hidden{display:none;}
+  .pausebtn{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;
+    background:rgba(16,20,42,0.75);border:1px solid rgba(120,140,220,0.3);color:var(--text);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:.15s;}
+  .pausebtn:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(57,230,255,0.3);}
+  .pausebtn.hidden{display:none;}
+  a.btn{text-decoration:none;display:inline-block;}
   .overlay h1{margin:0;font-size:clamp(26px,7vw,44px);letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
   .overlay p{margin:0;color:var(--muted);max-width:400px;line-height:1.5;font-size:14px;}
   .overlay .big{font-size:clamp(36px,9vw,60px);font-weight:900;color:var(--neon);text-shadow:0 0 20px rgba(57,230,255,0.6);}
@@ -93,6 +99,19 @@
         <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
       </div>
     </div>
+
+    <!-- Pause button + overlay -->
+    <div class="pausebtn hidden" id="pauseBtn" title="Pause (Esc)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </div>
+    <div class="overlay hidden" id="pauseO">
+      <h1 data-i18n="paused">PAUSED</h1>
+      <div class="btnrow">
+        <button class="btn" id="resumeBtn" data-i18n="resume">▶ RESUME</button>
+        <button class="btn sec" id="pauseRestartBtn" data-i18n="retry">↻ RETRY</button>
+      </div>
+      <a class="btn sec" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
+    </div>
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
@@ -111,12 +130,14 @@
     intro:"Steer with the mouse, finger or arrow keys. Dodge the traffic, grab coins, fill your nitro and hold it to blast forward. One crash ends the run.",
     hint:"Move: mouse / drag / ← →  ·  Nitro: Space / tap-hold",aboutH:"About Nexus Racer",
     aboutP:"Nexus Racer is a free endless car racing game you play right in your browser — no download, no signup. Weave through neon night traffic, collect coins, and build up your nitro to blast forward for extra distance. The further you drive, the faster it gets. Beat your personal record and challenge your friends. Works on desktop and mobile.",
-    shareText:s=>`I drove ${s}m in Nexus Racer! Can you go further?`,copied:"Copied — paste anywhere!"},
+    shareText:s=>`I drove ${s}m in Nexus Racer! Can you go further?`,copied:"Copied — paste anywhere!",
+    paused:"PAUSED",resume:"▶ RESUME",home:"🏠 HOME"},
   de:{hub:"Spiele",dist:"Distanz",coins:"Münzen",best:"Bestwert",play:"▶ LOSFAHREN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",crash:"CRASH",newbest:"★ NEUER REKORD ★",
     intro:"Lenke mit Maus, Finger oder Pfeiltasten. Weiche dem Verkehr aus, sammle Münzen, lade dein Nitro und halte es für den Boost. Ein Crash beendet den Lauf.",
     hint:"Lenken: Maus / ziehen / ← →  ·  Nitro: Leertaste / halten",aboutH:"Über Nexus Racer",
     aboutP:"Nexus Racer ist ein kostenloses Endlos-Rennspiel direkt im Browser — kein Download, keine Anmeldung. Schlängle dich durch den Neon-Nachtverkehr, sammle Münzen und lade dein Nitro auf, um für Extra-Distanz nach vorn zu schießen. Je weiter du fährst, desto schneller wird es. Knacke deinen Rekord und fordere Freunde heraus. Läuft auf Desktop und Handy.",
-    shareText:s=>`Ich bin ${s}m in Nexus Racer gefahren! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!"}};
+    shareText:s=>`Ich bin ${s}m in Nexus Racer gefahren! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
+    paused:"PAUSIERT",resume:"▶ WEITER",home:"🏠 HUB"}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   let muted=localStorage.getItem("nx_muted")==="1";
@@ -132,7 +153,7 @@
 
   const BEST="nx_racer_best";
   let best=parseInt(localStorage.getItem(BEST)||"0",10);
-  let state="menu",player=null,traffic=[],coins=[],parts=[],dist=0,coinCount=0,speed=260,spawnT=0,coinT=0,targetX=0,nitro=0,nitroOn=false,laneLines=[],elapsed=0,last=0;
+  let state="menu",paused=false,player=null,traffic=[],coins=[],parts=[],dist=0,coinCount=0,speed=260,spawnT=0,coinT=0,targetX=0,nitro=0,nitroOn=false,laneLines=[],elapsed=0,last=0;
   const roadPad=()=>W*0.10;
 
   function reset(){
@@ -160,7 +181,7 @@
   document.addEventListener("keyup",e=>{keys[e.key]=false;if(e.key===" ")nitroOn=false;});
 
   function update(dt){
-    if(state!=="playing")return;
+    if(state!=="playing"||paused)return;
     elapsed+=dt;
     // difficulty
     speed=260+elapsed*14;
@@ -218,9 +239,17 @@
   function loop(ts){if(!last)last=ts;let dt=(ts-last)/1000;last=ts;if(dt>0.05)dt=0.05;update(dt);draw();requestAnimationFrame(loop);}
   function hud(){document.getElementById("distVal").textContent=Math.floor(dist);document.getElementById("coinVal").textContent=coinCount;document.getElementById("bestVal").textContent=best;}
 
-  function start(){resize();reset();document.getElementById("startO").classList.add("hidden");document.getElementById("overO").classList.add("hidden");state="playing";if(actx&&actx.state==="suspended")actx.resume();}
+  function start(){resize();reset();document.getElementById("startO").classList.add("hidden");document.getElementById("overO").classList.add("hidden");document.getElementById("pauseO").classList.add("hidden");state="playing";paused=false;document.getElementById("pauseBtn").classList.remove("hidden");if(actx&&actx.state==="suspended")actx.resume();}
+  function togglePause(){
+    if(state!=="playing")return;
+    paused=!paused;
+    document.getElementById("pauseO").classList.toggle("hidden",!paused);
+    document.getElementById("pauseBtn").classList.toggle("hidden",paused);
+  }
   function crash(){
-    state="over";beep(90,0.4,"sawtooth",0.12);burst(player.x,player.y,"255,77,109",30);
+    state="over";paused=false;
+    document.getElementById("pauseBtn").classList.add("hidden");document.getElementById("pauseO").classList.add("hidden");
+    beep(90,0.4,"sawtooth",0.12);burst(player.x,player.y,"255,77,109",30);
     const fs=Math.floor(dist);document.getElementById("finalScore").textContent=fs;
     const isBest=fs>best;if(isBest){best=fs;localStorage.setItem(BEST,String(best));}
     document.getElementById("newBest").classList.toggle("hidden",!isBest);
@@ -236,6 +265,10 @@
   document.getElementById("shareBtn").addEventListener("click",share);
   document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
   document.getElementById("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
+  document.getElementById("pauseBtn").addEventListener("click",togglePause);
+  document.getElementById("resumeBtn").addEventListener("click",togglePause);
+  document.getElementById("pauseRestartBtn").addEventListener("click",start);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") togglePause(); });
   document.getElementById("muteBtn").addEventListener("click",()=>{muted=!muted;localStorage.setItem("nx_muted",muted?"1":"0");document.getElementById("muteBtn").textContent=muted?"🔇":"🔊";});
   document.getElementById("year").textContent=new Date().getFullYear();
   if(muted)document.getElementById("muteBtn").textContent="🔇";

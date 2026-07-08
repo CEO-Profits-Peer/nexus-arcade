@@ -36,9 +36,13 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
       13 Seiten von 4px auf 18px erhöht (mechanisch, einheitlich).
 
 ### 2. Fehlendes Pause-/Escape-Menü
-- [ ] Nexus 2048
-- [ ] Nexus Dash
-- [ ] Nexus Racer
+- [x] Nexus 2048
+- [x] Nexus Dash
+- [x] Nexus Racer
+
+Alle drei: Escape-Taste + kleiner Pause-Button (oben rechts im Spielfeld, Icon) öffnen ein Overlay mit
+Weiter/Neustart/Zum-Hub. Simulation/Eingabe pausiert währenddessen sauber (State-Flag `paused`, Guard in
+`update()`/`move()`).
 
 ### 3. Hauptmenü & Top-Bar — Redesign (hohe Priorität)
 - [x] **Einheitliche Top-Bar über Portal + alle 12 Spiele** — umgesetzt. Brand zeigt überall "NEXUS ARCADE"
