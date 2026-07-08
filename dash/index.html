@@ -58,6 +58,7 @@
   header.top{
     width:100%;max-width:960px;padding:14px 18px 4px;display:flex;
     align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    border-bottom:2px solid var(--neon);
   }
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:1px;}
   .brand .dot{width:14px;height:14px;border-radius:50%;
@@ -72,6 +73,8 @@
     display:flex;align-items:center;gap:6px;user-select:none;transition:.15s;
   }
   .chip:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(57,230,255,0.25);}
+  .ic{width:15px;height:15px;flex:none;}
+  .belowgame{width:100%;text-align:center;padding:10px 0 4px;}
 
   /* Ad slots — replace the inner content with your ad network snippet (e.g. Google AdSense) */
   .ad-slot{
@@ -140,11 +143,11 @@
 <body>
 
 <header class="top">
-  <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS DASH</span></a>
+  <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS ARCADE</span></a>
   <div class="controls">
-    <a class="chip" href="../" title="More games" style="text-decoration:none">← Games</a>
-    <div class="chip" id="langBtn" title="Language">🌐 <span id="langLabel">EN</span></div>
     <div class="chip" id="muteBtn" title="Sound">🔊 <span id="muteLabel">On</span></div>
+    <div class="chip" id="rankBtn" title="Leaderboards"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></div>
+    <div class="chip" id="langBtn" title="Language"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z"/></svg> <span id="langLabel">EN</span></div>
   </div>
 </header>
 
@@ -182,6 +185,7 @@
     </div>
   </div>
 </div>
+<div class="belowgame" id="belowGame"></div>
 
 <!-- ===== AD SLOT (below game) ===== -->
 <div class="ad-slot" id="adBottom"></div>
@@ -490,6 +494,7 @@
   document.getElementById("langBtn").addEventListener("click",()=>{
     lang=lang==="en"?"de":"en";localStorage.setItem("nd_lang",lang);applyLang();
   });
+  document.getElementById("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
   document.getElementById("muteBtn").addEventListener("click",()=>{
     muted=!muted;localStorage.setItem("nd_muted",muted?"1":"0");
     document.getElementById("muteBtn").firstChild.textContent=muted?"🔇 ":"🔊 ";

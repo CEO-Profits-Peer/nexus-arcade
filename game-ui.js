@@ -1,7 +1,7 @@
 /* ============================================================
    NEXUS ARCADE — game-ui.js
    Kleines, eigenständiges Modul für Spiel-Seiten. Fügt einen
-   Fullscreen-Button in die Kopfzeile (.controls) ein.
+   Fullscreen-Button unter dem Spielbereich (#belowGame) ein.
    Auf allen Spielseiten eingebunden (nicht auf der Startseite).
    ============================================================ */
 (function(){
@@ -12,14 +12,14 @@
       : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   }
   function init(){
-    const controls = document.querySelector(".controls");
-    if(!controls || document.getElementById("nxFsBtn")) return;
+    const mount = document.getElementById("belowGame");
+    if(!mount || document.getElementById("nxFsBtn")) return;
     const btn = document.createElement("div");
     btn.className = "chip"; btn.id = "nxFsBtn"; btn.title = "Fullscreen";
-    btn.style.cursor = "pointer"; btn.style.display = "inline-flex"; btn.style.alignItems = "center";
+    btn.style.cursor = "pointer"; btn.style.display = "inline-flex"; btn.style.alignItems = "center"; btn.style.gap = "6px";
     btn.innerHTML = icon(false);
     btn.addEventListener("click", toggle);
-    controls.insertBefore(btn, controls.firstChild);
+    mount.appendChild(btn);
     document.addEventListener("fullscreenchange", ()=>{ btn.innerHTML = icon(!!document.fullscreenElement); });
     document.addEventListener("webkitfullscreenchange", ()=>{ btn.innerHTML = icon(!!document.webkitFullscreenElement); });
   }
