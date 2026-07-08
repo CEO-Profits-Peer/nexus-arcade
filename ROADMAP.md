@@ -36,10 +36,11 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
 - [ ] Nexus Racer
 
 ### 3. Hauptmenü & Top-Bar — Redesign (hohe Priorität)
-- [ ] Portal-Hauptmenü und die Top-Bar innerhalb der Spiele clean, modern und **innovativ** neu gestalten.
-      Nutzer-Feedback: **einheitliche Top-Bar über alle Spiele** ist wichtig (aktuell pro Spiel leicht
-      unterschiedlich), Gesamt-UI generell cleaner (Basis wird als „schon super" empfunden — Politur, kein Neubau).
-      Visuelle Richtung mit Nutzer klären, bevor umgesetzt wird (großer, sichtbarer Schritt für alle Spieler).
+- [x] **Einheitliche Top-Bar über Portal + alle 12 Spiele** — umgesetzt. Brand zeigt überall "NEXUS ARCADE"
+      (Klick = zurück zum Hub, kein separater "← Games"-Chip mehr), Sprachumschalter + neuer Leaderboard-Shortcut
+      als cleane SVG-Icons statt Emoji, dünne Akzentlinie in der jeweiligen Spielfarbe unter der Bar. Fullscreen-
+      Button sitzt jetzt unter dem Spielbereich statt in der Top-Bar (`game-ui.js` → `#belowGame`).
+- [ ] Rest vom Portal-Hauptmenü (Grid/Kategorien/Suche) noch nicht angefasst — bei Bedarf eigene Runde.
 
 ### 4. UI/UX — Grundsatzfrage (Entscheidung offen)
 - [ ] Abwägen: Spiele stärker „geframed"/strukturiert gestalten (klarer, aber wirkt weniger offen) vs. aktuellen
