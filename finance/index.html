@@ -207,6 +207,7 @@
     <div class="portEmpty" id="bizEmpty" data-i18n="bizEmpty">No businesses yet — open one above.</div>
   </div>
   <div class="wrap hidden" id="stockTab" style="min-height:0">
+    <div id="daySession"></div>
     <h2 class="secH" data-i18n="companiesH">📈 Companies</h2>
     <div id="stockList"></div>
     <h2 class="secH" data-i18n="newsH">📰 Nexus Financial Times</h2>
@@ -242,7 +243,10 @@
     managerOffline:s=>"🤖 Your managers earned "+s+" while you were away!",
     tabStock:"Stocks",companiesH:"📈 Companies",newsH:"📰 Nexus Financial Times",
     youOwn:(q,v)=>"You own "+q+" · "+v,noNews:"No news yet — check back soon.",
-    justNow:"just now",minAgo:"m ago",hAgo:"h ago",dAgo:"d ago"},
+    justNow:"just now",minAgo:"m ago",hAgo:"h ago",dAgo:"d ago",
+    dayTradeH:"Day Trading Session",dayTradeHint:"Commit real capital, trade for 75 fast-paced seconds, then it's auto cashed out — profit or loss.",
+    dayStart:"Start Day Trading Session",dayActive:"Session Active",stakeLbl:"Stake",cashOut:"💵 Cash Out Now",
+    dayWin:s=>"⚡ Session ended: +"+s+" to your Empire capital!",dayLoss:s=>"⚡ Session ended: -"+s+" from your Empire capital."},
   de:{hub:"Spiele",cash:"Cash",networth:"Nettovermögen",time:"Zeit",best:"Bestwert",play:"▶ HANDELN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",gameover:"MARKT GESCHLOSSEN",newbest:"★ NEUER REKORD ★",buy:"Kaufen",sell:"Verkaufen",low:"Niedriges Risiko",mid:"Mittel",high:"Hohes Risiko",
     intro:"Vier volatile Neon-Märkte, eine 75-Sekunden-Runde. Tippe Kaufen, um einen Teil deines Cash zu investieren, tippe Verkaufen zum Kassieren. Reite die Kurssprünge, meide die Crashs — steigere dein Nettovermögen so hoch du kannst.",
     hint:"$1.000 Startkapital · 75 Sekunden",aboutH:"Über Nexus Finance",
@@ -262,7 +266,10 @@
     managerOffline:s=>"🤖 Deine Manager haben "+s+" verdient, während du weg warst!",
     tabStock:"Aktien",companiesH:"📈 Firmen",newsH:"📰 Nexus Finanz-Zeitung",
     youOwn:(q,v)=>"Du besitzt "+q+" · "+v,noNews:"Noch keine News — schau später vorbei.",
-    justNow:"gerade eben",minAgo:"m",hAgo:"h",dAgo:"d"}};
+    justNow:"gerade eben",minAgo:"m",hAgo:"h",dAgo:"d",
+    dayTradeH:"Day-Trading-Session",dayTradeHint:"Setze echtes Kapital ein, handle 75 rasante Sekunden lang, danach wird automatisch ausgezahlt — Gewinn oder Verlust.",
+    dayStart:"Day-Trading-Session starten",dayActive:"Session läuft",stakeLbl:"Einsatz",cashOut:"💵 Jetzt auszahlen",
+    dayWin:s=>"⚡ Session beendet: +"+s+" für dein Empire-Kapital!",dayLoss:s=>"⚡ Session beendet: -"+s+" von deinem Empire-Kapital."}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const $=id=>document.getElementById(id);
@@ -675,8 +682,15 @@
        {tag:"audit",headline:{en:"Regulator flags Meridian compliance gaps",de:"Aufsicht bemängelt Meridians Compliance"},dir:-1,mag:[0.08,0.18]}
      ]}
   ];
-  const STOCK_TICK_MS=1000, STOCK_NEWS_CHANCE=0.008, STOCK_OFFLINE_CAP_S=24*3600, STOCK_NEWS_MAXLEN=40;
+  // vol/drift auf COMPANIES sind fuer die schnelle, spannende Day-Trading-Session kalibriert (Tick alle
+  // DAY_TICK_MS). Fuer normales, dauerhaftes Ticken (auch offline ueber Stunden!) waeren die Werte roh
+  // hochgerechnet absurd (Zufallslauf-Varianz waechst mit sqrt(Anzahl Ticks) -> ueber 24h bei Sekundentakt
+  // waeren das tausende Prozent). Deshalb im Normalbetrieb stark gedaempft ueber effVol()/effDrift().
+  const STOCK_TICK_MS=6000, DAY_TICK_MS=200, STOCK_SLOW_FACTOR=0.03;
+  const STOCK_NEWS_CHANCE=0.0004, STOCK_OFFLINE_CAP_S=24*3600, STOCK_NEWS_MAXLEN=40;
   function companyOf(id){ return COMPANIES.find(c=>c.id===id); }
+  function effVol(c){ return emp.stocks.day ? c.vol : c.vol*STOCK_SLOW_FACTOR; }
+  function effDrift(c){ return emp.stocks.day ? c.drift : c.drift*STOCK_SLOW_FACTOR; }
   function stockFresh(){
     const prices={}, hist={};
     for(const c of COMPANIES){ prices[c.id]=c.price0; hist[c.id]=[c.price0]; }
@@ -697,13 +711,15 @@
   let stockAcc=0, stockSaveAcc=0;
   function stockTick(dt){
     if(!emp||!emp.stocks) return;
+    if(emp.stocks.day && Date.now()>=emp.stocks.day.endsAt) endDaySession();
+    const tickMs = emp.stocks.day ? DAY_TICK_MS : STOCK_TICK_MS;
     stockAcc+=dt*1000;
     let moved=false;
-    while(stockAcc>=STOCK_TICK_MS){
-      stockAcc-=STOCK_TICK_MS;
+    while(stockAcc>=tickMs){
+      stockAcc-=tickMs;
       for(const c of COMPANIES){
         let p=emp.stocks.prices[c.id];
-        const r=(Math.random()-0.5)*2*c.vol+c.drift;
+        const r=(Math.random()-0.5)*2*effVol(c)+effDrift(c);
         p=Math.max(0.5, p*(1+r));
         emp.stocks.prices[c.id]=p;
         const h=emp.stocks.hist[c.id]; h.push(p); if(h.length>40) h.shift();
@@ -711,8 +727,81 @@
         moved=true;
       }
     }
-    if(moved && mode==="empire" && eTab==="stock") renderStock();
+    if((moved||emp.stocks.day) && mode==="empire" && eTab==="stock") renderStock();
     stockSaveAcc+=dt; if(stockSaveAcc>=1){ stockSaveAcc=0; empSave(); }
+  }
+
+  /* ---- Day Trading: kurze getimte Session, echtes Kapital, beschleunigter Tick ---- */
+  const DAY_SESSION_S=75, DAY_MIN_STAKE=50;
+  function daySessionActive(){ return !!(emp.stocks && emp.stocks.day); }
+  function dayNetWorth(){
+    const d=emp.stocks.day; if(!d) return 0;
+    let v=d.cash; for(const id in d.holdings) v+=d.holdings[id]*emp.stocks.prices[id];
+    return v;
+  }
+  function startDaySession(amount){
+    const stake=Math.max(DAY_MIN_STAKE, Math.min(Math.floor(amount)||0, Math.floor(emp.capital)));
+    if(stake<DAY_MIN_STAKE || emp.capital<stake) return false;
+    emp.capital-=stake;
+    emp.stocks.day={stake, cash:stake, holdings:{}, startedAt:Date.now(), endsAt:Date.now()+DAY_SESSION_S*1000};
+    empSave(); return true;
+  }
+  function dayBuy(id){
+    const d=emp.stocks.day; if(!d) return;
+    const price=emp.stocks.prices[id]; if(d.cash<price) return;
+    const budget=Math.max(price, d.cash*0.25);
+    const qty=Math.max(1, Math.floor(Math.min(budget,d.cash)/price));
+    const cost=qty*price; if(cost>d.cash) return;
+    d.cash-=cost; d.holdings[id]=(d.holdings[id]||0)+qty;
+    empSave(); renderStock();
+  }
+  function daySell(id){
+    const d=emp.stocks.day; if(!d) return;
+    const held=d.holdings[id]||0; if(held<=0) return;
+    d.cash+=held*emp.stocks.prices[id]; d.holdings[id]=0;
+    empSave(); renderStock();
+  }
+  function endDaySession(){
+    const d=emp.stocks.day; if(!d) return;
+    const finalValue=dayNetWorth(), profit=finalValue-d.stake;
+    emp.capital+=finalValue;
+    emp.stocks.day=null;
+    empSave();
+    toast(profit>=0?T().dayWin(fmt$(profit)):T().dayLoss(fmt$(Math.abs(profit))));
+    if(window.NexusArcade){ try{ window.NexusArcade.addXP(Math.max(3,Math.floor(finalValue/50))); }catch(e){} }
+    renderStock(); renderEmpireHud();
+  }
+  function renderDaySession(){
+    const box=$("daySession"); if(!box) return;
+    const d=emp.stocks.day;
+    if(!d){
+      const maxStake=Math.floor(emp.capital);
+      box.innerHTML=
+        '<div class="pcard" style="text-align:center">'+
+          '<div class="pname">⚡ '+T().dayTradeH+'</div>'+
+          '<div class="sub" style="margin:4px 0 10px">'+T().dayTradeHint+'</div>'+
+          '<input type="number" id="dayStakeInput" min="'+DAY_MIN_STAKE+'" max="'+maxStake+'" step="50" value="'+Math.min(500,maxStake)+'" '+
+            'style="width:100%;padding:9px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-family:inherit;margin-bottom:8px;text-align:center;font-weight:800">'+
+          '<button class="btn" id="dayStartBtn" style="width:100%" '+(maxStake<DAY_MIN_STAKE?'disabled':'')+'>⚡ '+T().dayStart+'</button>'+
+        '</div>';
+      const btn=document.getElementById("dayStartBtn");
+      if(btn) btn.onclick=()=>{
+        const inp=document.getElementById("dayStakeInput");
+        if(startDaySession(parseInt(inp.value,10)||0)) renderStock();
+      };
+    } else {
+      const nw=dayNetWorth(), secsLeft=Math.max(0,Math.ceil((d.endsAt-Date.now())/1000)), pl=nw-d.stake;
+      box.innerHTML=
+        '<div class="pcard" style="text-align:center;border-color:var(--gold)">'+
+          '<div class="pname">⚡ '+T().dayActive+'</div>'+
+          '<div class="big" style="font-size:24px;margin:6px 0;color:'+(pl>=0?'var(--green)':'var(--pink)')+'">'+fmt$(nw)+'</div>'+
+          '<div class="sub">'+T().stakeLbl+': '+fmt$(d.stake)+' · '+(pl>=0?'+':'-')+fmt$(Math.abs(pl))+'</div>'+
+          '<div class="sub" style="margin:6px 0;font-weight:800;color:var(--neon)">⏱ '+secsLeft+'s</div>'+
+          '<button class="btn sec" id="dayCashOutBtn" style="width:100%">'+T().cashOut+'</button>'+
+        '</div>';
+      const cb=document.getElementById("dayCashOutBtn");
+      if(cb) cb.onclick=endDaySession;
+    }
   }
   function stockOfflineCatchup(){
     if(!emp.stocks) return;
@@ -720,9 +809,12 @@
     const elapsedS=Math.min(STOCK_OFFLINE_CAP_S, Math.max(0,(now-(emp.stocks.lastTick||now))/1000));
     if(elapsedS>30){
       for(const c of COMPANIES){
-        const drift=c.drift*elapsedS;
-        const noise=(Math.random()-0.5)*2*c.vol*Math.sqrt(elapsedS/(STOCK_TICK_MS/1000));
-        emp.stocks.prices[c.id]=Math.max(0.5, emp.stocks.prices[c.id]*(1+drift+noise));
+        const drift=c.drift*STOCK_SLOW_FACTOR*elapsedS;
+        const noise=(Math.random()-0.5)*2*c.vol*STOCK_SLOW_FACTOR*Math.sqrt(elapsedS/(STOCK_TICK_MS/1000));
+        // Hartes Sicherheitsnetz: unabhaengig von der Formel darf ein einzelner Offline-Aufhol-Durchlauf
+        // hoechstens -60%/+200% ausmachen - sonst waeren absurde Einzelspruenge bei sehr langer Abwesenheit moeglich.
+        const factor=Math.max(0.4, Math.min(3.0, 1+drift+noise));
+        emp.stocks.prices[c.id]=Math.max(0.5, emp.stocks.prices[c.id]*factor);
         const newsChance=Math.min(0.8, elapsedS/3600*0.35);
         if(Math.random()<newsChance) fireNews(c, now-Math.floor(Math.random()*elapsedS*1000));
         if(elapsedS>7200 && Math.random()<newsChance*0.5) fireNews(c, now-Math.floor(Math.random()*elapsedS*500));
@@ -778,7 +870,10 @@
   function renderStockProfile(){
     if(!stockProfileId) return;
     const c=companyOf(stockProfileId); if(!c) return;
-    const price=emp.stocks.prices[c.id], held=emp.stocks.holdings[c.id]||0;
+    const d=emp.stocks.day;
+    const price=emp.stocks.prices[c.id];
+    const held=d?(d.holdings[c.id]||0):(emp.stocks.holdings[c.id]||0);
+    const spendable=d?d.cash:emp.capital;
     const news=emp.stocks.news.filter(n=>n.companyId===c.id).slice(0,8);
     const box=$("stockProfile");
     box.innerHTML=
@@ -790,33 +885,36 @@
       '<div class="big" style="font-size:26px">'+fmt$(price)+'</div>'+
       (held>0?'<div class="sub">'+T().youOwn(held, fmt$(held*price))+'</div>':'')+
       '<div class="btnrow">'+
-        '<button class="btn" id="profileBuy" '+(emp.capital<price?'disabled':'')+'>'+T().buy+'</button>'+
+        '<button class="btn" id="profileBuy" '+(spendable<price?'disabled':'')+'>'+T().buy+'</button>'+
         '<button class="btn sec" id="profileSell" '+(held<=0?'disabled':'')+'>'+T().sell+'</button>'+
       '</div>'+
       '<h2 class="secH" style="margin-top:16px">'+T().newsH+'</h2>'+
       (news.length?news.map(n=>newsRowHtml(n,false)).join(""):'<div class="portEmpty">'+T().noNews+'</div>');
     drawSparkInto(document.getElementById("profileSpark"), emp.stocks.hist[c.id]);
     document.getElementById("stockProfileClose").onclick=closeStockProfile;
-    const bb=document.getElementById("profileBuy"); if(bb) bb.onclick=()=>{ stockBuy(c.id); renderStockProfile(); };
-    const sb=document.getElementById("profileSell"); if(sb) sb.onclick=()=>{ stockSell(c.id); renderStockProfile(); };
+    const bb=document.getElementById("profileBuy"); if(bb) bb.onclick=()=>{ (emp.stocks.day?dayBuy:stockBuy)(c.id); renderStockProfile(); };
+    const sb=document.getElementById("profileSell"); if(sb) sb.onclick=()=>{ (emp.stocks.day?daySell:stockSell)(c.id); renderStockProfile(); };
   }
   function renderStockList(){
     const box=$("stockList");
+    const d=emp.stocks.day;
     box.innerHTML=COMPANIES.map(c=>{
-      const price=emp.stocks.prices[c.id], held=emp.stocks.holdings[c.id]||0;
+      const price=emp.stocks.prices[c.id];
+      const held=d?(d.holdings[c.id]||0):(emp.stocks.holdings[c.id]||0);
+      const spendable=d?d.cash:emp.capital;
       return '<div class="pcard stockcard" data-stockopen="'+c.id+'">'+
         '<div class="phead"><span class="pname">'+c.icon+' '+c.name[lang]+'</span><b style="color:var(--gold)">'+fmt$(price)+'</b></div>'+
         '<div class="sub">'+c.sector[lang]+' · '+c.sym+(held>0?' · '+T().youOwn(held,fmt$(held*price)):'')+'</div>'+
         '<canvas class="spark" data-spark2="'+c.id+'" width="260" height="34"></canvas>'+
         '<div class="btnrow">'+
-          '<button class="tbtn buy" data-stockbuy="'+c.id+'" '+(emp.capital<price?'disabled':'')+'>'+T().buy+'</button>'+
+          '<button class="tbtn buy" data-stockbuy="'+c.id+'" '+(spendable<price?'disabled':'')+'>'+T().buy+'</button>'+
           '<button class="tbtn sell" data-stocksell="'+c.id+'" '+(held<=0?'disabled':'')+'>'+T().sell+'</button>'+
         '</div>'+
       '</div>';
     }).join("");
     COMPANIES.forEach(c=>drawSparkInto(document.querySelector('canvas[data-spark2="'+c.id+'"]'), emp.stocks.hist[c.id]));
-    box.querySelectorAll("[data-stockbuy]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); stockBuy(b.getAttribute("data-stockbuy")); });
-    box.querySelectorAll("[data-stocksell]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); stockSell(b.getAttribute("data-stocksell")); });
+    box.querySelectorAll("[data-stockbuy]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); (emp.stocks.day?dayBuy:stockBuy)(b.getAttribute("data-stockbuy")); });
+    box.querySelectorAll("[data-stocksell]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); (emp.stocks.day?daySell:stockSell)(b.getAttribute("data-stocksell")); });
     box.querySelectorAll("[data-stockopen]").forEach(b=>b.onclick=()=>openStockProfile(b.getAttribute("data-stockopen")));
   }
   function renderNewsFeed(){
@@ -825,7 +923,7 @@
     box.innerHTML=items.length?items.map(n=>newsRowHtml(n,true)).join(""):'<div class="portEmpty">'+T().noNews+'</div>';
     box.querySelectorAll("[data-newscompany]").forEach(el=>el.onclick=()=>openStockProfile(el.getAttribute("data-newscompany")));
   }
-  function renderStock(){ renderStockList(); renderNewsFeed(); if(stockProfileId) renderStockProfile(); }
+  function renderStock(){ renderDaySession(); renderStockList(); renderNewsFeed(); if(stockProfileId) renderStockProfile(); }
 
   function renderEmpire(){ renderEmpireHud(); renderEstateHud(); renderMarket(); renderPortfolio(); renderBiz(); renderStock(); $("empAboutH").textContent=T().empAboutH; $("empAboutP").textContent=T().empAboutP; }
 
