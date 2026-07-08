@@ -30,6 +30,7 @@ Im Supabase-Dashboard: **SQL Editor → New query**, das hier einfügen und **Ru
 create table if not exists public.saves (
   user_id    uuid primary key references auth.users on delete cascade,
   data       jsonb not null default '{}',
+  email      text,
   updated_at timestamptz default now()
 );
 
@@ -53,6 +54,7 @@ create table if not exists public.scores (
   game       text not null,
   score      int  not null default 0,
   name       text,
+  avatar     text,
   updated_at timestamptz default now(),
   primary key (user_id, game)
 );
@@ -69,7 +71,23 @@ create policy "scores update own" on public.scores
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 ```
 
-Danach werden deine Bestwerte beim Einloggen automatisch hochgeladen, und im Konto-Fenster unter **Ranks** siehst du die Top 10 pro Spiel. (Ohne Login kannst du die Listen ansehen, aber nicht drin erscheinen.)
+Danach werden deine Bestwerte beim Einloggen automatisch hochgeladen, und im Konto-Fenster unter **Ranks** siehst du die Top 10 pro Spiel (inkl. kleinem Avatar). (Ohne Login kannst du die Listen ansehen, aber nicht drin erscheinen.)
+
+### Bereits ein bestehendes Projekt? Diese 2 Spalten nachträglich ergänzen
+
+Falls du die Tabellen schon vor diesem Update angelegt hast, im **SQL Editor** einmal ausführen:
+
+```sql
+alter table public.scores add column if not exists avatar text;
+alter table public.saves  add column if not exists email  text;
+```
+
+- **`scores.avatar`**: zeigt einen kleinen Avatar neben jedem Leaderboard-Eintrag. Eigene Foto-Uploads werden dabei
+  bewusst **nicht** öffentlich geteilt (Fallback-Emoji) — nur Emoji/Nexus-Icon-Avatare erscheinen dort.
+- **`saves.email`**: rein für dich als Betreiber praktisch — im Table Editor siehst du direkt, welche E-Mail zu
+  welcher gespeicherten Zeile gehört, ohne in Authentication → Users nachschauen zu müssen. Bleibt durch die
+  bestehende RLS-Regel ("nur eigene Zeile lesbar") **nicht** öffentlich sichtbar — nur du siehst es über den
+  SQL Editor / Dashboard (Service-Role, umgeht RLS).
 
 ### Zusätzlich für Likes (Stern) auf der Startseite
 

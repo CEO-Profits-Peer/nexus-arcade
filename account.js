@@ -100,7 +100,7 @@
     checkQuests();
     quiet=false;
     if(initial && total>0) toast("🏆 +"+total+" "+t.tab_ach);
-    renderButton(); if(dom.modal && dom.modal.style.display!=="none") renderModal();
+    renderButton(); if(dom.modal && dom.modal.style.display!=="none" && activeTab!=="ranks") renderModal();
   }
   function scheduleEval(){ clearTimeout(evalTimer); evalTimer=setTimeout(function(){ evaluateStats(false); }, 600); }
   function addXP(n){ if(!n) return; grantXP(n); evaluateStats(false); }
@@ -181,6 +181,20 @@
     if(av.indexOf("data:")===0) return '<img src="'+av+'" style="width:100%;height:100%;object-fit:cover" alt="">';
     if(av.indexOf("svg:")===0){ const p=av.split(":"); const fn=SVG_ICON[p[1]]; if(fn) return '<span style="width:78%;height:78%;display:inline-flex;align-items:center;justify-content:center">'+fn(p[2]||"#39e6ff")+'</span>'; }
     return '<span style="font-size:'+(size||15)+'px">'+av+'</span>';
+  }
+  // Wert, der oeffentlich in "scores" landet: eigene Fotos (data:) NICHT teilen (Groesse + Privatsphaere) -> Fallback-Emoji.
+  function lbAvatarVal(){ const av=profile.avatar||"🎮"; return av.indexOf("data:")===0 ? "🎮" : av; }
+  // Rendering fuer FREMDE Avatare aus der oeffentlichen "scores"-Tabelle: strikt validieren statt roh einzufuegen
+  // (jeder eingeloggte Nutzer koennte sonst per direktem API-Call beliebigen HTML/SVG-Inhalt als "avatar" speichern -> stored XSS).
+  function safeLbAvatarHTML(av,size){
+    av = (av==null?"":String(av));
+    if(av.indexOf("svg:")===0){
+      const p=av.split(":"); const fn=SVG_ICON[p[1]];
+      if(fn && /^#[0-9a-fA-F]{3,8}$/.test(p[2]||"")) return '<span style="width:78%;height:78%;display:inline-flex;align-items:center;justify-content:center">'+fn(p[2])+'</span>';
+      return '<span style="font-size:'+(size||13)+'px">🎮</span>';
+    }
+    if(av.indexOf("data:")===0 || av.length>8 || !av) return '<span style="font-size:'+(size||13)+'px">🎮</span>';
+    return '<span style="font-size:'+(size||13)+'px">'+esc(av)+'</span>';
   }
   function renderButton(){
     if(!dom.av) return;
@@ -411,8 +425,13 @@
   async function doPush(){
     if(!user||!sb) return;
     const bundle={}; for(const k of SYNC_KEYS){ const v=localStorage.getItem(k); if(v!=null) bundle[k]=v; }
-    try{ const r=await sb.from("saves").upsert({user_id:user.id, data:bundle, updated_at:new Date().toISOString()}); if(r.error) syncErrToast(r.error); }
-    catch(e){ syncErrToast(e); }
+    const payload={user_id:user.id, data:bundle, updated_at:new Date().toISOString()};
+    if(SCHEMA_OK.email) payload.email=user.email||null;
+    try{
+      let r=await sb.from("saves").upsert(payload);
+      if(r.error && isMissingCol(r.error,"email")){ SCHEMA_OK.email=false; delete payload.email; r=await sb.from("saves").upsert(payload); }
+      if(r.error) syncErrToast(r.error);
+    }catch(e){ syncErrToast(e); }
   }
 
   /* ---------- Leaderboards ---------- */
@@ -420,36 +439,57 @@
   function displayName(){ return (profile.name && profile.name.trim()) || (user? user.email.split("@")[0] : "Player"); }
   let lbTimer=null;
   function scheduleScores(){ if(!user||!sb) return; clearTimeout(lbTimer); lbTimer=setTimeout(submitAllScores,1600); }
+  // Schema-Zustand: "avatar"/"email" Spalten evtl. noch nicht per SQL-Migration nachgezogen (siehe SUPABASE-SETUP.md).
+  // Statt Fehler-Toasts fuer alle Nutzer zu riskieren, still auf die alte Spaltenauswahl zurueckfallen.
+  const SCHEMA_OK = {avatar:true, email:true};
+  function isMissingCol(err,col){ return !!(err && err.code==="42703" && (!col || (err.message||"").indexOf(col)>=0)); }
   async function submitAllScores(){
     if(!user||!sb) return;
-    const st=readStats(); const rows=[];
-    for(const gk in SCORE_MAP){ const v=st[SCORE_MAP[gk]]||0; if(v>0) rows.push({user_id:user.id,game:gk,score:Math.floor(v),name:displayName(),updated_at:new Date().toISOString()}); }
-    if(!rows.length) return;
-    try{ const r=await sb.from("scores").upsert(rows,{onConflict:"user_id,game"}); if(r.error) syncErrToast(r.error); }catch(e){ syncErrToast(e); }
+    const st=readStats(); const av=lbAvatarVal();
+    const build=()=>{ const rows=[]; for(const gk in SCORE_MAP){ const v=st[SCORE_MAP[gk]]||0; if(v>0){ const row={user_id:user.id,game:gk,score:Math.floor(v),name:displayName(),updated_at:new Date().toISOString()}; if(SCHEMA_OK.avatar) row.avatar=av; rows.push(row); } } return rows; };
+    let rows=build(); if(!rows.length) return;
+    try{
+      let r=await sb.from("scores").upsert(rows,{onConflict:"user_id,game"});
+      if(r.error && isMissingCol(r.error,"avatar")){ SCHEMA_OK.avatar=false; rows=build(); r=await sb.from("scores").upsert(rows,{onConflict:"user_id,game"}); }
+      if(r.error) syncErrToast(r.error);
+    }catch(e){ syncErrToast(e); }
   }
   async function submitScore(game,score){
     if(!user||!sb||!score) return;
-    try{ const r=await sb.from("scores").upsert([{user_id:user.id,game:game,score:Math.floor(score),name:displayName(),updated_at:new Date().toISOString()}],{onConflict:"user_id,game"}); if(r.error) syncErrToast(r.error); }catch(e){ syncErrToast(e); }
+    const row={user_id:user.id,game:game,score:Math.floor(score),name:displayName(),updated_at:new Date().toISOString()};
+    if(SCHEMA_OK.avatar) row.avatar=lbAvatarVal();
+    try{
+      let r=await sb.from("scores").upsert([row],{onConflict:"user_id,game"});
+      if(r.error && isMissingCol(r.error,"avatar")){ SCHEMA_OK.avatar=false; delete row.avatar; r=await sb.from("scores").upsert([row],{onConflict:"user_id,game"}); }
+      if(r.error) syncErrToast(r.error);
+    }catch(e){ syncErrToast(e); }
   }
   async function fetchLeaderboard(game){
     if(!sb) return null;
-    try{ const r=await sb.from("scores").select("name,score").eq("game",game).order("score",{ascending:false}).limit(10); if(r.error){syncErrToast(r.error);return[];} return r.data||[]; }
+    try{
+      let r=await sb.from("scores").select(SCHEMA_OK.avatar?"name,score,avatar":"name,score").eq("game",game).order("score",{ascending:false}).limit(10);
+      if(r.error && isMissingCol(r.error,"avatar")){ SCHEMA_OK.avatar=false; r=await sb.from("scores").select("name,score").eq("game",game).order("score",{ascending:false}).limit(10); }
+      if(r.error){syncErrToast(r.error);return[];}
+      return r.data||[];
+    }
     catch(e){ syncErrToast(e); return []; }
   }
   async function fetchMyRank(game){
     if(!sb||!user) return null;
     try{
-      const mine=await sb.from("scores").select("score").eq("game",game).eq("user_id",user.id).maybeSingle();
+      let mine=await sb.from("scores").select(SCHEMA_OK.avatar?"score,avatar":"score").eq("game",game).eq("user_id",user.id).maybeSingle();
+      if(mine.error && isMissingCol(mine.error,"avatar")){ SCHEMA_OK.avatar=false; mine=await sb.from("scores").select("score").eq("game",game).eq("user_id",user.id).maybeSingle(); }
       if(mine.error||!mine.data) return null;
       const myScore=mine.data.score;
       const higher=await sb.from("scores").select("user_id",{count:"exact",head:true}).eq("game",game).gt("score",myScore);
       if(higher.error) return null;
-      return {score:myScore, rank:(higher.count||0)+1};
+      return {score:myScore, rank:(higher.count||0)+1, avatar:mine.data.avatar};
     }catch(e){ return null; }
   }
-  function lbRow(rankNum,name,score,mine,tt){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:8px;margin-bottom:4px;background:'+(mine?'rgba(57,230,255,.12)':'rgba(255,255,255,.02)')+'">'+
-      '<div style="width:26px;font-weight:800;color:'+(rankNum===1?"#ffcf5c":rankNum===2?"#c9d3f2":rankNum===3?"#c98a3a":"var(--muted,#8a97c2)")+'">'+rankNum+'</div>'+
+  function lbRow(rankNum,name,score,mine,tt,avatar){
+    return '<div style="display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;margin-bottom:4px;background:'+(mine?'rgba(57,230,255,.12)':'rgba(255,255,255,.02)')+'">'+
+      '<div style="width:22px;font-weight:800;color:'+(rankNum===1?"#ffcf5c":rankNum===2?"#c9d3f2":rankNum===3?"#c98a3a":"var(--muted,#8a97c2)")+'">'+rankNum+'</div>'+
+      '<span style="width:24px;height:24px;flex:none;border-radius:50%;background:#1a2140;border:1px solid var(--line,#333);display:flex;align-items:center;justify-content:center;overflow:hidden">'+safeLbAvatarHTML(avatar,13)+'</span>'+
       '<div style="flex:1;font-weight:600">'+esc(name||"Player")+(mine?' <span style="color:var(--neon,#39e6ff);font-size:11px">('+tt.lbYou+')</span>':'')+'</div>'+
       '<div style="font-weight:800;color:var(--neon,#39e6ff)">'+score+'</div></div>';
   }
@@ -463,14 +503,14 @@
     if(!rows||!rows.length){
       el2.innerHTML='<div style="padding:14px 0;text-align:center">'+t.lbEmpty+'</div>';
     } else {
-      el2.innerHTML=rows.map((r,i)=>lbRow(i+1,r.name,r.score,!!user&&r.name===me,t)).join("");
+      el2.innerHTML=rows.map((r,i)=>lbRow(i+1,r.name,r.score,!!user&&r.name===me,t,r.avatar)).join("");
     }
     if(user){
       const inTop=rows&&rows.some(r=>r.name===me);
       if(!inTop){
         const mineRank=await fetchMyRank(game);
         const el3=dom.card&&dom.card.querySelector("#nxLbList"); if(!el3||game!==lbGame)return;
-        if(mineRank) el3.insertAdjacentHTML("beforeend",'<div style="text-align:center;color:var(--muted,#8a97c2);font-size:12px;margin:2px 0">···</div>'+lbRow(mineRank.rank,me,mineRank.score,true,t));
+        if(mineRank) el3.insertAdjacentHTML("beforeend",'<div style="text-align:center;color:var(--muted,#8a97c2);font-size:12px;margin:2px 0">···</div>'+lbRow(mineRank.rank,me,mineRank.score,true,t,mineRank.avatar||lbAvatarVal()));
       }
     }
   }

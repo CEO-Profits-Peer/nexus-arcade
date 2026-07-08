@@ -27,18 +27,13 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
       Reaktion. Im Test (frischer State, alle Buttons) konnte ich das nicht reproduzieren — sehr wahrscheinlich der
       bekannte Cache-Fallstrick (Hard-Refresh nach Deploy nötig, siehe unten). Nutzer um Hard-Refresh + erneuten
       Test gebeten; falls es bleibt, genaue Reproduktionsschritte einholen.
-- [ ] **Leaderboards weiterhin unzuverlässig** — Nutzer meldet „funktioniert immer noch nicht sooo gescheit".
-      **Harter Befund (live per öffentlichem Lesezugriff geprüft):** die `scores`-Tabelle hat **0 Zeilen** —
-      seit Bestehen der Tabelle hat noch **niemand** je erfolgreich einen Score eingereicht. Das Problem ist also
-      nicht die Anzeige, sondern dass nie etwas ankommt. Wahrscheinlichste Ursachen: (a) noch kein vollständiger
-      Login-Test durchgeführt (Magic Link wirklich bis zum Klick im Postfach durchgespielt), oder (b)
-      Authentication → URL Configuration → Site URL zeigt noch auf `...supabase.co` statt die echte Domain
-      (siehe `SUPABASE-SETUP.md`, dort explizit als Stolperstein dokumentiert). **Bereits verbessert:** eigener
-      Rang wird jetzt auch außerhalb der Top 10 angezeigt (vorher komplett unsichtbar, falls nicht in Top 10).
-      **Nächster Schritt (nur der Nutzer kann das):** einmal komplett durchtesten — echtes Konto einloggen (Mail
-      abwarten, Link klicken, prüfen ob oben der eigene Name statt „Gast" steht), ein Spiel zu Ende spielen,
-      Ranks-Tab öffnen. Falls dann immer noch keine Zeile erscheint, Konsole (F12) beim Spielende prüfen ob ein
-      ⚠-Toast auftaucht (verrät die genaue Ursache: fehlende Tabelle/RLS-Block/Sonstiges).
+- [x] **Leaderboards** — Ursache war fehlender vollständiger Login-Test; Nutzer hat inzwischen echt eingeloggt
+      getestet, `scores`-Tabelle hat jetzt reale Einträge, funktioniert. Danach zwei weitere Verbesserungen:
+      eigener Rang wird auch außerhalb der Top 10 angezeigt; und ein **Flacker-Bug behoben** — die Liste baute
+      sich bei jedem XP-Gewinn (z. B. Auto-Kills in Nexus Realms) neu auf und verschwand kurz, weil
+      `evaluateStats()` das ganze Konto-Fenster neu rendert. Ranks-Tab wird davon jetzt ausgenommen.
+- [x] **Top-Bar zu eng** — Nutzer-Feedback „Spiele kleben an der Top-Bar". `header.top`-Bottom-Padding auf allen
+      13 Seiten von 4px auf 18px erhöht (mechanisch, einheitlich).
 
 ### 2. Fehlendes Pause-/Escape-Menü
 - [ ] Nexus 2048
@@ -83,6 +78,20 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
 ### 7. Meta / QoL
 - [ ] Globale Sound-Einstellung, evtl. Theme-Optionen.
 - [ ] Weitere Cosmetics/Titel/Rahmen; Achievement-Belohnungen (Coins).
+- [x] **Profilbilder in Leaderboards**: kleiner Avatar (Emoji/Nexus-SVG) neben jedem Ranks-Eintrag. Eigene
+      Foto-Uploads werden bewusst nicht öffentlich geteilt (Fallback-Emoji, Größe + Privatsphäre). Fremde
+      Avatar-Werte aus der öffentlichen `scores`-Tabelle werden strikt validiert gerendert (kein rohes HTML/SVG
+      aus der DB — sonst wäre über einen direkten API-Call stored XSS möglich gewesen).
+- [x] **E-Mails auch in `saves` gespeichert** (nur eigene Zeile lesbar, nicht öffentlich) — praktisch, um im
+      Supabase Table Editor Nutzer einer Zeile zuzuordnen, ohne in Authentication → Users nachzusehen.
+      **⚠️ Setup-Schritt nötig:** bestehendes Supabase-Projekt braucht die 2 neuen Spalten per SQL (siehe
+      `SUPABASE-SETUP.md`, Abschnitt „Bereits ein bestehendes Projekt?"). Code fällt bis dahin automatisch und
+      ohne Fehler-Toasts auf das alte Schema zurück (kein Leaderboard-Ausfall in der Übergangszeit).
+- [x] **5 Demo-/Test-Konten vorbereitet**: `scripts/seed-fake-accounts.mjs` (nicht deployed, siehe `.vercelignore`)
+      legt 5 Fake-Konten mit Scores in 7 Spielen an (dash/racer/merge/snake/breaker/blocks/stack), inkl.
+      unterschiedlicher Avatare. Braucht den Supabase **Service-Role-Key** (Admin-API, umgeht RLS) — bewusst
+      **nicht** von mir ausgeführt, da dieser Key niemals durch den Chat/Client laufen sollte. Nutzer führt das
+      Skript selbst lokal aus (Anleitung im Skript-Kommentar).
 
 ### 8. Wachstum / SEO
 - [ ] Eigene Domain kaufen + verbinden (statt vercel.app) — besser fürs SEO.
