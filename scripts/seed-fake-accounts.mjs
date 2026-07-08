@@ -124,14 +124,22 @@ async function upsertScores(user, acc) {
   }
 }
 
+function sleep(ms) { return new Promise((res) => setTimeout(res, ms)); }
+
 (async () => {
   console.log("Nexus Arcade: 5 Demo-Konten + Scores anlegen ...\n");
   for (const acc of ACCOUNTS) {
     console.log(acc.name, "(" + acc.email + ")");
-    const user = await ensureUser(acc);
-    if (!user) continue;
-    await upsertScores(user, acc);
+    // Ein Fehler bei einem Konto (Netzwerk-Haenger, Rate-Limit, ...) soll die anderen
+    // nicht mit abbrechen -> pro Konto einzeln abfangen und weitermachen.
+    try {
+      const user = await ensureUser(acc);
+      if (user) await upsertScores(user, acc);
+    } catch (e) {
+      console.error("  Unerwarteter Fehler bei", acc.name, "->", e && e.message ? e.message : e);
+    }
     console.log("");
+    await sleep(400); // kleine Pause zwischen Konten, falls Supabase Neuanlagen rate-limited
   }
-  console.log("Fertig. Im Konto-Fenster -> Ranks-Tab nachsehen.");
+  console.log("Fertig. Im Konto-Fenster -> Ranks-Tab nachsehen. Nochmal ausfuehren ist sicher: bestehende Konten werden wiederverwendet, fehlende werden ergaenzt.");
 })();
