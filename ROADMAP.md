@@ -56,8 +56,10 @@ Weiter/Neustart/Zum-Hub. Simulation/Eingabe pausiert währenddessen sauber (Stat
       offenen Look beibehalten. Noch keine Entscheidung — erst grundsätzlich klären, dann ggf. umsetzen.
 
 ### 5. Pro Spiel — Content & Tiefe
-- [ ] **Nexus Finance**: Trading-Runde soll zum Empire-Hauptspiel **beitragen** (Brücke Trading-Ergebnis → Empire-
-      Kapital), sauber und balanciert einbauen (aktuell bewusst getrennte Wirtschaft — Kopplung war Nutzerwunsch).
+- [x] **Nexus Finance**: Trading-Runde **beiträgt** jetzt zum Empire — ein Viertel des Rundengewinns (nur bei
+      Gewinn, Verluste bleiben ohne Auswirkung auf das Empire-Kapital) wandert dauerhaft ins Empire-Kapital,
+      sichtbar auf dem Ergebnis-Screen ("🏛️ +$X ans Empire-Kapital"). Bewusst nur ein Viertel und nur bei Gewinn,
+      damit Trading eine Zusatzchance bleibt statt eines Exploits fürs Farmen von Empire-Kapital.
 - [ ] **Nexus Dash**: Upgrade-Shop interessanter gestalten.
 - [ ] **Nexus Words**: mehrere Runden pro Tag, mehr Sprachen, eigenes Menü, unterschiedliche Wortlängen.
 - [ ] **Nexus Racer**: Shop mit Strecken-Upgrades u. Ä.
@@ -95,7 +97,11 @@ Weiter/Neustart/Zum-Hub. Simulation/Eingabe pausiert währenddessen sauber (Stat
       legt 5 Fake-Konten mit Scores in 7 Spielen an (dash/racer/merge/snake/breaker/blocks/stack), inkl.
       unterschiedlicher Avatare. Braucht den Supabase **Service-Role-Key** (Admin-API, umgeht RLS) — bewusst
       **nicht** von mir ausgeführt, da dieser Key niemals durch den Chat/Client laufen sollte. Nutzer führt das
-      Skript selbst lokal aus (Anleitung im Skript-Kommentar).
+      Skript selbst lokal aus (Anleitung im Skript-Kommentar). **Kritischer Bug behoben:** der Konto-Suche-Filter
+      hat ein falsches, echtes Konto getroffen und dessen Scores überschrieben — jetzt wird die E-Mail immer
+      exakt gegengeprüft, betroffene Daten wurden per SQL wiederhergestellt.
+- [x] **Like ohne Login**: Klick öffnet jetzt direkt das Konto-Fenster auf dem Login-Tab (`openLogin()` in
+      `account.js`), statt nur einen Hinweis-Toast zu zeigen.
 
 ### 8. Wachstum / SEO
 - [ ] Eigene Domain kaufen + verbinden (statt vercel.app) — besser fürs SEO.

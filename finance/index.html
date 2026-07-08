@@ -150,6 +150,7 @@
     <div class="big" id="finalNet">$0</div>
     <div class="new-best hidden" id="newBest" data-i18n="newbest">★ NEW RECORD ★</div>
     <div class="sub"><span data-i18n="best">Best</span>: <b id="overBest">$0</b></div>
+    <div class="sub hidden" id="empBonus" style="color:var(--green)"></div>
     <div class="btnrow">
       <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
       <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
@@ -209,6 +210,7 @@
     hint:"$1,000 starting cash · 75 seconds",aboutH:"About Nexus Finance",
     aboutP:"Nexus Finance is a free trading simulator you play right in your browser — no download, no signup. Start with $1,000 and 75 seconds on the clock, across four markets: a steady bond, two mid-risk stocks and one wild, high-volatility coin. Buy into dips, ride the news spikes, and sell before a crash wipes you out. When the bell rings, every position is cashed out automatically. How big can you grow your net worth?",
     shareText:s=>`I grew $1,000 into $${s} in Nexus Finance! Can you beat that?`,copied:"Copied — paste anywhere!",
+    empBonus:s=>"🏛️ +"+s+" sent to your Empire capital",
     up:n=>"📈 "+n+" surges!",down:n=>"📉 "+n+" plunges!",
     modeTrade:"Trading Floor",modeEmpire:"Empire",capital:"Capital",realtorLvl:"Realtor Lv",properties:"Properties",
     marketH:"🏘️ Market",portfolioH:"📁 My Properties",portfolioEmpty:"No properties yet — buy one from the market above.",
@@ -225,6 +227,7 @@
     hint:"$1.000 Startkapital · 75 Sekunden",aboutH:"Über Nexus Finance",
     aboutP:"Nexus Finance ist ein kostenloser Trading-Simulator direkt im Browser — kein Download, keine Anmeldung. Starte mit $1.000 und 75 Sekunden auf der Uhr, über vier Märkte: eine stabile Anleihe, zwei Aktien mit mittlerem Risiko und eine wilde, hochvolatile Coin. Kaufe Tiefs, reite Kurssprünge und verkaufe vor dem Crash. Wenn die Glocke läutet, wird alles automatisch ausgezahlt. Wie hoch wird dein Nettovermögen?",
     shareText:s=>`Ich habe aus $1.000 satte $${s} in Nexus Finance gemacht! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
+    empBonus:s=>"🏛️ +"+s+" gehen ans Empire-Kapital",
     up:n=>"📈 "+n+" schießt hoch!",down:n=>"📉 "+n+" stürzt ab!",
     modeTrade:"Trading-Runde",modeEmpire:"Empire",capital:"Kapital",realtorLvl:"Makler-Lv",properties:"Objekte",
     marketH:"🏘️ Markt",portfolioH:"📁 Meine Objekte",portfolioEmpty:"Noch keine Objekte — kaufe eins oben im Markt.",
@@ -332,6 +335,12 @@
     $("overBest").textContent=fmt$(best);
     $("board").classList.add("hidden");
     $("overO").classList.remove("hidden");
+    // Bruecke Trading -> Empire: ein Viertel des Rundengewinns (nur bei Gewinn) wandert dauerhaft ins
+    // Empire-Kapital. Verluste beruehren das Empire-Kapital nicht - Trading ist hier reine Zusatzchance.
+    const profit=fs-START_CASH, bonus=profit>0?Math.round(profit*0.25):0;
+    const empBonusEl=$("empBonus");
+    if(bonus>0 && emp){ emp.capital=(emp.capital||0)+bonus; empSave(); renderEmpire(); empBonusEl.textContent=T().empBonus(fmt$(bonus)); empBonusEl.classList.remove("hidden"); }
+    else empBonusEl.classList.add("hidden");
     if(window.NexusArcade){ try{ window.NexusArcade.addXP(Math.max(5,Math.floor(fs/100))); window.NexusArcade.submitScore("finance", best); }catch(e){} }
   }
   function tick(dt){
