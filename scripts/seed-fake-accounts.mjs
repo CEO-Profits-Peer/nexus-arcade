@@ -63,10 +63,13 @@ async function adminFetch(path, opts = {}) {
 }
 
 async function findUserByEmail(email) {
-  // Neuere Supabase-Versionen unterstuetzen den direkten Filter:
+  // WICHTIG: der "?email="-Filter wird von manchen Supabase-Projekten ignoriert und liefert dann
+  // einfach die komplette (ungefilterte) Nutzerliste zurueck -> IMMER die E-Mail exakt gegenpruefen,
+  // sonst landet man versehentlich auf einem fremden, echten Konto (ist uns schon passiert!).
   const direct = await adminFetch("/auth/v1/admin/users?email=" + encodeURIComponent(email));
-  if (direct.ok && direct.data && Array.isArray(direct.data.users) && direct.data.users[0]) {
-    return direct.data.users[0];
+  if (direct.ok && direct.data && Array.isArray(direct.data.users)) {
+    const hit = direct.data.users.find((u) => u.email === email);
+    if (hit) return hit;
   }
   // Fallback: Nutzerliste durchblaettern (fuer ein kleines Projekt meist 1 Seite).
   for (let page = 1; page <= 5; page++) {
