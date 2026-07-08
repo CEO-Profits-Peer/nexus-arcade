@@ -18,7 +18,7 @@
   const t = TXT[L] || TXT.en || {};
 
   /* ---------- Sync-Keys (alle Spielstände + Einstellungen + Profil) ---------- */
-  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_lang","nx_muted"];
+  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted"];
 
   /* ---------- Level-Kurve ---------- */
   // Kumulierte XP bis Level L: 50*(L-1)*L  -> Lv2=100, Lv3=300, Lv4=600, Lv5=1000 ...
@@ -40,7 +40,7 @@
   function saveAch(){ localStorage.setItem("nexus_ach", JSON.stringify(achieved)); }
 
   /* ---------- XP & Erfolge ---------- */
-  const GAME_KEYS = ["nd_best","nr_save_v1","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire"];
+  const GAME_KEYS = ["nd_best","nr_save_v1","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best"];
   let quiet=false, evalTimer=null;
   function grantXP(n){
     if(!n) return;
@@ -73,7 +73,7 @@
     st.tycoon_best=parseInt(localStorage.getItem("nx_tycoon_best")||"0",10)||0;
     st.stack_best=parseInt(localStorage.getItem("nx_stack_best")||"0",10)||0;
     st.blocks_best=parseInt(localStorage.getItem("nx_blocks_best")||"0",10)||0;
-    st.finance_best=parseInt(localStorage.getItem("nx_finance_best")||"0",10)||0;
+    st.ticker_best=parseInt(localStorage.getItem("nx_ticker_best")||"0",10)||0;
     try{ const e=JSON.parse(localStorage.getItem("nx_finance_empire")||"{}");
       st.finance_flips=(e.stats&&e.stats.flips)||0; st.finance_career_profit=(e.stats&&e.stats.careerProfit)||0;
       const biz=e.businesses||[]; st.finance_biz_count=biz.length; st.finance_managers=biz.filter(b=>b.manager).length;
@@ -137,6 +137,7 @@
     if(p.indexOf("/stack")>=0) return "stack";
     if(p.indexOf("/blocks")>=0) return "blocks";
     if(p.indexOf("/finance")>=0) return "finance";
+    if(p.indexOf("/ticker")>=0) return "ticker";
     return "arcade";
   }
 
@@ -403,7 +404,7 @@
     let stockVal=0; if(o.stocks&&o.stocks.holdings&&o.stocks.prices){ for(const id in o.stocks.holdings){ stockVal+=(o.stocks.holdings[id]||0)*(o.stocks.prices[id]||0); } }
     return (o.capital||0)+((o.stats&&o.stats.careerProfit)||0)*2+((o.stats&&o.stats.bizProfit)||0)*2+((o.owned&&o.owned.length)||0)*5000+(o.xp||0)*10+(o.founderXp||0)*10+biz.length*5000+biz.filter(b=>b.manager).length*10000+stockVal+((o.stats&&o.stats.dayProfit)||0);
   }catch(e){return -1;} }
-  const NUM_BESTS=["nd_best","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best"];
+  const NUM_BESTS=["nd_best","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_ticker_best"];
   function mergeKey(k,local,cloud){
     if(cloud==null) return local;
     if(local==null) return cloud;
@@ -552,6 +553,7 @@
       else if(g==="stack") unlockCore("play_stack");
       else if(g==="blocks") unlockCore("play_blocks");
       else if(g==="finance") unlockCore("play_finance");
+      else if(g==="ticker") unlockCore("play_ticker");
       quiet=false;
       ensureQuests();
       evaluateStats(true);

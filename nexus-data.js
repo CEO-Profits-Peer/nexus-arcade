@@ -141,10 +141,11 @@ window.NEXUS_DATA=(function(){
   ACH.push({id:"play_stack",game:"stack",icon:"🧱",xp:40,name:{en:"Builder",de:"Baumeister"},desc:{en:"Play Nexus Stack",de:"Nexus Stack spielen"}});
   ACH.push({id:"play_blocks",game:"blocks",icon:"🟪",xp:40,name:{en:"Stacker",de:"Stapler"},desc:{en:"Play Nexus Blocks",de:"Nexus Blocks spielen"}});
   ACH.push({id:"play_finance",game:"finance",icon:"💹",xp:40,name:{en:"Trader",de:"Trader"},desc:{en:"Play Nexus Finance",de:"Nexus Finance spielen"}});
+  ACH.push({id:"play_ticker",game:"ticker",icon:"📈",xp:40,name:{en:"Day Trader",de:"Day-Trader"},desc:{en:"Play Nexus Ticker",de:"Nexus Ticker spielen"}});
   addTier("tycoon","tycoon","💼","tycoon_best",[1000,100000,1000000,100000000,10000000000,1000000000000],"Empire","Imperium","Earn {n} total in Nexus Tycoon","{n} gesamt in Nexus Tycoon verdienen",true);
   addTier("stack","stack","🏢","stack_best",[10,25,50,100,150,250],"Tower","Turm","Stack {n} blocks in Nexus Stack","{n} Blöcke in Nexus Stack stapeln",false);
   addTier("blocks","blocks","🟪","blocks_best",[500,2000,5000,10000,25000,50000],"Blocks","Blocks","Score {n} in Nexus Blocks","{n} Punkte in Nexus Blocks",false);
-  addTier("finance","finance","💹","finance_best",[1500,2500,4000,6000,10000,20000],"Net Worth","Nettovermögen","Reach ${n} net worth in Nexus Finance","{n}$ Nettovermögen in Nexus Finance erreichen",true);
+  addTier("ticker","ticker","💹","ticker_best",[1500,2500,4000,6000,10000,20000],"Net Worth","Nettovermögen","Reach ${n} net worth in Nexus Ticker","{n}$ Nettovermögen in Nexus Ticker erreichen",true);
   ACH.push({id:"finance_flip1",game:"finance",icon:"🏠",xp:60,name:{en:"First Flip",de:"Erster Flip"},desc:{en:"Sell your first renovated property in Nexus Empire",de:"Dein erstes renoviertes Objekt in Nexus Empire verkaufen"},cond:{stat:"finance_flips",gte:1}});
   addTier("financeflips","finance","🏠","finance_flips",[5,15,40,100],"Flips","Flips","Sell {n} properties in Nexus Empire","{n} Objekte in Nexus Empire verkaufen",false);
   addTier("financeprofit","finance","💰","finance_career_profit",[5000,25000,100000,500000],"Realtor","Makler","Earn ${n} career profit in Nexus Empire","{n}$ Karriere-Gewinn in Nexus Empire erreichen",true);
@@ -167,7 +168,7 @@ window.NEXUS_DATA=(function(){
   ];
   const questSub={play1:{en:"Play any game today",de:"Heute irgendein Spiel spielen"},play3:{en:"Play 3 different games today",de:"Heute 3 verschiedene Spiele spielen"},xp150:{en:"Earn 150 XP today",de:"Heute 150 XP verdienen"},beat:{en:"Beat any highscore today",de:"Heute einen Highscore knacken"},word:{en:"Win a word puzzle today",de:"Heute ein Worträtsel gewinnen"},realm:{en:"Reach a new realm today",de:"Heute ein neues Reich erreichen"}};
   const questById=id=>QUESTS.find(q=>q.id===id);
-  const SCORE_MAP={dash:"dash_best",racer:"racer_best",merge:"merge_best",run3d:"run3d_best",snake:"snake_best",breaker:"breaker_best",tycoon:"tycoon_best",stack:"stack_best",blocks:"blocks_best",finance:"finance_best",idle:"idle_zone",words:"words_max"};
+  const SCORE_MAP={dash:"dash_best",racer:"racer_best",merge:"merge_best",run3d:"run3d_best",snake:"snake_best",breaker:"breaker_best",tycoon:"tycoon_best",stack:"stack_best",blocks:"blocks_best",ticker:"ticker_best",idle:"idle_zone",words:"words_max"};
 
   /* ---------- Spiele-Katalog (fuer Top-Bar-Spielname + "Das koennte dir gefallen") ---------- */
   const GAMES_CATALOG=[
@@ -182,7 +183,8 @@ window.NEXUS_DATA=(function(){
     {id:"tycoon",href:"/tycoon/",name:{en:"Nexus Tycoon",de:"Nexus Tycoon"},short:{en:"Tycoon",de:"Tycoon"},cats:["idle"]},
     {id:"stack",href:"/stack/",name:{en:"Nexus Stack",de:"Nexus Stack"},short:{en:"Stack",de:"Stack"},cats:["arcade"]},
     {id:"blocks",href:"/blocks/",name:{en:"Nexus Blocks",de:"Nexus Blocks"},short:{en:"Blocks",de:"Blocks"},cats:["puzzle"]},
-    {id:"finance",href:"/finance/",name:{en:"Nexus Finance",de:"Nexus Finance"},short:{en:"Finance",de:"Finance"},cats:["arcade"]}
+    {id:"finance",href:"/finance/",name:{en:"Nexus Finance",de:"Nexus Finance"},short:{en:"Finance",de:"Finance"},cats:["idle"]},
+    {id:"ticker",href:"/ticker/",name:{en:"Nexus Ticker",de:"Nexus Ticker"},short:{en:"Ticker",de:"Ticker"},cats:["arcade"]}
   ];
   const GAME_ICONS={
     dash:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
@@ -196,7 +198,8 @@ window.NEXUS_DATA=(function(){
     tycoon:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
     stack:'<rect x="6" y="15" width="12" height="4" rx="1"/><rect x="4" y="10" width="12" height="4" rx="1"/><rect x="8" y="5" width="12" height="4" rx="1"/>',
     blocks:'<rect x="3.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="10" width="5" height="5" rx="1"/><rect x="15.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="4" width="5" height="5" rx="1"/>',
-    finance:'<path d="M3 17l5-5 4 4 7-8"/><path d="M15 6h5v5"/>'
+    finance:'<path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/>',
+    ticker:'<path d="M3 17l5-5 4 4 7-8"/><path d="M15 6h5v5"/>'
   };
   return {FRAMES:FRAMES,PREMIUM_FRAMES:PREMIUM_FRAMES,ALLFRAMES:ALLFRAMES,frameById:frameById,PREMIUM_AVATARS:PREMIUM_AVATARS,SVG_ICON:SVG_ICON,SVG_AVATARS:SVG_AVATARS,CUSTOM_IMG_LEVEL:CUSTOM_IMG_LEVEL,TITLES:TITLES,titleById:titleById,ACH:ACH,achById:achById,QUESTS:QUESTS,questSub:questSub,questById:questById,SCORE_MAP:SCORE_MAP,GAMES_CATALOG:GAMES_CATALOG,GAME_ICONS:GAME_ICONS};
 })();

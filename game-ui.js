@@ -40,7 +40,7 @@
   }
 
   /* ---------- welches Spiel läuft gerade? ---------- */
-  const GAME_IDS=["dash","idle","words","racer","merge","run3d","snake","breaker","tycoon","stack","blocks","finance"];
+  const GAME_IDS=["dash","idle","words","racer","merge","run3d","snake","breaker","tycoon","stack","blocks","finance","ticker"];
   function detectGame(){
     const p=location.pathname.toLowerCase();
     for(const id of GAME_IDS) if(p.indexOf("/"+id)>=0) return id;

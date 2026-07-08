@@ -11,10 +11,13 @@ Jedes Spiel: kostenlos, sofort spielbar, zweisprachig (DE/EN), mobil + Desktop, 
 ---
 
 ## Aktueller Stand (fertig)
-12 Spiele + Portal (inkl. **Nexus Finance**: 75s-Trading-Runde + **Empire-Modus** — Immobilien-Flipping mit
-Realtor-Level, Unternehmen mit Personal/Lategame-Manager) · Konto mit Level/XP/Erfolgen/Quests/Coins + Cosmetics-Shop
-· globale Leaderboards (Supabase) · Favoriten (★) + Likes (❤) · Portal-Leaderboard-Vorschau · PWA (Manifest + Service
-Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modularisiert: `nexus-i18n.js`, `nexus-data.js`.
+13 Spiele + Portal, darunter **Nexus Finance** (dauerhaftes Finanzimperium: Immobilien-Flipping mit Realtor-
+Level, Unternehmen mit Personal/Lategame-Manager, Aktien mit Day-/Regular-Trading + News-Engine, eigene
+Bottom-Nav-Bar) und **Nexus Ticker** (die schnelle 75s-Trading-Runde, seit dem Nav-Umbau ein eigenständiges
+Mini-Game — speist einen Bonus in Finance's Empire-Kapital ein) · Konto mit Level/XP/Erfolgen/Quests/Coins +
+Cosmetics-Shop · globale Leaderboards (Supabase) · Favoriten (★) + Likes (❤) · Portal-Leaderboard-Vorschau ·
+PWA (Manifest + Service Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) ·
+Modularisiert: `nexus-i18n.js`, `nexus-data.js`.
 
 ---
 
@@ -73,6 +76,17 @@ Weiter/Neustart/Zum-Hub. Simulation/Eingabe pausiert währenddessen sauber (Stat
       erzeugte nach nur wenigen Stunden Abwesenheit absurde 150–300%-Kurssprünge. Fix: eigene, stark gedämpfte
       Kalibrierung für Normalbetrieb + hartes Sicherheitsnetz (Faktor pro Offline-Durchlauf auf −60 %/+200 %
       gedeckelt).
+- [x] **News erscheinen vor dem Kurseffekt**: Schlagzeile ist sofort in der Zeitung sichtbar ("noch nicht
+      eingepreist"-Badge), der Kurs reagiert erst 8s später — aufmerksame Leser können vorher reagieren.
+      News-Häufigkeit erhöht.
+- [x] **Nexus Finance / Nexus Ticker getrennt** (Nutzer-Feedback: „Trading Runde und Empire ist keine gute
+      Einteilung"): die 75s-Arcade-Runde ist jetzt ein **eigenständiges Mini-Game** `ticker/` (eigene URL,
+      eigenes Leaderboard `nx_ticker_best`, alte `nx_finance_best`-Bestwerte werden beim ersten Besuch einmalig
+      migriert). Nexus Finance ist jetzt reines Empire (Immobilien/Unternehmen/Aktien) mit einer neuen
+      **Bottom-Nav-Bar** (Icons, app-artig, unten fixiert) statt der alten Top-Tab-Einteilung
+      "Trading Floor vs. Empire" — schafft auch Platz für künftige weitere Bereiche. Ticker speist weiterhin
+      per `touchEmpireCapital()` einen Bonus (¼ Rundengewinn, nur bei Gewinn) in Finance's Empire-Kapital ein,
+      auch wenn Nexus Finance selbst noch nie geöffnet wurde.
 - [ ] **Nexus Finance — Jobs-System**: "jederzeit arbeiten" für Zusatzeinkommen (Nutzer-Idee, „eventuell").
       Bewusst nicht mit den Stocks gebaut — eigene Scoping-Runde (welche Jobs, aktiv vs. passiv, Cooldowns).
 - [ ] **Nexus Finance — Tutorial/Onboarding**: Nutzerwunsch, Finance/Empire soll "eines der größten Spiele" der

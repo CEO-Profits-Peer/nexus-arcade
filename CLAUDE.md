@@ -19,7 +19,10 @@ Live: `https://nexusarcade.vercel.app`
 - Je ein Spiel pro Ordner als **eine** `index.html` (HTML+CSS+JS in einer Datei):
   `dash/` (Arcade), `idle/` (Idle-Action-RPG „Nexus Realms"), `words/` (Wordle), `racer/` (Rennen),
   `merge/` (2048), `run3d/` (3D-Runner, Three.js), `snake/`, `breaker/` (Breakout), `tycoon/` (Idle-Business),
-  `stack/` (Timing-Stapeln), `blocks/` (Tetris-artig), `finance/` (Trading-Simulator, 75s-Runde).
+  `stack/` (Timing-Stapeln), `blocks/` (Tetris-artig), `finance/` (dauerhaftes Finanzimperium: Immobilien/
+  Unternehmen/Aktien, eigene Bottom-Nav-Bar statt Top-Tabs), `ticker/` (die schnelle 75s-Trading-Runde,
+  seit dem Umbau ein eigenständiges Mini-Game — ein Viertel Rundengewinn fließt als Bonus in Finance's
+  Empire-Kapital, siehe `touchEmpireCapital()` in `ticker/index.html`).
 - Gemeinsame Module (Reihenfolge auf **jeder** Seite so einhalten):
   1. `account-config.js` — Supabase URL + Publishable Key (vom Nutzer gepflegt)
   2. supabase-js (CDN)
@@ -35,11 +38,17 @@ Live: `https://nexusarcade.vercel.app`
 - **localStorage-Keys** (Bestwerte/Speicherstände):
   Dash `nd_best`, Racer `nx_racer_best`, 2048 `nx_2048_best`, Run3D `nx_run3d_best`, Snake `nx_snake_best`,
   Breaker `nx_breaker_best`, Tycoon `nx_tycoon` (State) + `nx_tycoon_best` (lifetime), Stack `nx_stack_best`,
-  Blocks `nx_blocks_best`, Finance `nx_finance_best` (bester Nettovermögen-Endstand der 75s-Runde) + `nx_finance_empire` (State des persistenten Empire-Modus: `capital`, `xp`, `stats.flips/careerProfit/stockTrades/dayTrades/dayProfit`, `owned[]`, `market[]` (Immobilien), `businesses[]`, `stocks{prices,hist,holdings,news[],lastTick,day}` (Aktien: Day-/Regular-Trading, News-getriebene Kurs-Engine mit Offline-Aufholung)), Realms `nr_save_v1` (Feld `maxZone`=Region, `gems`, `heroLv`, `gold`, …),
+  Blocks `nx_blocks_best`, Ticker `nx_ticker_best` (bester Nettovermögen-Endstand der 75s-Runde; ehemals
+  `nx_finance_best`, einmalig migriert beim ersten Laden von `ticker/index.html`) + `nx_finance_empire`
+  (State des persistenten Empire-Modus, gepflegt in `finance/index.html`: `capital`, `xp`,
+  `stats.flips/careerProfit/stockTrades/dayTrades/dayProfit`, `owned[]`, `market[]` (Immobilien),
+  `businesses[]`, `stocks{prices,hist,holdings,news[],lastTick,day}` (Aktien: Day-/Regular-Trading,
+  News-getriebene Kurs-Engine mit Offline-Aufholung) — `ticker/index.html` schreibt hier ebenfalls
+  hinein (`touchEmpireCapital()`, nur `capital`, sonst nichts), Realms `nr_save_v1` (Feld `maxZone`=Region, `gems`, `heroLv`, `gold`, …),
   Words `nw_v1_en`/`nw_v1_de` (`.stats.max`=Streak). Meta: `nexus_profile`, `nexus_ach`, `nexus_quests`, `nexus_favs`.
 - **Konto-Anbindung aus Spielen** (immer defensiv, `if(window.NexusArcade)`):
   - `window.NexusArcade.addXP(n)` bei Fortschritt/Game-Over.
-  - `window.NexusArcade.submitScore("<gameKey>", best)` bei Game-Over (Leaderboard). gameKeys = dash/racer/merge/run3d/snake/breaker/tycoon/stack/blocks/finance/idle/words.
+  - `window.NexusArcade.submitScore("<gameKey>", best)` bei Game-Over (Leaderboard). gameKeys = dash/racer/merge/run3d/snake/breaker/tycoon/stack/blocks/ticker/idle/words.
   - Erfolge schalten **automatisch** frei: `account.js` liest die localStorage-Stats (siehe `readStats()`), keine manuellen Calls nötig.
 - **Neues Spiel hinzufügen** = Ordner + `index.html` (Muster von einem bestehenden Spiel kopieren), die 6 Script-Includes ans Ende, in `index.html` (Portal) zur `GAMES`-Liste + SVG-Icon, in `account.js` `detectGame()` + Erfolge (in `nexus-data.js`) + `SCORE_MAP` (in `nexus-data.js`) ergänzen, `sitemap.xml` erweitern.
 - **Sync/Datensicherheit:** Login **merged** lokal+Cloud (`mergeKey` in `account.js` behält pro Feld den besseren Wert — niemals blind überschreiben).

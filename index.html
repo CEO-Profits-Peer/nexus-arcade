@@ -143,7 +143,8 @@
     tycoon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>',
     stack:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="15" width="12" height="4" rx="1"/><rect x="4" y="10" width="12" height="4" rx="1"/><rect x="8" y="5" width="12" height="4" rx="1"/></svg>',
     blocks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="10" width="5" height="5" rx="1"/><rect x="15.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="4" width="5" height="5" rx="1"/></svg>',
-    finance:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 7-8"/><path d="M15 6h5v5"/></svg>'
+    finance:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/></svg>',
+    ticker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 7-8"/><path d="M15 6h5v5"/></svg>'
   };
   const GAMES=[
     {id:"dash",href:"dash/",color:"var(--green)",cats:["arcade"],best:g=>bestNum("nd_best","",""),
@@ -179,8 +180,11 @@
     {id:"stack",href:"stack/",color:"var(--neon)",cats:["arcade"],best:g=>bestNum("nx_stack_best","",""),
       name:"Nexus Stack",tag:{en:"Arcade · Timing",de:"Arcade · Timing"},
       d:{en:"Drop each block at the perfect moment to build the tallest tower. Miss and it gets narrower. Pure one-more-try.",de:"Setze jeden Block im perfekten Moment für den höchsten Turm. Daneben = schmaler. Pures Suchtpotenzial."}},
-    {id:"finance",href:"finance/",color:"var(--green)",cats:["arcade"],best:g=>bestMoney("nx_finance_best"),
-      name:"Nexus Finance",tag:{en:"Arcade · Trading",de:"Arcade · Trading"},
+    {id:"finance",href:"finance/",color:"var(--green)",cats:["idle"],best:g=>bestEmpireCapital(),
+      name:"Nexus Finance",tag:{en:"Sim · Empire",de:"Sim · Empire"},
+      d:{en:"Build a financial empire: flip real estate, run businesses and trade stocks with real capital. Deep and persistent — your progress never resets.",de:"Baue ein Finanzimperium: Immobilien flippen, Unternehmen führen und mit echtem Kapital Aktien handeln. Tief und dauerhaft — dein Fortschritt setzt nie zurück."}},
+    {id:"ticker",href:"ticker/",color:"var(--green)",cats:["arcade"],best:g=>bestMoney("nx_ticker_best"),
+      name:"Nexus Ticker",tag:{en:"Arcade · Trading",de:"Arcade · Trading"},
       d:{en:"Trade four volatile neon markets in a 75-second session. Buy the dips, ride the spikes and cash out with the biggest net worth you can.",de:"Handle vier volatile Neon-Märkte in einer 75-Sekunden-Runde. Kaufe Tiefs, reite Kurssprünge und steige mit dem größten Nettovermögen aus."}}
   ];
   const CATS=[
@@ -196,6 +200,7 @@
   function bestNum(key,pre,suf){const v=parseInt(localStorage.getItem(key)||"0",10)||0;return v>0?(T().best+": "+pre+v+suf):null;}
   function bestMoney(key){let n=parseInt(localStorage.getItem(key)||"0",10)||0;if(n<=0)return null;const S=["","K","M","B","T"];let t=0;while(n>=1000&&t<S.length-1){n/=1000;t++;}return T().best+": $"+(n<10?n.toFixed(1):Math.floor(n))+S[t];}
   function bestRealm(){try{const r=JSON.parse(localStorage.getItem("nr_save_v1")||"{}");if(r.maxZone>1)return T().realm+" "+r.maxZone;}catch(e){}return null;}
+  function bestEmpireCapital(){try{const o=JSON.parse(localStorage.getItem("nx_finance_empire")||"null");if(!o||!(o.capital>0))return null;let n=o.capital;const S=["","K","M","B","T"];let t=0;while(n>=1000&&t<S.length-1){n/=1000;t++;}return T().best+": $"+(n<10?n.toFixed(1):Math.floor(n))+S[t];}catch(e){return null;}}
   function bestStreak(){try{let mx=0;for(const l of["en","de"]){const w=JSON.parse(localStorage.getItem("nw_v1_"+l)||"null");if(w&&w.stats)mx=Math.max(mx,w.stats.max||0);}if(mx>0)return T().streak+" "+mx;}catch(e){}return null;}
 
   function renderCats(){const c=document.getElementById("cats");c.innerHTML=CATS.map(x=>'<button class="cat'+(activeCat===x.id?' active':'')+'" data-c="'+x.id+'">'+x[lang]+'</button>').join("");
@@ -233,9 +238,9 @@
   (function hookSocial(){ if(window.NexusSocial){ window.NexusSocial.ready(renderGrid); window.NexusSocial.onChange(renderGrid); } else setTimeout(hookSocial,250); })();
 
   /* ---------- Leaderboard-Preview (Portal) / Portal leaderboard preview ---------- */
-  const LB_GAME_KEYS=["dash","racer","merge","run3d","snake","breaker","tycoon","stack","blocks","finance","idle","words"];
-  const LB_LABELS={dash:"Nexus Dash",racer:"Nexus Racer",merge:"Nexus 2048",run3d:"Nexus Run 3D",snake:"Nexus Snake",breaker:"Nexus Breaker",tycoon:"Nexus Tycoon",stack:"Nexus Stack",blocks:"Nexus Blocks",finance:"Nexus Finance",idle:"Nexus Realms",words:"Nexus Words"};
-  const LB_HREF={dash:"dash/",racer:"racer/",merge:"merge/",run3d:"run3d/",snake:"snake/",breaker:"breaker/",tycoon:"tycoon/",stack:"stack/",blocks:"blocks/",finance:"finance/",idle:"idle/",words:"words/"};
+  const LB_GAME_KEYS=["dash","racer","merge","run3d","snake","breaker","tycoon","stack","blocks","ticker","idle","words"];
+  const LB_LABELS={dash:"Nexus Dash",racer:"Nexus Racer",merge:"Nexus 2048",run3d:"Nexus Run 3D",snake:"Nexus Snake",breaker:"Nexus Breaker",tycoon:"Nexus Tycoon",stack:"Nexus Stack",blocks:"Nexus Blocks",ticker:"Nexus Ticker",idle:"Nexus Realms",words:"Nexus Words"};
+  const LB_HREF={dash:"dash/",racer:"racer/",merge:"merge/",run3d:"run3d/",snake:"snake/",breaker:"breaker/",tycoon:"tycoon/",stack:"stack/",blocks:"blocks/",ticker:"ticker/",idle:"idle/",words:"words/"};
   let lbOffset=0;
   function shuffled(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
   function pickLbGames(){const rot=shuffled(LB_GAME_KEYS);return rot.slice(lbOffset%rot.length,(lbOffset%rot.length)+3).concat(rot).slice(0,3);}
