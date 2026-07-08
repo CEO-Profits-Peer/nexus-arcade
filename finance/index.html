@@ -117,6 +117,16 @@
   .hirebtn:disabled{opacity:.35;cursor:not-allowed;}
   .managerbadge{background:rgba(124,255,107,.12);color:var(--green);border:1px solid var(--green);border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;text-align:center;margin-top:8px;}
   .bizlock{opacity:.55;}
+  .stockcard{cursor:pointer;}
+  .stockcard .sub{margin-bottom:6px;}
+  .newsrow{background:var(--panel2);border-radius:10px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
+  .newshead{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);gap:8px;}
+  .newsdir{font-weight:800;}
+  .newsdir.up{color:var(--green);}
+  .newsdir.down{color:var(--pink);}
+  .newshead2{font-size:13px;font-weight:600;margin-top:3px;}
+  #stockProfile{position:fixed;inset:0;z-index:50;overflow-y:auto;border-radius:0;}
+  .pclose{position:absolute;top:14px;right:16px;cursor:pointer;font-size:20px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -171,6 +181,7 @@
   <div class="etabs" id="eTabs" style="max-width:480px;padding:8px 16px 0">
     <button class="modeTab active" data-etab="estate">🏠 <span data-i18n="tabEstate">Real Estate</span></button>
     <button class="modeTab" data-etab="biz">🏢 <span data-i18n="tabBiz">Businesses</span></button>
+    <button class="modeTab" data-etab="stock">📈 <span data-i18n="tabStock">Stocks</span></button>
   </div>
   <div class="wrap" id="estateTab" style="min-height:0">
     <div class="l lvlLbl" data-i18n="realtorLvl">Realtor Lv</div>
@@ -194,6 +205,13 @@
     <h2 class="secH" data-i18n="myBizH">🏢 My Businesses</h2>
     <div id="bizOwnedList"></div>
     <div class="portEmpty" id="bizEmpty" data-i18n="bizEmpty">No businesses yet — open one above.</div>
+  </div>
+  <div class="wrap hidden" id="stockTab" style="min-height:0">
+    <h2 class="secH" data-i18n="companiesH">📈 Companies</h2>
+    <div id="stockList"></div>
+    <h2 class="secH" data-i18n="newsH">📰 Nexus Financial Times</h2>
+    <div id="newsFeed"></div>
+    <div class="overlay hidden" id="stockProfile"></div>
   </div>
   <section class="about">
     <h2 id="empAboutH">About Nexus Empire</h2>
@@ -221,7 +239,10 @@
     assets:"Assets",tabEstate:"Real Estate",tabBiz:"Businesses",founderLvl:"Founder Lv",openBizH:"🏪 Open a Business",myBizH:"🏢 My Businesses",bizEmpty:"No businesses yet — open one above.",
     open:"Open",workShift:"Work Shift",ready:"Ready",staff:"Staff",hireStaff:"Hire Staff",manager:"Manager",hireManager:"Hire Manager",automated:"🤖 Automated",
     bizLocked:(n,l)=>"🔒 "+n+" unlocks at Founder Lv "+l,shiftDone:s=>"💵 Shift complete: +"+s,managerHired:"🤖 Manager hired — this business now runs itself!",
-    managerOffline:s=>"🤖 Your managers earned "+s+" while you were away!"},
+    managerOffline:s=>"🤖 Your managers earned "+s+" while you were away!",
+    tabStock:"Stocks",companiesH:"📈 Companies",newsH:"📰 Nexus Financial Times",
+    youOwn:(q,v)=>"You own "+q+" · "+v,noNews:"No news yet — check back soon.",
+    justNow:"just now",minAgo:"m ago",hAgo:"h ago",dAgo:"d ago"},
   de:{hub:"Spiele",cash:"Cash",networth:"Nettovermögen",time:"Zeit",best:"Bestwert",play:"▶ HANDELN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",gameover:"MARKT GESCHLOSSEN",newbest:"★ NEUER REKORD ★",buy:"Kaufen",sell:"Verkaufen",low:"Niedriges Risiko",mid:"Mittel",high:"Hohes Risiko",
     intro:"Vier volatile Neon-Märkte, eine 75-Sekunden-Runde. Tippe Kaufen, um einen Teil deines Cash zu investieren, tippe Verkaufen zum Kassieren. Reite die Kurssprünge, meide die Crashs — steigere dein Nettovermögen so hoch du kannst.",
     hint:"$1.000 Startkapital · 75 Sekunden",aboutH:"Über Nexus Finance",
@@ -238,7 +259,10 @@
     assets:"Objekte",tabEstate:"Immobilien",tabBiz:"Unternehmen",founderLvl:"Gründer-Lv",openBizH:"🏪 Unternehmen eröffnen",myBizH:"🏢 Meine Unternehmen",bizEmpty:"Noch keine Unternehmen — eröffne oben eins.",
     open:"Eröffnen",workShift:"Schicht arbeiten",ready:"Bereit",staff:"Personal",hireStaff:"Personal einstellen",manager:"Manager",hireManager:"Manager anheuern",automated:"🤖 Automatisiert",
     bizLocked:(n,l)=>"🔒 "+n+" ab Gründer-Lv "+l,shiftDone:s=>"💵 Schicht abgeschlossen: +"+s,managerHired:"🤖 Manager angeheuert — dieses Unternehmen läuft jetzt von selbst!",
-    managerOffline:s=>"🤖 Deine Manager haben "+s+" verdient, während du weg warst!"}};
+    managerOffline:s=>"🤖 Deine Manager haben "+s+" verdient, während du weg warst!",
+    tabStock:"Aktien",companiesH:"📈 Firmen",newsH:"📰 Nexus Finanz-Zeitung",
+    youOwn:(q,v)=>"Du besitzt "+q+" · "+v,noNews:"Noch keine News — schau später vorbei.",
+    justNow:"gerade eben",minAgo:"m",hAgo:"h",dAgo:"d"}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const $=id=>document.getElementById(id);
@@ -351,7 +375,7 @@
     if(timeLeft<=0){ timeLeft=0; updateTimer(); endRound(); return; }
     updateTimer();
   }
-  let last=0; function loop(ts){ if(!last) last=ts; let dt=(ts-last)/1000; last=ts; if(dt>0.25) dt=0.25; tick(dt); bizTick(dt); requestAnimationFrame(loop); }
+  let last=0; function loop(ts){ if(!last) last=ts; let dt=(ts-last)/1000; last=ts; if(dt>0.25) dt=0.25; tick(dt); bizTick(dt); stockTick(dt); requestAnimationFrame(loop); }
 
   function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1600); }
   async function share(){ const txt=T().shareText(best), url=location.origin+location.pathname; if(navigator.share){ try{ await navigator.share({title:"Nexus Finance",text:txt,url}); return; }catch(e){} } try{ await navigator.clipboard.writeText(txt+" "+url); toast(T().copied); }catch(e){ toast(txt); } }
@@ -374,9 +398,9 @@
   ];
   const CAT_MAXLV=3, EMP_KEY="nx_finance_empire";
   let emp;
-  function empFresh(){ return {capital:3000, xp:0, stats:{flips:0,careerProfit:0,bestFlip:0,bizProfit:0}, owned:[], market:[], nextId:1, founderXp:0, businesses:[]}; }
-  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({flips:0,careerProfit:0,bestFlip:0,bizProfit:0},emp.stats); emp.businesses=emp.businesses||[]; return; } }catch(e){} emp=empFresh(); }
-  function empSave(){ for(const b of emp.businesses||[]) if(b.manager) b.lastTick=Date.now(); localStorage.setItem(EMP_KEY, JSON.stringify(emp)); }
+  function empFresh(){ return {capital:3000, xp:0, stats:{flips:0,careerProfit:0,bestFlip:0,bizProfit:0}, owned:[], market:[], nextId:1, founderXp:0, businesses:[], stocks:stockFresh()}; }
+  function empLoad(){ try{ const r=localStorage.getItem(EMP_KEY); if(r){ emp=Object.assign(empFresh(),JSON.parse(r)); emp.stats=Object.assign({flips:0,careerProfit:0,bestFlip:0,bizProfit:0},emp.stats); emp.businesses=emp.businesses||[]; emp.stocks=Object.assign(stockFresh(),emp.stocks||{}); for(const c of COMPANIES){ if(emp.stocks.prices[c.id]==null) emp.stocks.prices[c.id]=c.price0; if(!emp.stocks.hist[c.id]) emp.stocks.hist[c.id]=[emp.stocks.prices[c.id]]; } return; } }catch(e){} emp=empFresh(); }
+  function empSave(){ for(const b of emp.businesses||[]) if(b.manager) b.lastTick=Date.now(); if(emp.stocks) emp.stocks.lastTick=Date.now(); localStorage.setItem(EMP_KEY, JSON.stringify(emp)); }
   function empLevelXp(l){ return Math.pow(Math.max(0,l-1),2)*40; }
   function empLevel(){ let l=1; while(empLevelXp(l+1)<=(emp.xp||0)) l++; return l; }
   function empProgress(){ const l=empLevel(); const cur=empLevelXp(l), next=empLevelXp(l+1); return {level:l, into:(emp.xp||0)-cur, need:next-cur, pct:Math.min(100,((emp.xp||0)-cur)/(next-cur)*100)}; }
@@ -601,7 +625,209 @@
     box.querySelectorAll("[data-mgr]").forEach(bt=>bt.onclick=()=>hireManager(bt.getAttribute("data-mgr")));
   }
   function renderBiz(){ renderFounderHud(); renderBizOpen(); renderBizOwned(); }
-  function renderEmpire(){ renderEmpireHud(); renderEstateHud(); renderMarket(); renderPortfolio(); renderBiz(); $("empAboutH").textContent=T().empAboutH; $("empAboutP").textContent=T().empAboutP; }
+
+  /* ============================================================
+     STOCKS — Day Trading & Regular Trading mit echtem Empire-Kapital
+     News-getriebene Kurs-Engine: Drift+Rauschen wie die Arcade-Runde,
+     plus firmenspezifische Schlagzeilen, die Sprünge nachvollziehbar
+     machen. Positionen bleiben dauerhaft bestehen (emp.stocks.holdings),
+     Kurse bewegen sich per Offline-Aufholung auch weiter, waehrend die
+     Seite zu ist (gleiches Muster wie bizOfflineCatchup).
+     ============================================================ */
+  const COMPANIES=[
+    {id:"helix", sym:"HLX", name:{en:"Helix Biogenics",de:"Helix Biogenics"}, sector:{en:"Biotech",de:"Biotech"}, icon:"🧬", price0:45, vol:0.020, drift:0.0004,
+     newsPool:[
+       {tag:"trial+",headline:{en:"Helix trial results exceed expectations",de:"Helix-Studienergebnisse übertreffen Erwartungen"},dir:1,mag:[0.08,0.22]},
+       {tag:"trial-",headline:{en:"Helix trial fails to meet endpoint",de:"Helix-Studie verfehlt Zielvorgabe"},dir:-1,mag:[0.10,0.25]},
+       {tag:"fda+",headline:{en:"FDA fast-tracks Helix treatment",de:"FDA beschleunigt Helix-Behandlung"},dir:1,mag:[0.12,0.30]},
+       {tag:"fda-",headline:{en:"FDA raises safety concerns over Helix",de:"FDA äußert Sicherheitsbedenken zu Helix"},dir:-1,mag:[0.15,0.35]}
+     ]},
+    {id:"solace", sym:"SOL", name:{en:"Solace Energy",de:"Solace Energy"}, sector:{en:"Energy",de:"Energie"}, icon:"☀️", price0:30, vol:0.030, drift:0.0006,
+     newsPool:[
+       {tag:"contract+",headline:{en:"Solace lands major solar contract",de:"Solace erhält Großauftrag für Solarenergie"},dir:1,mag:[0.10,0.20]},
+       {tag:"contract-",headline:{en:"Solace loses key government contract",de:"Solace verliert wichtigen Regierungsauftrag"},dir:-1,mag:[0.10,0.22]},
+       {tag:"reg+",headline:{en:"New subsidies boost renewable sector",de:"Neue Subventionen stärken Erneuerbare"},dir:1,mag:[0.06,0.14]},
+       {tag:"reg-",headline:{en:"Energy price caps squeeze margins",de:"Preisdeckel bei Energie drücken Margen"},dir:-1,mag:[0.06,0.16]}
+     ]},
+    {id:"forge", sym:"FRG", name:{en:"Forge Robotics",de:"Forge Robotics"}, sector:{en:"Industrial",de:"Industrie"}, icon:"🤖", price0:55, vol:0.025, drift:0.0005,
+     newsPool:[
+       {tag:"order+",headline:{en:"Forge robotics order book at record high",de:"Forge-Auftragsbuch auf Rekordhoch"},dir:1,mag:[0.08,0.18]},
+       {tag:"order-",headline:{en:"Factory automation demand slows",de:"Nachfrage nach Fabrikautomation sinkt"},dir:-1,mag:[0.08,0.18]},
+       {tag:"recall",headline:{en:"Forge issues recall on flagship model",de:"Forge ruft Flaggschiff-Modell zurück"},dir:-1,mag:[0.14,0.28]}
+     ]},
+    {id:"driftcoin", sym:"DRC", name:{en:"DriftCoin",de:"DriftCoin"}, sector:{en:"Crypto",de:"Krypto"}, icon:"🌊", price0:8, vol:0.070, drift:-0.0001,
+     newsPool:[
+       {tag:"exchange+",headline:{en:"Major exchange lists DriftCoin",de:"Große Börse listet DriftCoin"},dir:1,mag:[0.20,0.45]},
+       {tag:"exchange-",headline:{en:"Exchange delists DriftCoin over compliance",de:"Börse entfernt DriftCoin wegen Compliance"},dir:-1,mag:[0.25,0.50]},
+       {tag:"hack",headline:{en:"DriftCoin bridge exploited by hackers",de:"DriftCoin-Bridge von Hackern ausgenutzt"},dir:-1,mag:[0.30,0.60]},
+       {tag:"hype",headline:{en:"Influencer hype sends DriftCoin soaring",de:"Influencer-Hype lässt DriftCoin steigen"},dir:1,mag:[0.15,0.40]}
+     ]},
+    {id:"aegis", sym:"AEG", name:{en:"Aegis Defense",de:"Aegis Defense"}, sector:{en:"Defense",de:"Verteidigung"}, icon:"🛰️", price0:70, vol:0.015, drift:0.0007,
+     newsPool:[
+       {tag:"contract+",headline:{en:"Aegis wins multi-year defense contract",de:"Aegis gewinnt mehrjährigen Verteidigungsauftrag"},dir:1,mag:[0.06,0.16]},
+       {tag:"contract-",headline:{en:"Budget cuts threaten Aegis programs",de:"Budgetkürzungen bedrohen Aegis-Programme"},dir:-1,mag:[0.06,0.16]},
+       {tag:"scandal",headline:{en:"Aegis faces procurement scandal probe",de:"Aegis im Visier einer Beschaffungsaffäre"},dir:-1,mag:[0.10,0.24]}
+     ]},
+    {id:"meridian", sym:"MER", name:{en:"Meridian Bank",de:"Meridian Bank"}, sector:{en:"Finance",de:"Finanzen"}, icon:"🏦", price0:90, vol:0.012, drift:0.0003,
+     newsPool:[
+       {tag:"rates+",headline:{en:"Rate hike boosts Meridian's margins",de:"Zinserhöhung stärkt Meridians Margen"},dir:1,mag:[0.04,0.10]},
+       {tag:"rates-",headline:{en:"Rate cuts squeeze Meridian's margins",de:"Zinssenkung drückt Meridians Margen"},dir:-1,mag:[0.04,0.10]},
+       {tag:"audit",headline:{en:"Regulator flags Meridian compliance gaps",de:"Aufsicht bemängelt Meridians Compliance"},dir:-1,mag:[0.08,0.18]}
+     ]}
+  ];
+  const STOCK_TICK_MS=1000, STOCK_NEWS_CHANCE=0.008, STOCK_OFFLINE_CAP_S=24*3600, STOCK_NEWS_MAXLEN=40;
+  function companyOf(id){ return COMPANIES.find(c=>c.id===id); }
+  function stockFresh(){
+    const prices={}, hist={};
+    for(const c of COMPANIES){ prices[c.id]=c.price0; hist[c.id]=[c.price0]; }
+    return {prices, hist, holdings:{}, news:[], lastTick:Date.now(), day:null};
+  }
+  function pushNews(entry){
+    emp.stocks.news.unshift(entry);
+    if(emp.stocks.news.length>STOCK_NEWS_MAXLEN) emp.stocks.news.length=STOCK_NEWS_MAXLEN;
+  }
+  function fireNews(c, atTime){
+    const n=c.newsPool[(Math.random()*c.newsPool.length)|0];
+    const mag=n.mag[0]+Math.random()*(n.mag[1]-n.mag[0]);
+    const newP=Math.max(0.5, emp.stocks.prices[c.id]*(1+n.dir*mag));
+    emp.stocks.prices[c.id]=newP;
+    pushNews({companyId:c.id, headline:n.headline, dir:n.dir, mag:mag, t:atTime});
+    return newP;
+  }
+  let stockAcc=0, stockSaveAcc=0;
+  function stockTick(dt){
+    if(!emp||!emp.stocks) return;
+    stockAcc+=dt*1000;
+    let moved=false;
+    while(stockAcc>=STOCK_TICK_MS){
+      stockAcc-=STOCK_TICK_MS;
+      for(const c of COMPANIES){
+        let p=emp.stocks.prices[c.id];
+        const r=(Math.random()-0.5)*2*c.vol+c.drift;
+        p=Math.max(0.5, p*(1+r));
+        emp.stocks.prices[c.id]=p;
+        const h=emp.stocks.hist[c.id]; h.push(p); if(h.length>40) h.shift();
+        if(Math.random()<STOCK_NEWS_CHANCE) fireNews(c, Date.now());
+        moved=true;
+      }
+    }
+    if(moved && mode==="empire" && eTab==="stock") renderStock();
+    stockSaveAcc+=dt; if(stockSaveAcc>=1){ stockSaveAcc=0; empSave(); }
+  }
+  function stockOfflineCatchup(){
+    if(!emp.stocks) return;
+    const now=Date.now();
+    const elapsedS=Math.min(STOCK_OFFLINE_CAP_S, Math.max(0,(now-(emp.stocks.lastTick||now))/1000));
+    if(elapsedS>30){
+      for(const c of COMPANIES){
+        const drift=c.drift*elapsedS;
+        const noise=(Math.random()-0.5)*2*c.vol*Math.sqrt(elapsedS/(STOCK_TICK_MS/1000));
+        emp.stocks.prices[c.id]=Math.max(0.5, emp.stocks.prices[c.id]*(1+drift+noise));
+        const newsChance=Math.min(0.8, elapsedS/3600*0.35);
+        if(Math.random()<newsChance) fireNews(c, now-Math.floor(Math.random()*elapsedS*1000));
+        if(elapsedS>7200 && Math.random()<newsChance*0.5) fireNews(c, now-Math.floor(Math.random()*elapsedS*500));
+        const h=emp.stocks.hist[c.id]; h.push(emp.stocks.prices[c.id]); if(h.length>40) h.shift();
+      }
+    }
+    emp.stocks.lastTick=now;
+  }
+
+  function stockBuy(id){
+    const price=emp.stocks.prices[id]; if(!price||emp.capital<price) return;
+    const budget=Math.max(price, emp.capital*0.25);
+    const qty=Math.max(1, Math.floor(Math.min(budget, emp.capital)/price));
+    const cost=qty*price; if(cost>emp.capital) return;
+    emp.capital-=cost; emp.stocks.holdings[id]=(emp.stocks.holdings[id]||0)+qty;
+    empSave(); renderStock(); renderEmpireHud();
+  }
+  function stockSell(id){
+    const held=emp.stocks.holdings[id]||0; if(held<=0) return;
+    const price=emp.stocks.prices[id];
+    emp.capital+=held*price; emp.stocks.holdings[id]=0;
+    empSave(); renderStock(); renderEmpireHud();
+  }
+  function drawSparkInto(cv, hist){
+    if(!cv||!hist||hist.length<2) return;
+    const ctx=cv.getContext("2d"), W=cv.width, H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    let mn=Math.min.apply(null,hist), mx=Math.max.apply(null,hist); if(mx===mn) mx=mn+1;
+    const up=hist[hist.length-1]>=hist[0];
+    ctx.beginPath();
+    hist.forEach((v,i)=>{ const x=i/(hist.length-1)*W; const y=H-2-((v-mn)/(mx-mn))*(H-6); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.strokeStyle=up?"#7cff6b":"#ff3ea5"; ctx.lineWidth=2; ctx.lineJoin="round"; ctx.stroke();
+  }
+  function timeAgo(t){
+    const s=Math.max(0,Math.floor((Date.now()-t)/1000));
+    if(s<60) return T().justNow;
+    if(s<3600) return Math.floor(s/60)+T().minAgo;
+    if(s<86400) return Math.floor(s/3600)+T().hAgo;
+    return Math.floor(s/86400)+T().dAgo;
+  }
+  function newsRowHtml(n, showCompany){
+    const c=companyOf(n.companyId);
+    return '<div class="newsrow" data-newscompany="'+n.companyId+'">'+
+      '<div class="newshead">'+(showCompany&&c?c.icon+' <b>'+c.sym+'</b> · ':'')+
+        '<span class="newsdir '+(n.dir>0?'up':'down')+'">'+(n.dir>0?'▲':'▼')+' '+Math.round(n.mag*100)+'%</span>'+
+        '<span>'+timeAgo(n.t)+'</span></div>'+
+      '<div class="newshead2">'+n.headline[lang]+'</div>'+
+    '</div>';
+  }
+  let stockProfileId=null;
+  function openStockProfile(id){ stockProfileId=id; renderStockProfile(); $("stockProfile").classList.remove("hidden"); }
+  function closeStockProfile(){ stockProfileId=null; $("stockProfile").classList.add("hidden"); }
+  function renderStockProfile(){
+    if(!stockProfileId) return;
+    const c=companyOf(stockProfileId); if(!c) return;
+    const price=emp.stocks.prices[c.id], held=emp.stocks.holdings[c.id]||0;
+    const news=emp.stocks.news.filter(n=>n.companyId===c.id).slice(0,8);
+    const box=$("stockProfile");
+    box.innerHTML=
+      '<span class="pclose" id="stockProfileClose">✕</span>'+
+      '<div style="font-size:34px">'+c.icon+'</div>'+
+      '<h1 style="font-size:20px;margin:2px 0">'+c.name[lang]+'</h1>'+
+      '<div class="sub">'+c.sector[lang]+' · '+c.sym+'</div>'+
+      '<canvas class="spark" id="profileSpark" width="280" height="56" style="margin:10px 0;width:100%;max-width:280px"></canvas>'+
+      '<div class="big" style="font-size:26px">'+fmt$(price)+'</div>'+
+      (held>0?'<div class="sub">'+T().youOwn(held, fmt$(held*price))+'</div>':'')+
+      '<div class="btnrow">'+
+        '<button class="btn" id="profileBuy" '+(emp.capital<price?'disabled':'')+'>'+T().buy+'</button>'+
+        '<button class="btn sec" id="profileSell" '+(held<=0?'disabled':'')+'>'+T().sell+'</button>'+
+      '</div>'+
+      '<h2 class="secH" style="margin-top:16px">'+T().newsH+'</h2>'+
+      (news.length?news.map(n=>newsRowHtml(n,false)).join(""):'<div class="portEmpty">'+T().noNews+'</div>');
+    drawSparkInto(document.getElementById("profileSpark"), emp.stocks.hist[c.id]);
+    document.getElementById("stockProfileClose").onclick=closeStockProfile;
+    const bb=document.getElementById("profileBuy"); if(bb) bb.onclick=()=>{ stockBuy(c.id); renderStockProfile(); };
+    const sb=document.getElementById("profileSell"); if(sb) sb.onclick=()=>{ stockSell(c.id); renderStockProfile(); };
+  }
+  function renderStockList(){
+    const box=$("stockList");
+    box.innerHTML=COMPANIES.map(c=>{
+      const price=emp.stocks.prices[c.id], held=emp.stocks.holdings[c.id]||0;
+      return '<div class="pcard stockcard" data-stockopen="'+c.id+'">'+
+        '<div class="phead"><span class="pname">'+c.icon+' '+c.name[lang]+'</span><b style="color:var(--gold)">'+fmt$(price)+'</b></div>'+
+        '<div class="sub">'+c.sector[lang]+' · '+c.sym+(held>0?' · '+T().youOwn(held,fmt$(held*price)):'')+'</div>'+
+        '<canvas class="spark" data-spark2="'+c.id+'" width="260" height="34"></canvas>'+
+        '<div class="btnrow">'+
+          '<button class="tbtn buy" data-stockbuy="'+c.id+'" '+(emp.capital<price?'disabled':'')+'>'+T().buy+'</button>'+
+          '<button class="tbtn sell" data-stocksell="'+c.id+'" '+(held<=0?'disabled':'')+'>'+T().sell+'</button>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    COMPANIES.forEach(c=>drawSparkInto(document.querySelector('canvas[data-spark2="'+c.id+'"]'), emp.stocks.hist[c.id]));
+    box.querySelectorAll("[data-stockbuy]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); stockBuy(b.getAttribute("data-stockbuy")); });
+    box.querySelectorAll("[data-stocksell]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); stockSell(b.getAttribute("data-stocksell")); });
+    box.querySelectorAll("[data-stockopen]").forEach(b=>b.onclick=()=>openStockProfile(b.getAttribute("data-stockopen")));
+  }
+  function renderNewsFeed(){
+    const box=$("newsFeed");
+    const items=emp.stocks.news.slice(0,20);
+    box.innerHTML=items.length?items.map(n=>newsRowHtml(n,true)).join(""):'<div class="portEmpty">'+T().noNews+'</div>';
+    box.querySelectorAll("[data-newscompany]").forEach(el=>el.onclick=()=>openStockProfile(el.getAttribute("data-newscompany")));
+  }
+  function renderStock(){ renderStockList(); renderNewsFeed(); if(stockProfileId) renderStockProfile(); }
+
+  function renderEmpire(){ renderEmpireHud(); renderEstateHud(); renderMarket(); renderPortfolio(); renderBiz(); renderStock(); $("empAboutH").textContent=T().empAboutH; $("empAboutP").textContent=T().empAboutP; }
 
   let mode="trade";
   function setMode(m){
@@ -617,6 +843,7 @@
     eTab=t;
     $("estateTab").classList.toggle("hidden", t!=="estate");
     $("bizTab").classList.toggle("hidden", t!=="biz");
+    $("stockTab").classList.toggle("hidden", t!=="stock");
     document.querySelectorAll("#eTabs .modeTab").forEach(b=>b.classList.toggle("active", b.getAttribute("data-etab")===t));
   }
   document.querySelectorAll("#eTabs .modeTab").forEach(b=>b.addEventListener("click",()=>setETab(b.getAttribute("data-etab"))));
@@ -637,7 +864,7 @@
   $("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
   $("year").textContent=new Date().getFullYear();
   $("overBest").textContent=fmt$(best);
-  empLoad(); refillMarket(); bizOfflineCatchup();
+  empLoad(); refillMarket(); bizOfflineCatchup(); stockOfflineCatchup();
   buildBoard(); applyLang(); requestAnimationFrame(loop);
 })();
 </script>
