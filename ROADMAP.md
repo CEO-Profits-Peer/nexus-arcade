@@ -28,7 +28,17 @@ Worker) · Sync-Fehler sichtbar als Toast (statt stillem console.warn) · Modula
       bekannte Cache-Fallstrick (Hard-Refresh nach Deploy nötig, siehe unten). Nutzer um Hard-Refresh + erneuten
       Test gebeten; falls es bleibt, genaue Reproduktionsschritte einholen.
 - [ ] **Leaderboards weiterhin unzuverlässig** — Nutzer meldet „funktioniert immer noch nicht sooo gescheit".
-      Genaue Symptome reproduzieren (welche Spiele, eingeloggt/Gast, welcher Browser) und Ursache finden.
+      **Harter Befund (live per öffentlichem Lesezugriff geprüft):** die `scores`-Tabelle hat **0 Zeilen** —
+      seit Bestehen der Tabelle hat noch **niemand** je erfolgreich einen Score eingereicht. Das Problem ist also
+      nicht die Anzeige, sondern dass nie etwas ankommt. Wahrscheinlichste Ursachen: (a) noch kein vollständiger
+      Login-Test durchgeführt (Magic Link wirklich bis zum Klick im Postfach durchgespielt), oder (b)
+      Authentication → URL Configuration → Site URL zeigt noch auf `...supabase.co` statt die echte Domain
+      (siehe `SUPABASE-SETUP.md`, dort explizit als Stolperstein dokumentiert). **Bereits verbessert:** eigener
+      Rang wird jetzt auch außerhalb der Top 10 angezeigt (vorher komplett unsichtbar, falls nicht in Top 10).
+      **Nächster Schritt (nur der Nutzer kann das):** einmal komplett durchtesten — echtes Konto einloggen (Mail
+      abwarten, Link klicken, prüfen ob oben der eigene Name statt „Gast" steht), ein Spiel zu Ende spielen,
+      Ranks-Tab öffnen. Falls dann immer noch keine Zeile erscheint, Konsole (F12) beim Spielende prüfen ob ein
+      ⚠-Toast auftaucht (verrät die genaue Ursache: fehlende Tabelle/RLS-Block/Sonstiges).
 
 ### 2. Fehlendes Pause-/Escape-Menü
 - [ ] Nexus 2048
