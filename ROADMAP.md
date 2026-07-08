@@ -60,6 +60,24 @@ Weiter/Neustart/Zum-Hub. Simulation/Eingabe pausiert währenddessen sauber (Stat
       Gewinn, Verluste bleiben ohne Auswirkung auf das Empire-Kapital) wandert dauerhaft ins Empire-Kapital,
       sichtbar auf dem Ergebnis-Screen ("🏛️ +$X ans Empire-Kapital"). Bewusst nur ein Viertel und nur bei Gewinn,
       damit Trading eine Zusatzchance bleibt statt eines Exploits fürs Farmen von Empire-Kapital.
+- [x] **Nexus Finance — Stocks (Day Trading + Regular Trading)**: dritter Empire-Sub-Tab, komplett getrennt von
+      der 75s-Arcade-Runde. Handel mit **echtem, dauerhaft besessenem Empire-Kapital**: Regular Trading kauft/
+      verkauft jederzeit direkt gegen das Kapital, Day Trading bindet einen gewählten Einsatz für eine getimte
+      75s-Session mit beschleunigtem Kurstick, am Ende automatische Auszahlung (Gewinn **oder Verlust**, echtes
+      Risiko). 6 Firmen mit eigenem Sektor + thematisch passendem News-Pool; News-getriebene Kurssprünge sind
+      dadurch nachvollziehbar (Schlagzeile erklärt die Richtung) statt anonymem Zufall. Firmenprofil (Sparkline +
+      firmenspezifische News) + "Nexus Finanz-Zeitung" (globaler News-Feed). Kurse bewegen sich auch offline
+      weiter (Aufholung analog Business-Manager). 4 neue Achievements, Fortschritt zählt in Cloud-Merge/Konto mit.
+      **Beim Bauen gefunden & behoben:** Firmen-vol/-drift waren für den schnellen Day-Trading-Tick kalibriert,
+      liefen aber auch im Normalbetrieb/Offline-Aufholung — Zufallslauf-Varianz wächst mit √(Tick-Anzahl), das
+      erzeugte nach nur wenigen Stunden Abwesenheit absurde 150–300%-Kurssprünge. Fix: eigene, stark gedämpfte
+      Kalibrierung für Normalbetrieb + hartes Sicherheitsnetz (Faktor pro Offline-Durchlauf auf −60 %/+200 %
+      gedeckelt).
+- [ ] **Nexus Finance — Jobs-System**: "jederzeit arbeiten" für Zusatzeinkommen (Nutzer-Idee, „eventuell").
+      Bewusst nicht mit den Stocks gebaut — eigene Scoping-Runde (welche Jobs, aktiv vs. passiv, Cooldowns).
+- [ ] **Nexus Finance — Tutorial/Onboarding**: Nutzerwunsch, Finance/Empire soll "eines der größten Spiele" der
+      Seite werden — dafür braucht es eine geführte Einführung über Trading-Runde + alle 3 Empire-Bereiche
+      (Immobilien/Unternehmen/Aktien). Eigene Runde, nicht Teil des Stocks-Umbaus.
 - [ ] **Nexus Dash**: Upgrade-Shop interessanter gestalten.
 - [ ] **Nexus Words**: mehrere Runden pro Tag, mehr Sprachen, eigenes Menü, unterschiedliche Wortlängen.
 - [ ] **Nexus Racer**: Shop mit Strecken-Upgrades u. Ä.
