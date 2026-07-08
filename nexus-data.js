@@ -164,5 +164,35 @@ window.NEXUS_DATA=(function(){
   const questSub={play1:{en:"Play any game today",de:"Heute irgendein Spiel spielen"},play3:{en:"Play 3 different games today",de:"Heute 3 verschiedene Spiele spielen"},xp150:{en:"Earn 150 XP today",de:"Heute 150 XP verdienen"},beat:{en:"Beat any highscore today",de:"Heute einen Highscore knacken"},word:{en:"Win a word puzzle today",de:"Heute ein Worträtsel gewinnen"},realm:{en:"Reach a new realm today",de:"Heute ein neues Reich erreichen"}};
   const questById=id=>QUESTS.find(q=>q.id===id);
   const SCORE_MAP={dash:"dash_best",racer:"racer_best",merge:"merge_best",run3d:"run3d_best",snake:"snake_best",breaker:"breaker_best",tycoon:"tycoon_best",stack:"stack_best",blocks:"blocks_best",finance:"finance_best",idle:"idle_zone",words:"words_max"};
-  return {FRAMES:FRAMES,PREMIUM_FRAMES:PREMIUM_FRAMES,ALLFRAMES:ALLFRAMES,frameById:frameById,PREMIUM_AVATARS:PREMIUM_AVATARS,SVG_ICON:SVG_ICON,SVG_AVATARS:SVG_AVATARS,CUSTOM_IMG_LEVEL:CUSTOM_IMG_LEVEL,TITLES:TITLES,titleById:titleById,ACH:ACH,achById:achById,QUESTS:QUESTS,questSub:questSub,questById:questById,SCORE_MAP:SCORE_MAP};
+
+  /* ---------- Spiele-Katalog (fuer Top-Bar-Spielname + "Das koennte dir gefallen") ---------- */
+  const GAMES_CATALOG=[
+    {id:"dash",href:"/dash/",name:{en:"Nexus Dash",de:"Nexus Dash"},short:{en:"Dash",de:"Dash"},cats:["arcade"]},
+    {id:"idle",href:"/idle/",name:{en:"Nexus Realms",de:"Nexus Realms"},short:{en:"Realms",de:"Realms"},cats:["rpg"]},
+    {id:"words",href:"/words/",name:{en:"Nexus Words",de:"Nexus Words"},short:{en:"Words",de:"Words"},cats:["puzzle","daily"]},
+    {id:"racer",href:"/racer/",name:{en:"Nexus Racer",de:"Nexus Racer"},short:{en:"Racer",de:"Racer"},cats:["racing","arcade"]},
+    {id:"merge",href:"/merge/",name:{en:"Nexus 2048",de:"Nexus 2048"},short:{en:"2048",de:"2048"},cats:["puzzle"]},
+    {id:"run3d",href:"/run3d/",name:{en:"Nexus Run 3D",de:"Nexus Run 3D"},short:{en:"Run 3D",de:"Run 3D"},cats:["3d","arcade"]},
+    {id:"snake",href:"/snake/",name:{en:"Nexus Snake",de:"Nexus Snake"},short:{en:"Snake",de:"Snake"},cats:["arcade"]},
+    {id:"breaker",href:"/breaker/",name:{en:"Nexus Breaker",de:"Nexus Breaker"},short:{en:"Breaker",de:"Breaker"},cats:["arcade"]},
+    {id:"tycoon",href:"/tycoon/",name:{en:"Nexus Tycoon",de:"Nexus Tycoon"},short:{en:"Tycoon",de:"Tycoon"},cats:["idle"]},
+    {id:"stack",href:"/stack/",name:{en:"Nexus Stack",de:"Nexus Stack"},short:{en:"Stack",de:"Stack"},cats:["arcade"]},
+    {id:"blocks",href:"/blocks/",name:{en:"Nexus Blocks",de:"Nexus Blocks"},short:{en:"Blocks",de:"Blocks"},cats:["puzzle"]},
+    {id:"finance",href:"/finance/",name:{en:"Nexus Finance",de:"Nexus Finance"},short:{en:"Finance",de:"Finance"},cats:["arcade"]}
+  ];
+  const GAME_ICONS={
+    dash:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+    idle:'<path d="M14 3l7 7-4 1-1 4-7-7"/><path d="M9 8l-6 6 3 3 6-6"/><path d="M5 17l-2 4 4-2"/>',
+    words:'<rect x="3" y="3" width="6.5" height="6.5" rx="1.4"/><rect x="14.5" y="3" width="6.5" height="6.5" rx="1.4"/><rect x="3" y="14.5" width="6.5" height="6.5" rx="1.4"/><rect x="14.5" y="14.5" width="6.5" height="6.5" rx="1.4"/>',
+    racer:'<path d="M3 13l2-5a3 3 0 0 1 2.8-2h8.4A3 3 0 0 1 19 8l2 5v5h-3.5"/><path d="M3 13v5h3.5"/><path d="M6.5 18h11"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+    merge:'<path d="M4 9h16M4 15h16M9 4v16M15 4v16"/>',
+    run3d:'<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 2v20M3 7l9 5 9-5"/>',
+    snake:'<path d="M5 7h7a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h9"/><circle cx="19" cy="6" r="1.3" fill="currentColor" stroke="none"/>',
+    breaker:'<rect x="3" y="4" width="5" height="3" rx="1"/><rect x="10" y="4" width="5" height="3" rx="1"/><rect x="16" y="4" width="5" height="3" rx="1"/><circle cx="12" cy="13" r="1.6" fill="currentColor" stroke="none"/><rect x="8" y="19" width="8" height="2.4" rx="1.2"/>',
+    tycoon:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+    stack:'<rect x="6" y="15" width="12" height="4" rx="1"/><rect x="4" y="10" width="12" height="4" rx="1"/><rect x="8" y="5" width="12" height="4" rx="1"/>',
+    blocks:'<rect x="3.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="10" width="5" height="5" rx="1"/><rect x="15.5" y="10" width="5" height="5" rx="1"/><rect x="9.5" y="4" width="5" height="5" rx="1"/>',
+    finance:'<path d="M3 17l5-5 4 4 7-8"/><path d="M15 6h5v5"/>'
+  };
+  return {FRAMES:FRAMES,PREMIUM_FRAMES:PREMIUM_FRAMES,ALLFRAMES:ALLFRAMES,frameById:frameById,PREMIUM_AVATARS:PREMIUM_AVATARS,SVG_ICON:SVG_ICON,SVG_AVATARS:SVG_AVATARS,CUSTOM_IMG_LEVEL:CUSTOM_IMG_LEVEL,TITLES:TITLES,titleById:titleById,ACH:ACH,achById:achById,QUESTS:QUESTS,questSub:questSub,questById:questById,SCORE_MAP:SCORE_MAP,GAMES_CATALOG:GAMES_CATALOG,GAME_ICONS:GAME_ICONS};
 })();
