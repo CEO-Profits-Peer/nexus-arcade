@@ -9,5 +9,5 @@
 //     Wert hier eintragen.
 // ============================================================
 window.NEXUS_ANALYTICS = {
-  cloudflareToken: "",   // z.B. "abcdef1234567890abcdef1234567890"
+  cloudflareToken: "abbd3c02a3ca477cb667dc005807aac5",
 };
