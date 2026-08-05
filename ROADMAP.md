@@ -104,14 +104,23 @@ Weiter/Neustart/Zum-Hub. Simulation/Eingabe pausiert währenddessen sauber (Stat
       Aufbauspiel im Clash-of-Clans-Stil. Größere Würfe — vor Umsetzung jeweils eigene Scoping-Runde.
 
 ### 6. Monetarisierung
-- [ ] **Rewarded Ads zuerst** (opt-in, z. B. „Video ansehen → 2× Gold/Coins, Continue"): können **jetzt schon**
-      sinnvoll sein — Spieler entscheiden sich freiwillig dafür, geringes Risiko fürs Nutzererlebnis, monetarisiert
-      jeden Traffic der schon da ist. Ad-Netzwerk-Konto nötig (AdSense oder AdinPlay/CreativeClan für Games).
-- [ ] **Display-/Banner-Ads (die vorhandenen `.ad-slot`-Platzhalter) erst später füllen**: aktuell noch keine eigene
-      Domain, nicht bei Search Console eingereicht, kein organischer Traffic — Banner würden nur den ersten
-      Eindruck für frühe Tester verschlechtern, ohne nennenswert Umsatz zu bringen (zu wenig Impressionen für
-      Ad-Netzwerk-Fill-Rate). Sinnvoller Trigger: **nach** eigener Domain + Search-Console-Einreichung, sobald
-      im Analytics echter (nicht selbst erzeugter) Traffic über mehrere Wochen ankommt.
+- [x] **Display-Ads sitewide vorbereitet**: alle 14 Seiten (Portal + 13 Spiele) laden jetzt `ads-config.js` +
+      `ads.js` im `<head>`; jede Seite hat einen `.ad-slot` oben (unter der Top-Bar) und unten (nach dem Spiel),
+      plus zwei feste Skyscraper-Rails (`.ad-rail`, links+rechts neben dem Spiel, nur auf breiten Desktop-Fenstern,
+      Breite 140–200px passend zur jeweiligen Spielspalte). Rails brauchen zusätzlich `railSlotId` in `ads-config.js`
+      (eine responsive AdSense-Anzeigeneinheit reicht für alle Spiele, da "Responsive" sich automatisch anpasst).
+      Ohne gesetzte `adsenseClientId` ist das komplett unsichtbar (No-Op) — sobald der Nutzer ein AdSense-Konto hat
+      und seine Publisher-ID in `ads-config.js` einträgt, läuft Google Auto Ads sofort sitewide, ohne Code-Änderung.
+      **Bewusst vorgezogen** trotz der ursprünglichen "erst nach echtem Traffic"-Überlegung unten, weil jetzt aktiv
+      Social-Media-Marketing (Instagram-Reels, KI-generiert, mehrmals täglich via GitHub Actions) auf die Seite
+      verweist — der Traffic, auf den vorher gewartet wurde, ist jetzt der Plan, nicht mehr offen.
+      **Nutzer-Schritt (kann ich nicht automatisieren):** eigenes Google-AdSense-Konto anlegen (oder alternativ ein
+      Games-Netzwerk wie AdinPlay/CreativeClan, oft bessere Fill-Rate für Spiele-Sites), Seite verifizieren lassen,
+      Publisher-ID (`ca-pub-...`) in `ads-config.js` eintragen, `ads.txt` im Domain-Root mit der von AdSense
+      vorgegebenen Zeile anlegen (Pflicht, sonst liefert AdSense keine Anzeigen aus).
+- [ ] **Rewarded Ads** (opt-in, z. B. „Video ansehen → 2× Gold/Coins, Continue"): eigenes Feature on top von den
+      Display-Ads, noch nicht gebaut — braucht ein Ad-Netzwerk mit Rewarded-Format (AdSense H5 Games Ads oder
+      AdinPlay) und pro Spiel eine Stelle, die den Bonus auslöst. Sinnvoll als nächster Schritt nach Punkt oben.
 
 ### 7. Meta / QoL
 - [ ] Globale Sound-Einstellung, evtl. Theme-Optionen.

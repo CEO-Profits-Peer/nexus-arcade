@@ -30,6 +30,12 @@ Live: `https://nexusarcade.vercel.app`
   4. `nexus-data.js` — **163 Erfolge, Rahmen, Titel, Cosmetics, Quests, SCORE_MAP** + Helfer → `window.NEXUS_DATA`
   5. `account.js` — Konto/Level/XP/Coins/Shop/Quests/Leaderboards/Sync (nutzt NEXUS_I18N + NEXUS_DATA)
   6. `game-ui.js` (Spielseiten: Fullscreen-Button) bzw. `social.js` (Portal: Favoriten+Likes)
+- **Werbung**: `ads-config.js` (Publisher-ID, vom Nutzer gepflegt) + `ads.js` (Loader) im `<head>` **jeder** der 14 Seiten
+  eingebunden. Ohne gesetzte `adsenseClientId` ist `ads.js` ein No-Op — die `.ad-slot`-Flächen (je Seite oben unter der
+  Top-Bar + unten nach `#belowGame`) bleiben dank `.ad-slot:empty{display:none}` unsichtbar. Sobald die ID gesetzt ist,
+  lädt Google AdSense Auto Ads sitewide, ohne dass pro Seite etwas geändert werden muss.
+- **Analytics**: `analytics-config.js` (Cloudflare-Token, vom Nutzer gepflegt) + `analytics.js` (Loader), gleiches
+  Prinzip: No-Op ohne Token, sonst lädt Cloudflare Web Analytics (kostenlos, cookielos, kein DNS-Umzug nötig).
 - Doku: `ANLEITUNG.md`, `SUPABASE-SETUP.md`, `ROADMAP.md`.
 
 ## Konventionen (bitte einhalten)

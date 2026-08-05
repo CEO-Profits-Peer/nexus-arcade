@@ -28,6 +28,13 @@
   .chip:hover{border-color:var(--neon);}
   .ic{width:15px;height:15px;flex:none;}
   .belowgame{width:100%;text-align:center;padding:10px 0 4px;}
+  .ad-slot{width:100%;max-width:460px;min-height:90px;margin:8px 0;border-radius:12px;border:1px dashed rgba(120,140,220,0.35);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:1px;background:rgba(255,255,255,0.02);}
+  .ad-slot:empty{display:none;}
+  .ad-rail{position:fixed;top:110px;width:200px;min-height:250px;max-height:600px;border-radius:12px;border:1px dashed rgba(120,140,220,0.3);background:rgba(255,255,255,0.02);z-index:1;}
+  .ad-rail:empty{display:none;}
+  .ad-rail-l{left:16px;}
+  .ad-rail-r{right:16px;}
+  @media(max-width:1060px){.ad-rail{display:none;}}
   .hud{width:100%;max-width:460px;display:flex;gap:10px;padding:4px 16px;}
   .hud .box{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;text-align:center;}
   .hud .l{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
@@ -53,8 +60,14 @@
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--neon);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:60;}
   .toast.show{opacity:1;}
 </style>
+<script src="/ads-config.js"></script>
+<script src="/ads.js"></script>
+<script src="/analytics-config.js"></script>
+<script src="/analytics.js"></script>
 </head>
 <body>
+<div class="ad-rail ad-rail-l" id="railL"></div>
+<div class="ad-rail ad-rail-r" id="railR"></div>
 <header class="top">
   <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS ARCADE</span></a>
   <div class="controls">
@@ -62,6 +75,8 @@
     <div class="chip" id="langBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z"/></svg> <span id="langLabel">EN</span></div>
   </div>
 </header>
+
+<div class="ad-slot" id="adTop"></div>
 <div class="hud">
   <div class="box"><div class="l" data-i18n="score">Score</div><div class="v green" id="scoreVal">0</div></div>
   <div class="box"><div class="l" data-i18n="best">Best</div><div class="v" id="bestVal">0</div></div>
@@ -89,6 +104,7 @@
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
+<div class="ad-slot" id="adBottom"></div>
 <section class="about">
   <h2 id="aboutH">About Nexus Snake</h2>
   <p id="aboutP">Nexus Snake is a free take on the timeless snake arcade game, right in your browser — no download, no signup. Guide your glowing snake to eat orbs and grow longer, but don't crash into the walls or your own tail. The longer you get, the faster it moves. Chase a new highscore and challenge your friends. Works on desktop and mobile.</p>

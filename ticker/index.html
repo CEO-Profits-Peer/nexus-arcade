@@ -26,6 +26,13 @@
   .controls{display:flex;gap:8px;align-items:center;}
   .ic{width:15px;height:15px;flex:none;}
   .belowgame{width:100%;text-align:center;padding:10px 0 4px;}
+  .ad-slot{width:100%;max-width:480px;min-height:90px;margin:8px 0;border-radius:12px;border:1px dashed rgba(120,140,220,0.35);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:1px;background:rgba(255,255,255,0.02);}
+  .ad-slot:empty{display:none;}
+  .ad-rail{position:fixed;top:110px;width:200px;min-height:250px;max-height:600px;border-radius:12px;border:1px dashed rgba(120,140,220,0.3);background:rgba(255,255,255,0.02);z-index:1;}
+  .ad-rail:empty{display:none;}
+  .ad-rail-l{left:16px;}
+  .ad-rail-r{right:16px;}
+  @media(max-width:1080px){.ad-rail{display:none;}}
   .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;}
   .chip:hover{border-color:var(--neon);}
   .hud{width:100%;max-width:480px;display:flex;gap:8px;padding:4px 16px;}
@@ -72,8 +79,14 @@
   .toast.show{opacity:1;}
   .hidden{display:none !important;}
 </style>
+<script src="/ads-config.js"></script>
+<script src="/ads.js"></script>
+<script src="/analytics-config.js"></script>
+<script src="/analytics.js"></script>
 </head>
 <body>
+<div class="ad-rail ad-rail-l" id="railL"></div>
+<div class="ad-rail ad-rail-r" id="railR"></div>
 <header class="top">
   <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS ARCADE</span></a>
   <div class="controls">
@@ -81,6 +94,8 @@
     <div class="chip" id="langBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z"/></svg> <span id="langLabel">EN</span></div>
   </div>
 </header>
+
+<div class="ad-slot" id="adTop"></div>
 <div class="hud">
   <div class="box"><div class="l" data-i18n="cash">Cash</div><div class="v cash" id="cashVal">$0</div></div>
   <div class="box"><div class="l" data-i18n="networth">Net Worth</div><div class="v net" id="netVal">$0</div></div>
@@ -107,6 +122,7 @@
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
+<div class="ad-slot" id="adBottom"></div>
 <section class="about">
   <h2 id="aboutH">About Nexus Ticker</h2>
   <p id="aboutP">Nexus Ticker is a free trading simulator you play right in your browser — no download, no signup. Start with $1,000 and 75 seconds on the clock, across four markets: a steady bond, two mid-risk stocks and one wild, high-volatility coin. Buy into dips, ride the news spikes, and sell before a crash wipes you out. When the bell rings, every position is cashed out automatically. A quarter of any profit also flows into your Nexus Finance Empire capital. How big can you grow your net worth?</p>
