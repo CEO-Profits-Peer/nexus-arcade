@@ -1,0 +1,81 @@
+<!--
+  Nexus Arcade — Magic-Link-Login-Mail (gebrandetes Template)
+
+  Einrichtung in Supabase:
+  1. Supabase-Dashboard -> dein Projekt -> Authentication -> Email Templates
+  2. Vorlage "Magic Link" auswählen
+  3. Betreff (optional): "Dein Login-Link für Nexus Arcade"
+  4. Den KOMPLETTEN Inhalt dieser Datei (inkl. <!DOCTYPE>/<html>-Rahmen unten)
+     in das Body-Feld einfügen und speichern. {{ .ConfirmationURL }} ist die
+     von Supabase automatisch eingesetzte Login-URL - nicht verändern/entfernen.
+
+  Hinweis: E-Mail-Clients unterstützen kein modernes CSS (kein backdrop-
+  filter, keine Verläufe im Text, kaum Flexbox) - deshalb bewusst simples
+  Tabellen-Layout mit Inline-Styles statt der Website-Optik 1:1. Der
+  <meta charset="utf-8"> im Kopf ist Pflicht, sonst zeigen viele Mail-Clients
+  Emoji/Umlaute als Kauderwelsch an.
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dein Login-Link für Nexus Arcade</title>
+</head>
+<body style="margin:0;padding:0;background-color:#05060f;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#05060f;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background-color:#0d0f1f;border:1px solid #2a2f55;border-radius:16px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;">
+        <tr>
+          <td style="padding:32px 32px 8px;text-align:center;">
+            <span style="font-size:22px;font-weight:900;letter-spacing:2px;color:#39e6ff;">🎮 NEXUS ARCADE</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 32px 0;text-align:center;">
+            <h1 style="margin:0;font-size:22px;line-height:1.4;color:#eaf6ff;font-weight:800;">Dein Login-Link ist da</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:12px 32px 0;text-align:center;">
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#8a97c2;">
+              Klick auf den Button unten, um dich einzuloggen. Der Link ist eine Stunde gültig und funktioniert nur einmal.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 32px;text-align:center;">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+              <tr>
+                <td style="border-radius:999px;background-color:#39e6ff;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:800;letter-spacing:0.5px;color:#04121a;text-decoration:none;border-radius:999px;">
+                    ▶ JETZT EINLOGGEN
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 28px;text-align:center;">
+            <p style="margin:0;font-size:12px;line-height:1.6;color:#5b6488;">
+              Button funktioniert nicht? Kopiere diesen Link in deinen Browser:<br>
+              <a href="{{ .ConfirmationURL }}" style="color:#39e6ff;word-break:break-all;">{{ .ConfirmationURL }}</a>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 32px 28px;border-top:1px solid #1c2040;text-align:center;">
+            <p style="margin:0;font-size:12px;line-height:1.6;color:#5b6488;">
+              Hast du das nicht angefordert? Dann einfach ignorieren — es passiert nichts.<br>
+              Nexus Arcade · nexusarcade.vercel.app
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

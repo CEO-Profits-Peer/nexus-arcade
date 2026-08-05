@@ -124,7 +124,7 @@ Damit kann jeder Nutzer **nur seine eigenen** Daten lesen/schreiben.
 
    **WICHTIG:** Die **Site URL** muss deine App sein (`https://nexusarcade.vercel.app`), NICHT die `...supabase.co`-Adresse. Steht dort die supabase.co-Domain, landest du nach dem Klick auf `{"error":"requested path is invalid"}`. Bei **Redirect URLs** am besten `https://nexusarcade.vercel.app/**` eintragen (das `**` erlaubt alle Unterseiten).
 
-3b. **Optional — E-Mail auf „Nexus Arcade" branden:** Authentication → **Email Templates** → Vorlage „Magic Link" bzw. „Confirm signup" bearbeiten (Betreff/Text, z. B. „Dein Nexus-Arcade-Login"). Für einen eigenen Absender*namen*/Adresse brauchst du eigenes SMTP unter Authentication → **SMTP Settings** (z. B. über einen Mail-Dienst). Ohne SMTP verschickt Supabase über die Standard-Adresse.
+3b. **E-Mail auf „Nexus Arcade" branden:** Authentication → **Email Templates** → Vorlage „Magic Link" öffnen, Betreff z. B. „Dein Login-Link für Nexus Arcade" eintragen, und den kompletten Inhalt von [`email-templates/magic-link.html`](email-templates/magic-link.html) ins Body-Feld einfügen (fertiges gebrandetes Design, `{{ .ConfirmationURL }}` nicht anfassen). Für einen eigenen Absender*namen*/Adresse brauchst du zusätzlich eigenes SMTP unter Authentication → **SMTP Settings** (z. B. über einen Mail-Dienst). Ohne SMTP verschickt Supabase über die Standard-Adresse, das Design greift trotzdem.
 
 ## 5. Deployen & testen
 
