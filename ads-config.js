@@ -15,5 +15,5 @@ window.NEXUS_ADS = {
   // "Responsive" passt sich automatisch an die (pro Spiel unterschiedliche)
   // Breite der Fläche an. Leer = Rails bleiben unsichtbar, auch wenn oben eine
   // adsenseClientId gesetzt ist.
-  railSlotId: "",   // z.B. "1234567890"
+  railSlotId: "6684921280",
 };
