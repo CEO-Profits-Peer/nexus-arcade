@@ -7,7 +7,7 @@
 //  alle .ad-slot-Flächen bleiben unsichtbar wie bisher).
 // ============================================================
 window.NEXUS_ADS = {
-  adsenseClientId: "",   // z.B. "ca-pub-1234567890123456"
+  adsenseClientId: "ca-pub-8917109998081495",
 
   // Optional: eine responsive AdSense-"Display-Anzeige"-Einheit (im AdSense-
   // Dashboard einmal anlegen, Format "Responsive") für die seitlichen Skyscraper-
