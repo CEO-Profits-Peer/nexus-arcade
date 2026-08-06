@@ -24,12 +24,14 @@
       url: "https://getnexusnode.github.io/nexus-node-site/",
       pitch: "Turn your network into interactive maps & graphs.",
       color: "#39e6ff",
+      image: "/promo-assets/nexus-node.png",
     },
     {
       name: "Olympos",
       url: "https://olympos-gym.vercel.app",
       pitch: "Strength tracker styled after ancient Greece.",
       color: "#ff3ea5",
+      image: "/promo-assets/olympos.png",
     },
   ];
 
@@ -47,6 +49,15 @@
   link.target = "_blank";
   link.rel = "noopener";
   link.style.cssText = "text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;";
+
+  if (promo.image) {
+    var img = document.createElement("img");
+    img.src = promo.image;
+    img.alt = promo.name;
+    img.style.cssText = "width:100%;border-radius:10px;display:block;object-fit:cover;";
+    img.onerror = function () { img.style.display = "none"; };
+    link.appendChild(img);
+  }
 
   var eyebrow = document.createElement("div");
   eyebrow.textContent = "ALSO BY US";
