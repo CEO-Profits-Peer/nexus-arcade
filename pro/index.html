@@ -40,6 +40,7 @@
 </style>
 <script src="/ads-config.js"></script><script src="/ads.js"></script>
 <script src="/analytics-config.js"></script><script src="/analytics.js"></script>
+<script src="/pro-promo-config.js"></script><script src="/pro-promo.js"></script>
 </head>
 <body>
 <header class="top">
@@ -59,6 +60,10 @@
   </div>
 
   <div class="card">
+    <div id="proPromoBanner" style="display:none;background:rgba(255,207,92,.1);border:1px solid rgba(255,207,92,.4);border-radius:12px;padding:10px;margin-bottom:16px">
+      <div id="proPromoText" style="font-size:13px;font-weight:700;color:var(--gold)"></div>
+      <div id="proPromoTimer" style="font-size:18px;font-weight:900;margin-top:2px;font-variant-numeric:tabular-nums"></div>
+    </div>
     <div class="price" id="proPrice">Simple monthly plan<br><small>see checkout for exact price</small></div>
     <button class="cta" id="proBtn">Get NEXUS ARCADE PRO</button>
     <button class="cta" id="proManageBtn" style="display:none;background:transparent;border:1px solid var(--line);color:var(--text)">Manage subscription</button>
@@ -81,8 +86,27 @@
   var manageBtn = document.getElementById("proManageBtn");
   var statusEl = document.getElementById("proStatus");
   var params = new URLSearchParams(location.search);
+  var promoCode = params.get("promo") || "";
+  var promoExpired = false;
 
   function setStatus(msg, cls){ statusEl.textContent = msg || ""; statusEl.className = "status" + (cls ? " " + cls : ""); }
+
+  function initPromoBanner(){
+    if(!promoCode || !window.NexusPromo) return;
+    var banner = document.getElementById("proPromoBanner");
+    var textEl = document.getElementById("proPromoText");
+    var timerEl = document.getElementById("proPromoTimer");
+    banner.style.display = "block";
+    textEl.textContent = "🎁 Welcome offer applied: " + (window.NexusPromo.percent || 20) + "% off your first month";
+    var exp = window.NexusPromo.offerExpiry();
+    var tick = function(){
+      var left = exp - Date.now();
+      if(left <= 0){ timerEl.textContent = "Offer expired — standard price applies"; promoExpired = true; clearInterval(h); return; }
+      timerEl.textContent = window.NexusPromo.fmt(left);
+    };
+    tick();
+    var h = setInterval(tick, 1000);
+  }
 
   function render(){
     var pro = window.NexusArcade && window.NexusArcade.isPro && window.NexusArcade.isPro();
@@ -115,7 +139,7 @@
     try{
       var res = await fetch("/api/create-checkout-session", {
         method: "POST", headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ userId: user.id, email: user.email })
+        body: JSON.stringify({ userId: user.id, email: user.email, promoCode: (promoCode && !promoExpired) ? promoCode : undefined })
       });
       var data = await res.json();
       if(data && data.url){ location.href = data.url; return; }
@@ -143,6 +167,8 @@
       manageBtn.disabled = false; manageBtn.textContent = "Manage subscription";
     }
   });
+
+  initPromoBanner();
 
   if(window.NexusArcade && window.NexusArcade.ready){
     window.NexusArcade.ready(function(){

@@ -168,6 +168,12 @@ Der Code dafür ist fertig (`/pro/`, `/api/create-checkout-session.js`, `/api/cr
 
 **Abo kündigen:** Der „Manage subscription"-Button auf `/pro/` öffnet Stripes gehostetes Kunden-Portal (kein eigener Code nötig) — dort können Nutzer selbst kündigen/Zahlungsmittel ändern; der Webhook entfernt danach automatisch den PRO-Status.
 
+**Optional — Willkommensangebot fürs Promo-Popup:** Ohne diesen Schritt läuft alles normal, nur ohne Rabatt-Banner (Checkout fällt auf `allow_promotion_codes` zurück, Nutzer könnten also selbst einen Code eintippen, aber es wird keiner beworben). Für den Rabatt im Promo-Popup (siehe unten):
+1. Stripe Dashboard → Product catalog → dein PRO-Produkt → **Coupons** → Coupon anlegen (z.B. 20% off, "once" für nur den 1. Monat oder "repeating" für mehrere Monate).
+2. Darauf **Promotion code** anlegen mit dem Code `WELCOME20` (oder eigenem Code).
+3. Falls du einen anderen Code als `WELCOME20` gewählt hast: in **`pro-promo-config.js`** eintragen (`code`/`percent`).
+4. Ohne einen in Stripe aktiven Code mit exakt diesem Namen ignoriert der Checkout den Code automatisch (kein Fehler, normaler Preis).
+
 ## 7. Rewarded Ads (AdinPlay) — Setup
 
 Der Code dafür ist fertig (`rewarded-ads-config.js`, `rewarded-ads.js`, „📺 Video ansehen · +50 Coins"-Button im Konto-Fenster, Profil-Tab), aber **inaktiv** bis publisherId/siteId eingetragen sind — ohne sie bleibt der Button unsichtbar, kein Request an AdinPlay.
@@ -185,6 +191,10 @@ Der Code dafür ist fertig (`rewarded-ads-config.js`, `rewarded-ads.js`, „📺
 5. Belohnung (aktuell 50 Coins, `WATCH_AD_REWARD` in `account.js`) anpassbar.
 
 **Technischer Hinweis:** Die Integration nutzt AdinPlays Standard-Preroll-Player (`aiptag.cmd.player` / `aipPlayer` / `AIP_REMOVE`) — dasselbe Muster, das z.B. das Open-Source-Spiel shapez.io produktiv einsetzt. „Reward" wird vergeben, sobald der Nutzer den Ad-Screen bis zum Schließen angesehen hat.
+
+## 8. PRO-Promo-Popup
+
+Läuft direkt ohne weiteren Setup-Schritt (`pro-promo-config.js` + `pro-promo.js`, auf allen 13 Spielseiten + Portal eingebunden). Zeigt Nicht-PRO-Spielern nach 25s auf der Seite ein Popup mit allen PRO-Vorteilen + einem 15-Minuten-Countdown fürs Willkommensangebot (Rabatt-Setup siehe Abschnitt 6). Maximal 1x alle 24h pro Browser (`localStorage nx_promo_last`), nie wenn schon PRO, nie auf `/pro/` selbst. Tunables direkt in `pro-promo.js`: `SHOW_DELAY_MS`, `REPEAT_MS`, `OFFER_MS`.
 
 ## Nächste Ausbaustufe (Phase 2)
 
