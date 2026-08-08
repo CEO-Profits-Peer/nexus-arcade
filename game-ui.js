@@ -13,6 +13,19 @@
       ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5v4M15 3h4v4M9 21H5v-4M15 21h4v-4"/></svg>'
       : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   }
+  // Andere Arcade-Portale (z.B. CrazyGames) laden jedes Spiel in einem
+  // <iframe> und fullscreenen NUR das - dadurch verschwindet automatisch
+  // die ganze Seiten-Chrome (Nav, Werbung, Vorschläge). Nexus Arcade hat
+  // bewusst kein iframe (eine index.html pro Spiel), daher fullscreenen wir
+  // stattdessen gezielt den Spielcontainer (#frame bzw. #board bei merge)
+  // statt document.documentElement - vorher wurde die GESAMTE Seite
+  // fullgescreent, inklusive Top-Bar/Ads/Vorschlägen.
+  const FULLSCREEN_TARGET_ID = { merge: "board" };
+  function fullscreenTarget(){
+    const gid = detectGame();
+    const id = (gid && FULLSCREEN_TARGET_ID[gid]) || "frame";
+    return document.getElementById(id) || document.documentElement;
+  }
   function initFullscreen(){
     const mount = document.getElementById("belowGame");
     if(!mount || document.getElementById("nxFsBtn")) return;
@@ -26,10 +39,10 @@
     document.addEventListener("webkitfullscreenchange", ()=>{ btn.innerHTML = icon(!!document.webkitFullscreenElement); });
   }
   function toggle(){
-    const el = document.documentElement;
     const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
     try{
       if(!fsEl){
+        const el = fullscreenTarget();
         const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
         if(req) req.call(el);
       } else {
@@ -63,7 +76,12 @@
       ".nxSuggestCard{display:flex;flex-direction:column;align-items:center;gap:6px;width:78px;padding:10px 6px;border-radius:12px;background:var(--panel,rgba(16,20,42,.82));border:1px solid var(--line,rgba(120,140,220,.25));text-decoration:none;color:var(--text,#eaf6ff);font-size:11px;font-weight:700;text-align:center;transition:.15s;}"+
       ".nxSuggestCard:hover{border-color:var(--neon,#39e6ff);transform:translateY(-2px);}"+
       ".nxSuggestIc{width:26px;height:26px;color:var(--neon,#39e6ff);}"+
-      ".nxSuggestIc svg{width:100%;height:100%;}";
+      ".nxSuggestIc svg{width:100%;height:100%;}"+
+      // Vollbild: Höhe an den Bildschirm anpassen, Breite ergibt sich aus dem
+      // vorhandenen aspect-ratio des Spiels (kein Verzerren, sauberes
+      // Letterboxing statt gestrecktem Canvas), zentriert per margin:auto.
+      "#frame:fullscreen,#board:fullscreen{width:auto;height:100vh;max-width:100vw;margin:auto;border-radius:0;}"+
+      "#frame:-webkit-full-screen,#board:-webkit-full-screen{width:auto;height:100vh;max-width:100vw;margin:auto;border-radius:0;}";
     document.head.appendChild(st);
   }
 
@@ -131,12 +149,27 @@
     mount.insertAdjacentElement("afterend", sec);
   }
 
+  // Zusätzliche Anzeigenfläche unterm Spiel (neben dem schon vorhandenen
+  // #adTop/#adBottom + der rechten Rail) - ein Slot pro Spielseite mehr,
+  // ohne alle 13 Spiel-Dateien einzeln anfassen zu müssen. Nutzt dieselbe
+  // .ad-slot-Klasse wie die anderen Flächen (siehe ads.js/Auto-Ads-Kommentar
+  // dort): ohne aktivierte Auto Ads im AdSense-Konto bleibt sie leer und
+  // unsichtbar (.ad-slot:empty{display:none}), genau wie die anderen.
+  function insertMidAdSlot(){
+    const mount = document.getElementById("belowGame");
+    if(!mount || document.getElementById("adMid")) return;
+    const slot = document.createElement("div");
+    slot.className = "ad-slot"; slot.id = "adMid";
+    mount.appendChild(slot);
+  }
+
   function init(){
+    injectStyles();
     initFullscreen();
+    insertMidAdSlot();
     const D=window.NEXUS_DATA||{}; const catalog=D.GAMES_CATALOG||[]; const icons=D.GAME_ICONS||{};
     const gid=detectGame();
     if(gid&&catalog.length){
-      injectStyles();
       injectGameTag(gid,catalog);
       renderSuggestions(gid,catalog,icons);
     }
