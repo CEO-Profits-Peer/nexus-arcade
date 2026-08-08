@@ -38,6 +38,14 @@
   var rail = document.getElementById("railL");
   if (!rail) return;
 
+  // "display:flex" NICHT bedingungslos inline setzen: ein Inline-Style
+  // schlägt jede @media-Regel im Stylesheet, egal wie schmal das Fenster
+  // ist - dadurch blieb die Promo-Karte auch dort sichtbar/überlappend, wo
+  // die responsive .ad-rail-Regel sie eigentlich (per max-width) ausblenden
+  // sollte ("schneidet in Spiele ein"). Nur flexen, wenn die Karte laut
+  // aktuell greifender CSS-Regel überhaupt sichtbar sein soll.
+  if (getComputedStyle(rail).display === "none") return;
+
   var promo = PROMOS[Math.floor(Math.random() * PROMOS.length)];
 
   rail.style.cssText += "border-style:solid;border-color:" + promo.color + "44;" +
