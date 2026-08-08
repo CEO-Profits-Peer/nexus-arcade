@@ -183,7 +183,7 @@
 <header class="top">
   <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS ARCADE</span></a>
   <div class="controls">
-    <div class="chip" id="muteBtn" title="Sound">🔊 <span id="muteLabel">On</span></div>
+    <div class="chip" id="muteBtn" title="Sound"><span id="muteIcon" class="ic" style="display:inline-flex"></span> <span id="muteLabel">On</span></div>
     <div class="chip" id="rankBtn" title="Leaderboards"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></div>
     <div class="chip" id="langBtn" title="Language"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z"/></svg> <span id="langLabel">EN</span></div>
   </div>
@@ -236,7 +236,7 @@
         <button class="btn" id="resumeBtn" data-i18n="resume">▶ RESUME</button>
         <button class="btn secondary" id="pauseRestartBtn" data-i18n="retry">↻ RETRY</button>
       </div>
-      <a class="btn secondary" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
+      <a class="btn secondary" id="pauseHomeBtn" href="/"><svg width="15" height="15" style="vertical-align:-2px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span data-i18n="home">HOME</span></a>
     </div>
   </div>
 </div>
@@ -286,7 +286,7 @@
       shareText:(s)=>`I scored ${s} in Nexus Dash! Can you beat me?`,
       copied:"Score copied — paste it anywhere!",
       soundOn:"On", soundOff:"Off",
-      paused:"PAUSED", resume:"▶ RESUME", home:"🏠 HOME",
+      paused:"PAUSED", resume:"▶ RESUME", home:"HOME",
       upgrades:"⚡ UPGRADES", close:"✕ CLOSE", needMore:"Not enough coins — earn more by leveling up, finishing quests or watching a rewarded ad.",
       maxed:"MAX", buy:"Buy",
       upMagnetName:"Orb Magnet", upMagnetDesc:"Nearby orbs get pulled toward you — bigger radius per level.",
@@ -306,7 +306,7 @@
       shareText:(s)=>`Ich habe ${s} Punkte in Nexus Dash! Schaffst du mehr?`,
       copied:"Score kopiert — überall einfügen!",
       soundOn:"An", soundOff:"Aus",
-      paused:"PAUSIERT", resume:"▶ WEITER", home:"🏠 HUB",
+      paused:"PAUSIERT", resume:"▶ WEITER", home:"HUB",
       upgrades:"⚡ UPGRADES", close:"✕ SCHLIESSEN", needMore:"Nicht genug Coins — verdiene mehr durch Level-Ups, Quests oder ein Werbevideo.",
       maxed:"MAX", buy:"Kaufen",
       upMagnetName:"Orb-Magnet", upMagnetDesc:"Orbs in der Nähe werden angezogen — größerer Radius pro Stufe.",
@@ -334,6 +334,11 @@
   }
 
   /* ---------------- Sound (WebAudio, no assets) ---------------- */
+  // SVG statt Emoji (🔊/🔇) fuers Lautsprecher-Icon - gleicher Stil wie die anderen
+  // Top-Bar-Icons (rankBtn/langBtn), siehe ROADMAP.md Abschnitt 5.
+  const ICON_SOUND_ON='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const ICON_SOUND_OFF='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
+  function updateMuteIcon(){ document.getElementById("muteIcon").innerHTML = muted?ICON_SOUND_OFF:ICON_SOUND_ON; }
   let muted = localStorage.getItem("nd_muted")==="1";
   let actx = null;
   function beep(freq, dur, type, vol){
@@ -702,7 +707,7 @@
   document.addEventListener("keydown",e=>{ if(e.key==="Escape") togglePause(); });
   document.getElementById("muteBtn").addEventListener("click",()=>{
     muted=!muted;localStorage.setItem("nd_muted",muted?"1":"0");
-    document.getElementById("muteBtn").firstChild.textContent=muted?"🔇 ":"🔊 ";
+    updateMuteIcon();
     document.getElementById("muteLabel").textContent=muted?I18N[lang].soundOff:I18N[lang].soundOn;
   });
   document.getElementById("year").textContent=new Date().getFullYear();
@@ -714,7 +719,7 @@
   // init
   resize();
   document.getElementById("bestVal").textContent=best;
-  if(muted) document.getElementById("muteBtn").firstChild.textContent="🔇 ";
+  updateMuteIcon();
   applyLang();
   requestAnimationFrame(frameLoop);
 })();

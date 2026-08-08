@@ -101,7 +101,7 @@
 <header class="top">
   <a class="brand" href="/" style="text-decoration:none;color:inherit" title="Nexus Arcade — Home"><div class="dot"></div><span>NEXUS ARCADE</span></a>
   <div class="controls">
-    <div class="chip" id="muteBtn">🔊</div>
+    <div class="chip" id="muteBtn"><span id="muteIcon" class="ic"></span></div>
     <div class="chip" id="rankBtn" title="Leaderboards"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></div>
     <div class="chip" id="langBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z"/></svg> <span id="langLabel">EN</span></div>
   </div>
@@ -150,7 +150,7 @@
         <button class="btn" id="resumeBtn" data-i18n="resume">▶ RESUME</button>
         <button class="btn sec" id="pauseRestartBtn" data-i18n="retry">↻ RETRY</button>
       </div>
-      <a class="btn sec" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
+      <a class="btn sec" id="pauseHomeBtn" href="/"><svg width="15" height="15" style="vertical-align:-2px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span data-i18n="home">HOME</span></a>
     </div>
   </div>
 </div>
@@ -183,7 +183,7 @@
     hint:"Move: mouse / drag / ← →  ·  Nitro: Space / tap-hold",aboutH:"About Nexus Racer",
     aboutP:"Nexus Racer is a free endless car racing game you play right in your browser — no download, no signup. Weave through neon night traffic, collect coins, and build up your nitro to blast forward for extra distance. The further you drive, the faster it gets. Beat your personal record and challenge your friends. Works on desktop and mobile.",
     shareText:s=>`I drove ${s}m in Nexus Racer! Can you go further?`,copied:"Copied — paste anywhere!",
-    paused:"PAUSED",resume:"▶ RESUME",home:"🏠 HOME",
+    paused:"PAUSED",resume:"▶ RESUME",home:"HOME",
     upgrades:"⚡ UPGRADES",close:"✕ CLOSE",needMore:"Not enough coins — earn more by leveling up, finishing quests or watching a rewarded ad.",
     maxed:"MAX",buy:"Buy",
     upNitroName:"Nitro Efficiency",upNitroDesc:"Nitro drains slower while boosting — hold it longer per tank.",
@@ -195,7 +195,7 @@
     hint:"Lenken: Maus / ziehen / ← →  ·  Nitro: Leertaste / halten",aboutH:"Über Nexus Racer",
     aboutP:"Nexus Racer ist ein kostenloses Endlos-Rennspiel direkt im Browser — kein Download, keine Anmeldung. Schlängle dich durch den Neon-Nachtverkehr, sammle Münzen und lade dein Nitro auf, um für Extra-Distanz nach vorn zu schießen. Je weiter du fährst, desto schneller wird es. Knacke deinen Rekord und fordere Freunde heraus. Läuft auf Desktop und Handy.",
     shareText:s=>`Ich bin ${s}m in Nexus Racer gefahren! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
-    paused:"PAUSIERT",resume:"▶ WEITER",home:"🏠 HUB",
+    paused:"PAUSIERT",resume:"▶ WEITER",home:"HUB",
     upgrades:"⚡ UPGRADES",close:"✕ SCHLIESSEN",needMore:"Nicht genug Coins — verdiene mehr durch Level-Ups, Quests oder ein Werbevideo.",
     maxed:"MAX",buy:"Kaufen",
     upNitroName:"Nitro-Effizienz",upNitroDesc:"Nitro verbraucht sich beim Boosten langsamer — haelt pro Tank laenger.",
@@ -212,6 +212,9 @@
   window.addEventListener("resize",resize);
 
   // audio
+  const ICON_SOUND_ON='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const ICON_SOUND_OFF='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
+  function updateMuteIcon(){document.getElementById("muteIcon").innerHTML=muted?ICON_SOUND_OFF:ICON_SOUND_ON;}
   let actx=null;
   function beep(f,d,t,v){if(muted)return;try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t||"sine";o.frequency.value=f;g.gain.value=v||0.05;o.connect(g);g.connect(actx.destination);const n=actx.currentTime;g.gain.exponentialRampToValueAtTime(0.0001,n+(d||0.1));o.start(n);o.stop(n+(d||0.1));}catch(e){}}
 
@@ -411,9 +414,9 @@
   document.getElementById("resumeBtn").addEventListener("click",togglePause);
   document.getElementById("pauseRestartBtn").addEventListener("click",start);
   document.addEventListener("keydown",e=>{ if(e.key==="Escape") togglePause(); });
-  document.getElementById("muteBtn").addEventListener("click",()=>{muted=!muted;localStorage.setItem("nx_muted",muted?"1":"0");document.getElementById("muteBtn").textContent=muted?"🔇":"🔊";});
+  document.getElementById("muteBtn").addEventListener("click",()=>{muted=!muted;localStorage.setItem("nx_muted",muted?"1":"0");updateMuteIcon();});
   document.getElementById("year").textContent=new Date().getFullYear();
-  if(muted)document.getElementById("muteBtn").textContent="🔇";
+  updateMuteIcon();
   resize();document.getElementById("bestVal").textContent=best;applyLang();requestAnimationFrame(loop);
 })();
 </script>

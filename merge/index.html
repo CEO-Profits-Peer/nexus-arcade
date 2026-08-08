@@ -114,7 +114,7 @@
         <button class="btn" id="resumeBtn" data-i18n="resume">▶ RESUME</button>
         <button class="btn sec" id="pauseRestartBtn" data-i18n="retry">↻ NEW GAME</button>
       </div>
-      <a class="btn sec" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
+      <a class="btn sec" id="pauseHomeBtn" href="/"><svg width="15" height="15" style="vertical-align:-2px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span data-i18n="home">HOME</span></a>
     </div>
   </div>
   <div style="text-align:center;margin-top:12px"><button class="btn sec" id="newBtn" data-i18n="newgame">↻ New Game</button></div>
@@ -137,12 +137,12 @@
     hint:"Swipe or use arrow keys · WASD",aboutH:"About Nexus 2048",
     aboutP:"Nexus 2048 is a free merge puzzle game you can play right in your browser — no download, no signup. Slide the tiles in any direction; when two tiles with the same number touch, they merge into one. Keep combining to reach the 2048 tile, then push for an even higher score. Easy to learn, hard to put down. Works on desktop and mobile, and your best score is saved.",
     shareText:s=>`I scored ${s} in Nexus 2048! Can you beat me?`,copied:"Copied — paste anywhere!",
-    paused:"PAUSED",resume:"▶ RESUME",home:"🏠 HOME"},
+    paused:"PAUSED",resume:"▶ RESUME",home:"HOME"},
   de:{hub:"Spiele",score:"Punkte",best:"Bestwert",gameover:"GAME OVER",retry:"↻ NEUES SPIEL",share:"⤴ TEILEN",newgame:"↻ Neues Spiel",win:"2048 ERREICHT!",keepgoing:"Weiterspielen",
     hint:"Wischen oder Pfeiltasten · WASD",aboutH:"Über Nexus 2048",
     aboutP:"Nexus 2048 ist ein kostenloses Merge-Puzzle direkt im Browser — kein Download, keine Anmeldung. Schiebe die Kacheln in eine Richtung; berühren sich zwei mit derselben Zahl, verschmelzen sie. Kombiniere weiter bis zur 2048-Kachel und dann zu einem noch höheren Score. Leicht zu lernen, schwer aufzuhören. Läuft auf Desktop und Handy, dein Bestwert wird gespeichert.",
     shareText:s=>`Ich habe ${s} Punkte in Nexus 2048! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
-    paused:"PAUSIERT",resume:"▶ WEITER",home:"🏠 HUB"}};
+    paused:"PAUSIERT",resume:"▶ WEITER",home:"HUB"}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const COLORS={2:"#2b3358",4:"#39506b",8:"#3a7bd5",16:"#39e6ff",32:"#5bbf4a",64:"#7cff6b",128:"#ffcf5c",256:"#ffb03a",512:"#ff7a3a",1024:"#ff4d6d",2048:"#c77dff",4096:"#ff3ea5",8192:"#fff"};
