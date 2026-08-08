@@ -143,6 +143,14 @@
       });
       var data = await res.json();
       if(data && data.url){ location.href = data.url; return; }
+      if(data && data.error === "already_subscribed"){
+        setStatus("You already have an active PRO subscription — syncing your status now, one moment…", "ok");
+        var synced = await window.NexusArcade.refreshPro();
+        if(!synced){ for(var i=0;i<5 && !synced;i++){ await new Promise(function(r){ setTimeout(r,1500); }); synced = await window.NexusArcade.refreshPro(); } }
+        render();
+        if(!synced) setStatus("Already subscribed in Stripe, but this account hasn't synced yet — this can take a minute.", "ok");
+        return;
+      }
       throw new Error(data && data.error || "checkout_failed");
     }catch(e){
       setStatus("Couldn't start checkout — PRO isn't live yet, try again shortly.", "err");

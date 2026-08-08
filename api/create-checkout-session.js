@@ -12,6 +12,26 @@ module.exports = async (req, res) => {
     const { userId, email, promoCode } = req.body || {};
     if (!userId) return res.status(400).json({ error: "missing_user_id" });
 
+    // Geld-Sicherheitsnetz: NIE eine zweite Subscription fuer denselben Nutzer anlegen.
+    // Fragt direkt bei Stripe nach (nicht nur unserem eigenen, webhook-gefuellten
+    // "nexus_pro"-Flag) - das ist race-frei, auch wenn der Webhook noch nicht
+    // durchgelaufen ist: Stripe legt die Subscription synchron beim Checkout an,
+    // unser DB-Sync passiert erst asynchron danach ueber den Webhook.
+    if (email) {
+      const existingCustomers = await stripe.customers.list({ email, limit: 20 });
+      for (const cust of existingCustomers.data) {
+        const subs = await stripe.subscriptions.list({ customer: cust.id, status: "all", limit: 20 });
+        const alreadyActive = subs.data.some(
+          (s) =>
+            (s.status === "active" || s.status === "trialing") &&
+            s.items.data.some((i) => i.price && i.price.id === process.env.STRIPE_PRICE_ID)
+        );
+        if (alreadyActive) {
+          return res.status(409).json({ error: "already_subscribed" });
+        }
+      }
+    }
+
     const origin = req.headers.origin || `https://${req.headers.host}`;
     const sessionParams = {
       mode: "subscription",
