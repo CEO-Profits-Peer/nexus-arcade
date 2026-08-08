@@ -81,7 +81,12 @@
       // vorhandenen aspect-ratio des Spiels (kein Verzerren, sauberes
       // Letterboxing statt gestrecktem Canvas), zentriert per margin:auto.
       "#frame:fullscreen,#board:fullscreen{width:auto;height:100vh;max-width:100vw;margin:auto;border-radius:0;}"+
-      "#frame:-webkit-full-screen,#board:-webkit-full-screen{width:auto;height:100vh;max-width:100vw;margin:auto;border-radius:0;}";
+      "#frame:-webkit-full-screen,#board:-webkit-full-screen{width:auto;height:100vh;max-width:100vw;margin:auto;border-radius:0;}"+
+      // Bei Spielen mit quadratischerem Format als 1080x1920 bleibt links/
+      // rechts bzw. oben/unten Platz frei (korrektes Letterboxing statt
+      // Verzerren) - Backdrop auf die Marken-Hintergrundfarbe statt dem
+      // Browser-Standard (wirkte grau/unfertig).
+      "#frame:fullscreen::backdrop,#board:fullscreen::backdrop{background:#05060f;}";
     document.head.appendChild(st);
   }
 
