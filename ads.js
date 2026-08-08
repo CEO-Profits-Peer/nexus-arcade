@@ -16,6 +16,11 @@
 // ============================================================
 (function () {
   "use strict";
+  // NEXUS ARCADE PRO: "nexus_pro" wird von account.js aus der Cloud (Stripe-Webhook)
+  // synchronisiert. Dieses Script laedt VOR account.js (siehe <head> in jeder Spielseite),
+  // deshalb direkt aus localStorage lesen statt auf window.NexusArcade zu warten.
+  if (localStorage.getItem("nexus_pro") === "1") return;
+
   var cfg = window.NEXUS_ADS || {};
   var clientId = cfg.adsenseClientId;
   if (!clientId) return;

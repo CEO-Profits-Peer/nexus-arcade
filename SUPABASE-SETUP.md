@@ -142,6 +142,32 @@ Damit kann jeder Nutzer **nur seine eigenen** Daten lesen/schreiben.
 - **Profilrahmen als Rewards**, die sich mit steigendem Level freischalten.
 - **Auto-Sync**: alle Spielstände + Einstellungen + Profil landen in der Cloud, sobald man eingeloggt ist; als Gast bleibt alles lokal.
 
+## 6. NEXUS ARCADE PRO (werbefrei, Stripe-Abo) — Setup
+
+Der Code dafür ist fertig (`/pro/`, `/api/create-checkout-session.js`, `/api/create-portal-session.js`, `/api/stripe-webhook.js`), aber **inaktiv** bis diese Schritte erledigt sind — ohne sie zeigt `/pro/` einen freundlichen Fehler statt eines kaputten Buttons.
+
+1. **Stripe-Konto** anlegen auf stripe.com (erst im **Testmodus** arbeiten, oben rechts umschaltbar).
+2. **Produkt anlegen**: Product catalog → Add product → z.B. „Nexus Arcade PRO", Preis **recurring/monthly** (Betrag frei wählbar, z.B. 2,99 €). Die **Price-ID** (`price_...`) kopieren.
+3. **Secret Key** kopieren: Developers → API keys → **Secret key** (`sk_test_...` im Testmodus, später `sk_live_...`).
+4. **Service-Role-Key** aus Supabase kopieren: Project Settings → API Keys → Abschnitt „Service role" (⚠️ geheim, niemals im Frontend verwenden — nur diese Serverless Functions dürfen ihn kennen).
+5. In **Vercel** → Projekt `nexus_arcade` → Settings → **Environment Variables** eintragen:
+   ```
+   STRIPE_SECRET_KEY        = sk_test_...
+   STRIPE_PRICE_ID          = price_...
+   SUPABASE_URL             = https://<dein-ref>.supabase.co   (dieselbe wie NEXUS_SUPABASE_URL)
+   SUPABASE_SERVICE_ROLE_KEY = eyJ...                            (Service-role, NICHT der Publishable-Key)
+   ```
+   Danach neu deployen, damit die Functions die Werte sehen.
+6. **Webhook registrieren**: Stripe Dashboard → Developers → Webhooks → Add endpoint → URL `https://nexusarcade.vercel.app/api/stripe-webhook` → Events auswählen: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Nach dem Anlegen die **Signing secret** (`whsec_...`) kopieren und als weitere Vercel-Env-Var setzen:
+   ```
+   STRIPE_WEBHOOK_SECRET = whsec_...
+   ```
+   Erneut deployen.
+7. **Testen** (Testmodus): `/pro/` öffnen, einloggen, „Get NEXUS ARCADE PRO" klicken → Stripe-Testkarte `4242 4242 4242 4242`, beliebiges Zukunftsdatum/CVC. Nach Abschluss sollte die Seite „✨ PRO is now active" zeigen und auf allen Spielseiten sind Werbeflächen weg (prüfbar: `localStorage.getItem("nexus_pro")` sollte `"1"` sein).
+8. Erst wenn Testkäufe sauber durchlaufen: im Stripe-Dashboard auf **Live-Modus** umschalten, Schritte 2–6 mit den Live-Werten wiederholen (eigene Live-Keys, eigener Live-Webhook).
+
+**Abo kündigen:** Der „Manage subscription"-Button auf `/pro/` öffnet Stripes gehostetes Kunden-Portal (kein eigener Code nötig) — dort können Nutzer selbst kündigen/Zahlungsmittel ändern; der Webhook entfernt danach automatisch den PRO-Status.
+
 ## Nächste Ausbaustufe (Phase 2)
 
 Tiefere, spielspezifische Erfolge (z.B. „2000 Punkte in Dash", „Reich 5 in Realms", „5-Tage-Serie in Words") sowie XP für konkrete Leistungen und Boost-Rewards, die im Spiel wirken. Das Gerüst dafür steht bereits (`NexusArcade.unlock(id)` / `NexusArcade.addXP(n)`).

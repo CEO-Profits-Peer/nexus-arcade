@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEXUS ARCADE PRO — Remove Ads Sitewide | Nexus Arcade</title>
+<meta name="description" content="Go ad-free across every Nexus Arcade game with one subscription. Cancel anytime." />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/pro/" />
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.8);--neon:#39e6ff;--pink:#ff3ea5;--mag:#c77dff;--gold:#ffcf5c;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;} html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1200px 600px at 50% -10%,rgba(255,207,92,0.14),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+  header.top{width:100%;max-width:760px;padding:16px 20px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:2px solid var(--gold);}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .brand .dot{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 16px var(--neon);}
+  .brand span{font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:999px;font-size:13px;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  main{width:100%;max-width:760px;padding:36px 20px 60px;text-align:center;}
+  .badge{display:inline-block;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:800;margin-bottom:10px;}
+  h1{font-size:clamp(30px,6vw,44px);margin:0 0 12px;background:linear-gradient(90deg,var(--gold),var(--mag),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:16px;margin:0 auto 30px;max-width:520px;line-height:1.6;}
+  .benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;text-align:left;margin-bottom:34px;}
+  .benefit{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;}
+  .benefit b{display:block;font-size:14px;margin-bottom:4px;}
+  .benefit span{font-size:13px;color:var(--muted);line-height:1.5;}
+  .card{background:var(--panel);border:1px solid rgba(255,207,92,.45);border-radius:20px;padding:28px 24px;max-width:400px;margin:0 auto;box-shadow:0 0 50px rgba(255,207,92,.08);}
+  .price{font-size:34px;font-weight:900;color:var(--gold);}
+  .price small{font-size:14px;color:var(--muted);font-weight:600;}
+  .cta{display:block;width:100%;margin-top:18px;padding:14px;border:none;border-radius:12px;cursor:pointer;font-weight:800;font-size:15px;background:linear-gradient(90deg,var(--gold),var(--pink));color:#160a24;}
+  .cta:disabled{opacity:.6;cursor:wait;}
+  .note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;}
+  .status{font-size:14px;font-weight:700;margin-top:8px;min-height:20px;}
+  .status.ok{color:#7cff6b;}
+  .status.err{color:var(--pink);}
+  footer{color:var(--muted);font-size:12px;padding:30px 18px 40px;text-align:center;}
+  footer a{color:var(--neon);text-decoration:none;}
+</style>
+<script src="/ads-config.js"></script><script src="/ads.js"></script>
+<script src="/analytics-config.js"></script><script src="/analytics.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="dot"></span><span>NEXUS ARCADE</span></a>
+  <a class="chip" href="/">← All games</a>
+</header>
+<main>
+  <div class="badge">✨ Nexus Arcade PRO</div>
+  <h1>Play Every Game, Zero Ads</h1>
+  <p class="sub">One subscription removes ads across all 13 games — arcade, racing, puzzle, idle, RPG. Cancel anytime, no strings attached.</p>
+
+  <div class="benefits">
+    <div class="benefit"><b>🚫 No ads, anywhere</b><span>Auto ads, in-game ads and the side rail all disappear on every game page — instantly on this device, synced to your account everywhere else.</span></div>
+    <div class="benefit"><b>⚡ Faster, cleaner</b><span>Fewer scripts loading means games start quicker and run smoother.</span></div>
+    <div class="benefit"><b>❤️ Support development</b><span>Directly funds new games and features instead of ad networks.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="price" id="proPrice">Simple monthly plan<br><small>see checkout for exact price</small></div>
+    <button class="cta" id="proBtn">Get NEXUS ARCADE PRO</button>
+    <button class="cta" id="proManageBtn" style="display:none;background:transparent;border:1px solid var(--line);color:var(--text)">Manage subscription</button>
+    <div class="status" id="proStatus"></div>
+    <div class="note">Secure checkout via Stripe. Requires a free Nexus Arcade account so PRO syncs across your devices.</div>
+  </div>
+</main>
+<footer>© <span id="year"></span> Nexus Arcade · <a href="/">Back to all games</a> · <a href="/leaderboards/">Leaderboards</a> · <a href="/datenschutz/">Privacy Policy / Datenschutz</a></footer>
+<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script>
+(function(){
+  "use strict";
+  var btn = document.getElementById("proBtn");
+  var manageBtn = document.getElementById("proManageBtn");
+  var statusEl = document.getElementById("proStatus");
+  var params = new URLSearchParams(location.search);
+
+  function setStatus(msg, cls){ statusEl.textContent = msg || ""; statusEl.className = "status" + (cls ? " " + cls : ""); }
+
+  function render(){
+    var pro = window.NexusArcade && window.NexusArcade.isPro && window.NexusArcade.isPro();
+    if(pro){
+      btn.style.display = "none";
+      manageBtn.style.display = "block";
+      if(!statusEl.textContent) setStatus("✨ PRO is active on this account — thank you!", "ok");
+    } else {
+      btn.style.display = "block";
+      manageBtn.style.display = "none";
+      btn.disabled = false;
+      btn.textContent = "Get NEXUS ARCADE PRO";
+    }
+  }
+
+  async function pollForActivation(){
+    setStatus("Payment received — activating PRO…");
+    for(var i=0;i<10;i++){
+      await new Promise(function(r){ setTimeout(r, 1500); });
+      var ok = await window.NexusArcade.refreshPro();
+      if(ok){ setStatus("✨ PRO is now active — enjoy the ad-free games!", "ok"); render(); return; }
+    }
+    setStatus("Still activating — this can take a minute. Reopen this page shortly if ads are still showing.");
+  }
+
+  btn.addEventListener("click", async function(){
+    var user = window.NexusArcade && window.NexusArcade.getUser && window.NexusArcade.getUser();
+    if(!user){ window.NexusArcade.openLogin(); setStatus("Sign in first, then click Get PRO again — it syncs to your account."); return; }
+    btn.disabled = true; btn.textContent = "Redirecting to checkout…";
+    try{
+      var res = await fetch("/api/create-checkout-session", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: user.id, email: user.email })
+      });
+      var data = await res.json();
+      if(data && data.url){ location.href = data.url; return; }
+      throw new Error(data && data.error || "checkout_failed");
+    }catch(e){
+      setStatus("Couldn't start checkout — PRO isn't live yet, try again shortly.", "err");
+      btn.disabled = false; btn.textContent = "Get NEXUS ARCADE PRO";
+    }
+  });
+
+  manageBtn.addEventListener("click", async function(){
+    var user = window.NexusArcade && window.NexusArcade.getUser && window.NexusArcade.getUser();
+    if(!user) return;
+    manageBtn.disabled = true; manageBtn.textContent = "Opening…";
+    try{
+      var res = await fetch("/api/create-portal-session", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: user.id })
+      });
+      var data = await res.json();
+      if(data && data.url){ location.href = data.url; return; }
+      throw new Error(data && data.error || "portal_failed");
+    }catch(e){
+      setStatus("Couldn't open the billing portal — try again shortly.", "err");
+      manageBtn.disabled = false; manageBtn.textContent = "Manage subscription";
+    }
+  });
+
+  if(window.NexusArcade && window.NexusArcade.ready){
+    window.NexusArcade.ready(function(){
+      render();
+      if(params.get("success")==="1") pollForActivation();
+      else if(params.get("canceled")==="1") setStatus("Checkout canceled — no charge was made.");
+    });
+  }
+})();
+</script>
+</body>
+</html>

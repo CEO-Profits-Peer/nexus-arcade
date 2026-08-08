@@ -18,7 +18,7 @@
   const t = TXT[L] || TXT.en || {};
 
   /* ---------- Sync-Keys (alle Spielstände + Einstellungen + Profil) ---------- */
-  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted"];
+  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
 
   /* ---------- Level-Kurve ---------- */
   // Kumulierte XP bis Level L: 50*(L-1)*L  -> Lv2=100, Lv3=300, Lv4=600, Lv5=1000 ...
@@ -308,15 +308,22 @@
         '<div style="font-size:11px;color:var(--muted,#8a97c2);margin-top:10px">'+t.shopInfo+'</div>';
     }
     else { // account
+      const proBlock = isPro()
+        ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:10px;margin-bottom:16px;background:linear-gradient(90deg,rgba(255,207,92,.14),rgba(199,125,255,.14));border:1px solid rgba(255,207,92,.4)">'+
+            '<span style="font-size:13px;font-weight:700;color:var(--gold,#ffcf5c)">'+t.proActive+'</span>'+
+            (user?'<a href="/pro/" style="font-size:12px;color:var(--muted,#8a97c2);white-space:nowrap">'+t.proManage+'</a>':'')+'</div>'
+        : '<a href="/pro/" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:10px;margin-bottom:16px;background:rgba(255,255,255,.03);border:1px solid var(--line,#333);text-decoration:none">'+
+            '<span style="font-size:13px;font-weight:700;color:var(--text,#eaf6ff)">✨ '+t.proCta+'</span>'+
+            '<span style="font-size:12px;color:var(--neon,#39e6ff);white-space:nowrap;font-weight:800">'+t.proGo+' →</span></a>';
       if(!configured){
-        body = '<p style="color:var(--muted,#8a97c2);line-height:1.6">'+t.notcfg+'</p>';
+        body = proBlock+'<p style="color:var(--muted,#8a97c2);line-height:1.6">'+t.notcfg+'</p>';
       } else if(user){
-        body = '<p style="color:var(--muted,#8a97c2);margin-bottom:6px">'+t.signedin+'</p>'+
+        body = proBlock+'<p style="color:var(--muted,#8a97c2);margin-bottom:6px">'+t.signedin+'</p>'+
           '<div style="font-weight:700;margin-bottom:6px">'+esc(user.email)+'</div>'+
           '<div style="font-size:13px;color:#7cff6b;margin-bottom:16px">☁️ '+t.cloudon+'</div>'+
           '<button id="nxLogout" style="width:100%;padding:12px;border:none;border-radius:10px;cursor:pointer;font-weight:800;background:transparent;color:var(--text,#eaf6ff);border:1px solid var(--line,#444)">'+t.logout+'</button>';
       } else {
-        body = '<div style="font-size:13px;color:var(--muted,#8a97c2);margin-bottom:12px">☁️ '+t.cloudoff+'</div>'+
+        body = proBlock+'<div style="font-size:13px;color:var(--muted,#8a97c2);margin-bottom:12px">☁️ '+t.cloudoff+'</div>'+
           '<label style="font-size:12px;color:var(--muted,#8a97c2)">'+t.email+'</label>'+
           '<input id="nxEmail" type="email" placeholder="name@mail.com" style="width:100%;margin:4px 0 12px;padding:10px 12px;border-radius:9px;border:1px solid var(--line,#333);background:#0d1226;color:inherit;font-family:inherit">'+
           '<button id="nxLogin" style="width:100%;padding:12px;border:none;border-radius:10px;cursor:pointer;font-weight:800;background:linear-gradient(90deg,var(--neon,#39e6ff),#7cff6b);color:#04121a">'+t.sendlink+'</button>'+
@@ -415,6 +422,7 @@
     if(k==="nr_save_v1"){ return progScore(cloud)>progScore(local)?cloud:local; }
     if(k==="nx_finance_empire"){ return empProgScore(cloud)>empProgScore(local)?cloud:local; }
     if(k==="nw_v1_en"||k==="nw_v1_de"){ try{const a=JSON.parse(local),b=JSON.parse(cloud);const as=(a&&a.stats)||{},bs=(b&&b.stats)||{};return ((bs.played||0)+(bs.wins||0))>((as.played||0)+(as.wins||0))?cloud:local;}catch(e){return local;} }
+    if(k==="nexus_pro"){ return (local==="1"||cloud==="1") ? "1" : "0"; } // einmal PRO (Stripe-Webhook), bleibt PRO bei jedem Merge
     return local; // Einstellungen/Quests: lokal bevorzugen
   }
   async function pull(){
@@ -563,11 +571,28 @@
 
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
+  /* ---------- NEXUS ARCADE PRO ---------- */
+  // "nexus_pro" ist ein SYNC_KEY (siehe oben) - Stripe-Webhook setzt ihn serverseitig
+  // in saves.data, pull() holt ihn beim Login aufs Gerät. ads.js liest ihn direkt aus
+  // localStorage (laedt vor account.js, siehe Kommentar dort).
+  function isPro(){ return localStorage.getItem("nexus_pro")==="1"; }
+  async function refreshPro(){
+    if(!sb||!user) return isPro();
+    try{
+      const r = await sb.from("saves").select("data").eq("user_id",user.id).maybeSingle();
+      const v = (r.data && r.data.data && r.data.data.nexus_pro) || "0";
+      if(v==="1") localStorage.setItem("nexus_pro","1");
+      return v==="1";
+    }catch(e){ return isPro(); }
+  }
+
   /* ---------- öffentliche API ---------- */
   const api = {
     addXP, unlock, open, openRanks, openLogin, submitScore, fetchLeaderboard,
     getProfile: ()=>Object.assign({}, profile, levelProgress(profile.xp)),
     hasAchievement: id=>!!achieved[id],
+    getUser: ()=> user ? {id:user.id, email:user.email} : null,
+    isPro, refreshPro,
     ready: cb=>{ if(typeof cb==="function") readyCbs.push(cb); }
   };
   window.NexusArcade = api;
