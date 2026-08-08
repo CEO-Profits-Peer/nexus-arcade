@@ -63,6 +63,22 @@
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   .nitrobar{position:absolute;left:10px;bottom:10px;width:12px;height:90px;background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
   .nitrofill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,var(--accent),#fff);height:0%;}
+  .shop-modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,6,15,0.85);backdrop-filter:blur(3px);}
+  .shop-modal.hidden{display:none;}
+  .shop-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:420px;width:100%;max-height:86vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 0 40px rgba(57,230,255,0.1);}
+  .shop-list{display:flex;flex-direction:column;gap:10px;width:100%;text-align:left;padding:2px;margin-top:6px;}
+  .shop-item{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+  .shop-item .info{flex:1;min-width:0;}
+  .shop-item .name{font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;}
+  .shop-item .desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .shop-item .pips{display:flex;gap:3px;margin-top:5px;}
+  .shop-item .pip{width:14px;height:5px;border-radius:3px;background:rgba(120,140,220,0.25);}
+  .shop-item .pip.on{background:var(--neon);box-shadow:0 0 6px var(--neon);}
+  .shop-buy{border:none;cursor:pointer;font-weight:800;font-size:12px;padding:9px 12px;border-radius:9px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));white-space:nowrap;flex:none;}
+  .shop-buy:disabled{opacity:.4;cursor:not-allowed;background:rgba(120,140,220,0.25);color:var(--muted);}
+  .shop-buy.max{opacity:.7;cursor:default;background:rgba(124,255,107,0.25);color:#7cff6b;}
+  .shop-coins{font-weight:800;color:var(--accent);font-size:15px;}
+
   .about{max-width:560px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
   .about h2{color:var(--text);font-size:17px;}
   footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
@@ -106,7 +122,10 @@
     <div class="overlay" id="startO">
       <h1>NEXUS RACER</h1>
       <p data-i18n="intro">Steer with the mouse, finger or arrow keys. Dodge the traffic, grab coins, fill your nitro and hold it to blast forward. One crash ends the run.</p>
-      <button class="btn" id="startBtn" data-i18n="play">▶ DRIVE</button>
+      <div class="btnrow">
+        <button class="btn" id="startBtn" data-i18n="play">▶ DRIVE</button>
+        <button class="btn sec" id="shopBtn" data-i18n="upgrades">⚡ UPGRADES</button>
+      </div>
       <div class="sub" data-i18n="hint">Move: mouse / drag / ← →  ·  Nitro: Space / tap-hold</div>
     </div>
     <div class="overlay hidden" id="overO">
@@ -117,6 +136,7 @@
       <div class="btnrow">
         <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
         <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+        <button class="btn sec" id="shopBtn2" data-i18n="upgrades">⚡ UPGRADES</button>
       </div>
     </div>
 
@@ -132,6 +152,17 @@
       </div>
       <a class="btn sec" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
     </div>
+  </div>
+</div>
+
+<!-- Upgrade shop modal — fixed full-viewport, not nested in .frame (that box is aspect-ratio
+     3/4.4 and gets too cramped on narrow phones for a 4-item list; same lesson as Dash's shop). -->
+<div class="shop-modal hidden" id="shopOverlay">
+  <div class="shop-card">
+    <h1 style="font-size:clamp(20px,5vw,28px);margin:0 0 4px" data-i18n="upgrades">⚡ UPGRADES</h1>
+    <div class="shop-coins">💰 <span id="shopCoins">0</span></div>
+    <div class="shop-list" id="shopList"></div>
+    <button class="btn sec" id="shopCloseBtn" data-i18n="close" style="margin-top:14px">✕ CLOSE</button>
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
@@ -152,13 +183,25 @@
     hint:"Move: mouse / drag / ← →  ·  Nitro: Space / tap-hold",aboutH:"About Nexus Racer",
     aboutP:"Nexus Racer is a free endless car racing game you play right in your browser — no download, no signup. Weave through neon night traffic, collect coins, and build up your nitro to blast forward for extra distance. The further you drive, the faster it gets. Beat your personal record and challenge your friends. Works on desktop and mobile.",
     shareText:s=>`I drove ${s}m in Nexus Racer! Can you go further?`,copied:"Copied — paste anywhere!",
-    paused:"PAUSED",resume:"▶ RESUME",home:"🏠 HOME"},
+    paused:"PAUSED",resume:"▶ RESUME",home:"🏠 HOME",
+    upgrades:"⚡ UPGRADES",close:"✕ CLOSE",needMore:"Not enough coins — earn more by leveling up, finishing quests or watching a rewarded ad.",
+    maxed:"MAX",buy:"Buy",
+    upNitroName:"Nitro Efficiency",upNitroDesc:"Nitro drains slower while boosting — hold it longer per tank.",
+    upChassisName:"Narrow Chassis",upChassisDesc:"A slightly slimmer car — a few more close calls survive.",
+    upMagnetName:"Coin Magnet",upMagnetDesc:"Nearby coins get pulled toward you — bigger radius per level.",
+    upShieldName:"Guardian Shield",upShieldDesc:"Start each run with shield charges that absorb one crash each, then break."},
   de:{hub:"Spiele",dist:"Distanz",coins:"Münzen",best:"Bestwert",play:"▶ LOSFAHREN",retry:"↻ NOCHMAL",share:"⤴ TEILEN",crash:"CRASH",newbest:"★ NEUER REKORD ★",
     intro:"Lenke mit Maus, Finger oder Pfeiltasten. Weiche dem Verkehr aus, sammle Münzen, lade dein Nitro und halte es für den Boost. Ein Crash beendet den Lauf.",
     hint:"Lenken: Maus / ziehen / ← →  ·  Nitro: Leertaste / halten",aboutH:"Über Nexus Racer",
     aboutP:"Nexus Racer ist ein kostenloses Endlos-Rennspiel direkt im Browser — kein Download, keine Anmeldung. Schlängle dich durch den Neon-Nachtverkehr, sammle Münzen und lade dein Nitro auf, um für Extra-Distanz nach vorn zu schießen. Je weiter du fährst, desto schneller wird es. Knacke deinen Rekord und fordere Freunde heraus. Läuft auf Desktop und Handy.",
     shareText:s=>`Ich bin ${s}m in Nexus Racer gefahren! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
-    paused:"PAUSIERT",resume:"▶ WEITER",home:"🏠 HUB"}};
+    paused:"PAUSIERT",resume:"▶ WEITER",home:"🏠 HUB",
+    upgrades:"⚡ UPGRADES",close:"✕ SCHLIESSEN",needMore:"Nicht genug Coins — verdiene mehr durch Level-Ups, Quests oder ein Werbevideo.",
+    maxed:"MAX",buy:"Kaufen",
+    upNitroName:"Nitro-Effizienz",upNitroDesc:"Nitro verbraucht sich beim Boosten langsamer — haelt pro Tank laenger.",
+    upChassisName:"Schmale Karosserie",upChassisDesc:"Ein etwas schmaleres Auto — ein paar knappe Treffer mehr werden überlebt.",
+    upMagnetName:"Münz-Magnet",upMagnetDesc:"Münzen in der Nähe werden angezogen — größerer Radius pro Stufe.",
+    upShieldName:"Schutzschild",upShieldDesc:"Startet jeden Lauf mit Schild-Ladungen, die je einen Crash absorbieren und dann zerbrechen."}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   let muted=localStorage.getItem("nx_muted")==="1";
@@ -172,14 +215,39 @@
   let actx=null;
   function beep(f,d,t,v){if(muted)return;try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t||"sine";o.frequency.value=f;g.gain.value=v||0.05;o.connect(g);g.connect(actx.destination);const n=actx.currentTime;g.gain.exponentialRampToValueAtTime(0.0001,n+(d||0.1));o.start(n);o.stop(n+(d||0.1));}catch(e){}}
 
+  // ---- Upgrade shop (coins-based, window.NexusArcade.spendCoins) ----
+  // Gleiche Preis-Groessenordnung wie Dash (siehe dash/index.html-Kommentar): deutlich ueber den
+  // 120-800 Coins der Cosmetics (nexus-data.js), da Vorteile JEDEN Lauf wirken, nicht einmalig.
+  // "Strecken-Upgrades" (aus dem Auftrag) passen nicht 1:1, weil es keine auswaehlbaren Strecken
+  // gibt (endlos-prozeduraler Verkehr) - stattdessen 4 Fahrzeug-Upgrades, die auf DIESES Spiel
+  // (Verkehr ausweichen, Muenzen/Nitro) zugeschnitten sind.
+  const UPGRADES=[
+    {id:"nitro",nameKey:"upNitroName",descKey:"upNitroDesc",icon:"🔥",
+      costs:[90,170,270,400,550],values:[35,31,27,23,19,15]}, // Nitro-Verbrauch/s waehrend Boost (Index 0 = Level 0 = Basiswert)
+    {id:"chassis",nameKey:"upChassisName",descKey:"upChassisDesc",icon:"◎",
+      costs:[150,320,550,850],values:[0,0.03,0.06,0.09,0.12]}, // Verkleinerung von Breite/Hoehe
+    {id:"magnet",nameKey:"upMagnetName",descKey:"upMagnetDesc",icon:"🧲",
+      costs:[80,150,240,350,480],values:[0,55,85,115,145,175]}, // Magnet-Radius in px
+    {id:"shield",nameKey:"upShieldName",descKey:"upShieldDesc",icon:"🛡️",
+      costs:[250,550,1000],values:[0,1,2,3]} // Schild-Ladungen pro Lauf
+  ];
+  const UPG_KEY="nx_racer_upg";
+  function loadUpg(){try{return JSON.parse(localStorage.getItem(UPG_KEY)||"{}")||{};}catch(e){return{};}}
+  let upg=loadUpg();
+  function upgLevel(id){return Math.max(0,Math.min(upg[id]||0,UPGRADES.find(u=>u.id===id).costs.length));}
+  function saveUpg(){localStorage.setItem(UPG_KEY,JSON.stringify(upg));}
+
   const BEST="nx_racer_best";
   let best=parseInt(localStorage.getItem(BEST)||"0",10);
   let state="menu",paused=false,player=null,traffic=[],coins=[],parts=[],dist=0,coinCount=0,speed=260,spawnT=0,coinT=0,targetX=0,nitro=0,nitroOn=false,laneLines=[],elapsed=0,last=0;
+  let shields=0,invulnT=0;
   const roadPad=()=>W*0.10;
 
   function reset(){
-    player={x:W/2,y:H*0.80,w:Math.max(26,W*0.11),h:Math.max(44,W*0.19)};
+    const chassisCut=1-UPGRADES.find(u=>u.id==="chassis").values[upgLevel("chassis")];
+    player={x:W/2,y:H*0.80,w:Math.max(26,W*0.11)*chassisCut,h:Math.max(44,W*0.19)*chassisCut};
     targetX=W/2;traffic=[];coins=[];parts=[];dist=0;coinCount=0;speed=260;spawnT=0;coinT=0;nitro=0;nitroOn=false;elapsed=0;laneLines=[];
+    shields=UPGRADES.find(u=>u.id==="shield").values[upgLevel("shield")];invulnT=0;
     for(let i=0;i<8;i++)laneLines.push(i*(H/6));
     hud();
   }
@@ -204,10 +272,12 @@
   function update(dt){
     if(state!=="playing"||paused)return;
     elapsed+=dt;
+    if(invulnT>0)invulnT=Math.max(0,invulnT-dt);
     // difficulty
     speed=260+elapsed*14;
     let boost=1;
-    if(nitroOn&&nitro>0){boost=1.8;nitro=Math.max(0,nitro-dt*35);}else{nitro=Math.min(100,nitro+dt*6);}
+    const nitroDrain=UPGRADES.find(u=>u.id==="nitro").values[upgLevel("nitro")];
+    if(nitroOn&&nitro>0){boost=1.8;nitro=Math.max(0,nitro-dt*nitroDrain);}else{nitro=Math.min(100,nitro+dt*6);}
     const sp=speed*boost;
     dist+=sp*dt*0.05;
     // keyboard steer
@@ -222,9 +292,16 @@
     coinT-=dt;if(coinT<=0){spawnCoin();coinT=1.3+Math.random();}
     // traffic
     for(let i=traffic.length-1;i>=0;i--){const c=traffic[i];c.y+=(c.vy+sp*0.6)*dt;if(c.y>H+c.h){traffic.splice(i,1);continue;}
-      if(Math.abs(c.x-player.x)<(c.w+player.w)/2*0.82&&Math.abs(c.y-player.y)<(c.h+player.h)/2*0.82){crash();return;}}
-    // coins
+      if(invulnT>0)continue;
+      if(Math.abs(c.x-player.x)<(c.w+player.w)/2*0.82&&Math.abs(c.y-player.y)<(c.h+player.h)/2*0.82){
+        if(shields>0){shields--;traffic.splice(i,1);burst(player.x,player.y,"57,230,255",22);beep(500,0.12,"square",0.08);setTimeout(()=>beep(320,0.18,"square",0.07),70);invulnT=0.7;hud();continue;}
+        crash();return;
+      }}
+    // coins (magnet pulls nearby coins toward the player before the pickup check)
+    const magnetR=UPGRADES.find(u=>u.id==="magnet").values[upgLevel("magnet")];
     for(let i=coins.length-1;i>=0;i--){const o=coins[i];o.y+=sp*dt;o.t+=dt;if(o.y>H+20){coins.splice(i,1);continue;}
+      if(magnetR>0){const mdx=o.x-player.x,mdy=o.y-player.y,mdist=Math.sqrt(mdx*mdx+mdy*mdy)||1;
+        if(mdist<magnetR){const pull=Math.min(mdist,320*dt);o.x-=(mdx/mdist)*pull;o.y-=(mdy/mdist)*pull;}}
       if(Math.abs(o.x-player.x)<player.w/2+o.r&&Math.abs(o.y-player.y)<player.h/2+o.r){coins.splice(i,1);coinCount++;nitro=Math.min(100,nitro+8);burst(o.x,o.y,"255,207,92",10);beep(880,0.08,"triangle",0.06);}}
     for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.t+=dt;if(p.t>=p.life){parts.splice(i,1);continue;}p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.94;p.vy*=.94;}
     hud();
@@ -254,11 +331,52 @@
     for(const c of traffic)drawCar(c.x,c.y,c.w,c.h,c.col,"rgba(255,77,109,0.6)");
     for(const p of parts){ctx.globalAlpha=1-p.t/p.life;ctx.fillStyle="rgba("+p.c+",1)";ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);ctx.fill();}
     ctx.globalAlpha=1;
-    if(state==="playing"||state==="menu")drawCar(player?player.x:W/2,player?player.y:H*0.8,player?player.w:40,player?player.h:70,"#39e6ff","rgba(57,230,255,0.8)");
+    if(state==="playing"||state==="menu"){
+      if(invulnT>0)ctx.globalAlpha=0.55+Math.sin(performance.now()*0.03)*0.25;
+      drawCar(player?player.x:W/2,player?player.y:H*0.8,player?player.w:40,player?player.h:70,"#39e6ff","rgba(57,230,255,0.8)");
+      ctx.globalAlpha=1;
+      if(state==="playing"&&shields>0&&player){
+        ctx.save();ctx.strokeStyle="rgba(57,230,255,0.9)";ctx.lineWidth=2;
+        for(let i=0;i<shields;i++){ctx.beginPath();ctx.arc(player.x,player.y,Math.max(player.w,player.h)/2+6+i*5,0,6.283);ctx.stroke();}
+        ctx.restore();
+      }
+    }
     document.getElementById("nitro").style.height=nitro+"%";
   }
   function loop(ts){if(!last)last=ts;let dt=(ts-last)/1000;last=ts;if(dt>0.05)dt=0.05;update(dt);draw();requestAnimationFrame(loop);}
   function hud(){document.getElementById("distVal").textContent=Math.floor(dist);document.getElementById("coinVal").textContent=coinCount;document.getElementById("bestVal").textContent=best;}
+
+  // ---- Upgrade shop UI ----
+  let shopReturnId=null;
+  function openShop(returnId){shopReturnId=returnId;document.getElementById(returnId).classList.add("hidden");document.getElementById("shopOverlay").classList.remove("hidden");renderShop();}
+  function closeShop(){document.getElementById("shopOverlay").classList.add("hidden");if(shopReturnId)document.getElementById(shopReturnId).classList.remove("hidden");}
+  function renderShop(){
+    const t=T();
+    const coinsBal=(window.NexusArcade&&window.NexusArcade.getProfile)?(window.NexusArcade.getProfile().coins||0):0;
+    document.getElementById("shopCoins").textContent=coinsBal;
+    document.getElementById("shopList").innerHTML=UPGRADES.map(function(u){
+      const lvl=upgLevel(u.id),maxLvl=u.costs.length,maxed=lvl>=maxLvl;
+      const cost=maxed?0:u.costs[lvl];
+      const afford=!maxed&&coinsBal>=cost;
+      const pips=Array.from({length:maxLvl},function(_,i){return '<span class="pip'+(i<lvl?' on':'')+'"></span>';}).join("");
+      return '<div class="shop-item">'+
+        '<div class="info"><div class="name">'+u.icon+' '+t[u.nameKey]+' <span style="color:var(--muted);font-weight:600">Lv '+lvl+'/'+maxLvl+'</span></div>'+
+        '<div class="desc">'+t[u.descKey]+'</div><div class="pips">'+pips+'</div></div>'+
+        (maxed?'<button class="shop-buy max" disabled>'+t.maxed+'</button>'
+          :'<button class="shop-buy" data-up="'+u.id+'" '+(afford?'':'disabled')+'>'+t.buy+'<br>💰'+cost+'</button>')+
+        '</div>';
+    }).join("");
+    document.querySelectorAll(".shop-buy[data-up]").forEach(function(b){b.addEventListener("click",function(){buyUpgrade(b.getAttribute("data-up"));});});
+  }
+  function buyUpgrade(id){
+    const u=UPGRADES.find(function(x){return x.id===id;});
+    const lvl=upgLevel(id);
+    if(lvl>=u.costs.length)return;
+    const cost=u.costs[lvl];
+    if(!window.NexusArcade||!window.NexusArcade.spendCoins){toast(T().needMore);return;}
+    if(!window.NexusArcade.spendCoins(cost)){toast(T().needMore);return;}
+    upg[id]=lvl+1;saveUpg();renderShop();
+  }
 
   function start(){resize();reset();document.getElementById("startO").classList.add("hidden");document.getElementById("overO").classList.add("hidden");document.getElementById("pauseO").classList.add("hidden");state="playing";paused=false;document.getElementById("pauseBtn").classList.remove("hidden");if(actx&&actx.state==="suspended")actx.resume();}
   function togglePause(){
@@ -280,10 +398,13 @@
   function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
   async function share(){const fs=Math.floor(dist),txt=T().shareText(fs),url=location.origin+location.pathname;if(navigator.share){try{await navigator.share({title:"Nexus Racer",text:txt,url});return;}catch(e){}}try{await navigator.clipboard.writeText(txt+" "+url);toast(T().copied);}catch(e){toast(txt);}}
 
-  function applyLang(){document.documentElement.lang=lang;document.getElementById("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});document.getElementById("aboutH").textContent=T().aboutH;document.getElementById("aboutP").textContent=T().aboutP;}
+  function applyLang(){document.documentElement.lang=lang;document.getElementById("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});document.getElementById("aboutH").textContent=T().aboutH;document.getElementById("aboutP").textContent=T().aboutP;if(!document.getElementById("shopOverlay").classList.contains("hidden"))renderShop();}
   document.getElementById("startBtn").addEventListener("click",start);
   document.getElementById("retryBtn").addEventListener("click",start);
   document.getElementById("shareBtn").addEventListener("click",share);
+  document.getElementById("shopBtn").addEventListener("click",()=>openShop("startO"));
+  document.getElementById("shopBtn2").addEventListener("click",()=>openShop("overO"));
+  document.getElementById("shopCloseBtn").addEventListener("click",closeShop);
   document.getElementById("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
   document.getElementById("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
   document.getElementById("pauseBtn").addEventListener("click",togglePause);

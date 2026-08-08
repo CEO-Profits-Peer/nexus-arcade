@@ -18,7 +18,10 @@
   const t = TXT[L] || TXT.en || {};
 
   /* ---------- Sync-Keys (alle Spielstände + Einstellungen + Profil) ---------- */
-  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nd_upgrades","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
+  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nd_upgrades","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_racer_upg","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
+  // Pro-Spiel-Upgrade-Level (Coins-Shops in Dash/Racer/...): reines "hoeher gewinnt" pro Track,
+  // wie bei Erfolgen - ein gekauftes Upgrade darf durch einen Merge nie wieder sinken.
+  const UPGRADE_SYNC_KEYS = ["nd_upgrades","nx_racer_upg"];
 
   /* ---------- Level-Kurve ---------- */
   // Kumulierte XP bis Level L: 50*(L-1)*L  -> Lv2=100, Lv3=300, Lv4=600, Lv5=1000 ...
@@ -467,9 +470,7 @@
     if(NUM_BESTS.indexOf(k)>=0) return numMerge(local,cloud);
     if(k==="nexus_profile"){ try{const a=JSON.parse(local)||{},b=JSON.parse(cloud)||{};const hi=(b.xp||0)>=(a.xp||0)?b:a,lo=(hi===b)?a:b;const win=Object.assign({},lo,hi);win.xp=Math.max(a.xp||0,b.xp||0);win.coins=Math.max(a.coins||0,b.coins||0);win.owned=Object.assign({},a.owned||{},b.owned||{});return JSON.stringify(win);}catch(e){return local;} }
     if(k==="nexus_ach"){ try{return JSON.stringify(Object.assign({},JSON.parse(cloud)||{},JSON.parse(local)||{}));}catch(e){return local;} }
-    // Pro-Spiel-Upgrade-Level (z.B. nd_upgrades fuer Nexus Dash): reines "hoeher gewinnt" pro
-    // Track, wie bei Erfolgen - ein gekauftes Upgrade darf durch einen Merge nie wieder sinken.
-    if(k==="nd_upgrades"){ try{const a=JSON.parse(local)||{},b=JSON.parse(cloud)||{};const win={};for(const key of new Set(Object.keys(a).concat(Object.keys(b)))) win[key]=Math.max(a[key]||0,b[key]||0); return JSON.stringify(win);}catch(e){return local;} }
+    if(UPGRADE_SYNC_KEYS.indexOf(k)>=0){ try{const a=JSON.parse(local)||{},b=JSON.parse(cloud)||{};const win={};for(const key of new Set(Object.keys(a).concat(Object.keys(b)))) win[key]=Math.max(a[key]||0,b[key]||0); return JSON.stringify(win);}catch(e){return local;} }
     if(k==="nexus_favs"){ try{const a=JSON.parse(local)||[],b=JSON.parse(cloud)||[];return JSON.stringify(Array.from(new Set(a.concat(b))));}catch(e){return local;} }
     if(k==="nr_save_v1"){ return progScore(cloud)>progScore(local)?cloud:local; }
     if(k==="nx_finance_empire"){ return empProgScore(cloud)>empProgScore(local)?cloud:local; }
