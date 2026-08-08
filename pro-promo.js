@@ -33,15 +33,8 @@
     return exp;
   }
 
-  window.NexusPromo = { fmt: fmt, offerExpiry: offerExpiry, code: PROMO_CODE, percent: PROMO_PERCENT };
-
-  if (location.pathname.indexOf("/pro/") === 0) return; // nur Helfer bereitstellen, kein Auto-Popup
-  if (localStorage.getItem("nexus_pro") === "1") return;
-
-  var last = +(localStorage.getItem("nx_promo_last") || 0);
-  if (Date.now() - last < REPEAT_MS) return;
-
   function build() {
+    if (document.getElementById("nxPromoOverlay")) return; // schon offen, nicht doppelt einfügen
     var L = ((localStorage.getItem("nr_lang") || localStorage.getItem("nw_lang") || localStorage.getItem("nd_lang") || navigator.language || "en").toLowerCase().startsWith("de")) ? "de" : "en";
     var TXT = {
       en: { title: "✨ Go PRO", sub: "Remove ads everywhere + unlock the exclusive PRO frame.",
@@ -94,6 +87,14 @@
       timerHandle = setInterval(tick, 1000);
     }
   }
+
+  window.NexusPromo = { fmt: fmt, offerExpiry: offerExpiry, code: PROMO_CODE, percent: PROMO_PERCENT, openCard: build };
+
+  if (location.pathname.indexOf("/pro/") === 0) return; // nur Helfer/openCard bereitstellen, kein Auto-Popup
+  if (localStorage.getItem("nexus_pro") === "1") return;
+
+  var last = +(localStorage.getItem("nx_promo_last") || 0);
+  if (Date.now() - last < REPEAT_MS) return;
 
   setTimeout(function () {
     if (localStorage.getItem("nexus_pro") === "1") return; // seit Laden könnte sich das geändert haben

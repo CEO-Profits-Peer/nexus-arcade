@@ -35,6 +35,19 @@
     },
   ];
 
+  // NEXUS ARCADE PRO nimmt an derselben Zufallsauswahl teil wie Nexus Node/Olympos -
+  // eigene Werbung darf sich hier genauso gut verkaufen wie die Cross-Promo. Nur
+  // anzeigen, wenn noch kein PRO aktiv ist (sonst sinnlos).
+  if (localStorage.getItem("nexus_pro") !== "1") {
+    PROMOS.push({
+      name: "NEXUS ARCADE PRO",
+      url: "/pro/",
+      pitch: "Remove ads everywhere + unlock the exclusive animated PRO frame.",
+      color: "#ffcf5c",
+      internal: true,
+    });
+  }
+
   var rail = document.getElementById("railL");
   if (!rail) return;
 
@@ -44,7 +57,15 @@
   // die responsive .ad-rail-Regel sie eigentlich (per max-width) ausblenden
   // sollte ("schneidet in Spiele ein"). Nur flexen, wenn die Karte laut
   // aktuell greifender CSS-Regel überhaupt sichtbar sein soll.
-  if (getComputedStyle(rail).display === "none") return;
+  // WICHTIG: getComputedStyle(rail).display hierfür NICHT verwenden - .ad-rail
+  // hat zusätzlich eine ":empty{display:none}"-Regel (fürs Google-Ads-Pendant
+  // rechts, damit ein leerer Rahmen nicht sichtbar bleibt), die JEDES Mal
+  // greift, solange die Karte noch keinen Inhalt hat - also immer, bevor wir
+  // sie befüllen. Das ließ diese Guard-Bedingung dauerhaft "true" liefern und
+  // die Promo-Karte nie anzeigen, unabhängig von der Fensterbreite. Stattdessen
+  // direkt den Breakpoint der Media Query spiegeln (1320px, siehe .ad-rail CSS
+  // in jeder Spielseite).
+  if (window.innerWidth <= 1320) return;
 
   var promo = PROMOS[Math.floor(Math.random() * PROMOS.length)];
 
@@ -54,8 +75,7 @@
 
   var link = document.createElement("a");
   link.href = promo.url;
-  link.target = "_blank";
-  link.rel = "noopener";
+  if (!promo.internal) { link.target = "_blank"; link.rel = "noopener"; }
   link.style.cssText = "text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;";
 
   if (promo.image) {
@@ -68,7 +88,7 @@
   }
 
   var eyebrow = document.createElement("div");
-  eyebrow.textContent = "ALSO BY US";
+  eyebrow.textContent = promo.internal ? "✨ GO PRO" : "ALSO BY US";
   eyebrow.style.cssText = "font-size:10px;letter-spacing:1.5px;color:" + promo.color + ";font-weight:700;";
 
   var name = document.createElement("div");

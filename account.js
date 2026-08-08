@@ -169,6 +169,21 @@
       else { chip.style.position="fixed"; chip.style.top="10px"; chip.style.right="10px"; chip.style.zIndex="90"; document.body.appendChild(chip); }
     }
 
+    // Permanenter "PRO werden"-Button (nicht nur das gelegentliche Auto-Popup aus
+    // pro-promo.js) - jederzeit anklickbar, oeffnet dieselbe Vorteile-Karte auf
+    // Wunsch. Nur sichtbar solange kein PRO aktiv ist und pro-promo.js auf dieser
+    // Seite geladen wurde (nicht jede Seite bindet es ein).
+    if(isPro && !isPro() && window.NexusPromo && window.NexusPromo.openCard){
+      const proPill = document.createElement("div");
+      proPill.id = "nxProPill";
+      proPill.style.cssText = "display:flex;align-items:center;cursor:pointer;user-select:none;"+
+        "background:linear-gradient(90deg,#ffcf5c,#ff3ea5);color:#160a24;padding:6px 12px;"+
+        "border-radius:999px;font-size:12px;font-weight:800;font-family:inherit;white-space:nowrap;";
+      proPill.textContent = "✨ PRO";
+      proPill.addEventListener("click", ()=>window.NexusPromo.openCard());
+      chip.insertAdjacentElement("afterend", proPill);
+    }
+
     // Modal
     const m = document.createElement("div");
     m.id="nxModal"; m.className="hidden";
