@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
     if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_ID) {
       return res.status(503).json({ error: "pro_not_configured" });
     }
-    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+    const stripe = Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-03-31.basil" });
     const { userId, email, promoCode } = req.body || {};
     if (!userId) return res.status(400).json({ error: "missing_user_id" });
 

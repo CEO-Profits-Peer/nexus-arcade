@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed" });
   try {
     if (!process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: "pro_not_configured" });
-    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+    const stripe = Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-03-31.basil" });
     const { userId } = req.body || {};
     if (!userId) return res.status(400).json({ error: "missing_user_id" });
 

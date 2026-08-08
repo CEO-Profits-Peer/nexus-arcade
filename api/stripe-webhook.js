@@ -20,7 +20,7 @@ function readRawBody(req) {
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).end();
-  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-03-31.basil" });
 
   let event;
   try {
