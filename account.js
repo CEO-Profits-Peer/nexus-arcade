@@ -18,7 +18,10 @@
   const t = TXT[L] || TXT.en || {};
 
   /* ---------- Sync-Keys (alle Spielstände + Einstellungen + Profil) ---------- */
-  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_muted","nd_lang","nd_upgrades","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_racer_upg","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
+  // "nx_muted" ist jetzt der EINE geteilte Sound-Key ueber alle Spiele (Dash+Racer, siehe
+  // dash/index.html-Kommentar) - "nd_muted" gibt es nicht mehr, Dash migriert Bestandsnutzer
+  // beim ersten Laden automatisch auf "nx_muted".
+  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_lang","nd_upgrades","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_racer_upg","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
   // Pro-Spiel-Upgrade-Level (Coins-Shops in Dash/Racer/...): reines "hoeher gewinnt" pro Track,
   // wie bei Erfolgen - ein gekauftes Upgrade darf durch einen Merge nie wieder sinken.
   const UPGRADE_SYNC_KEYS = ["nd_upgrades","nx_racer_upg"];

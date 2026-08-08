@@ -341,7 +341,15 @@
   const ICON_SOUND_ON='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg>';
   const ICON_SOUND_OFF='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
   function updateMuteIcon(){ document.getElementById("muteIcon").innerHTML = muted?ICON_SOUND_OFF:ICON_SOUND_ON; }
-  let muted = localStorage.getItem("nd_muted")==="1";
+  // Gemeinsamer Sound-Key ueber alle Spiele hinweg statt eigenem Key pro Spiel - Racer nutzte
+  // "nx_muted" schon, Dash hatte bisher sein eigenes "nd_muted". Ein globales Stummschalten
+  // (ROADMAP.md Abschnitt 7) muss geraeteweit fuer beide gelten, nicht nur fuers gerade offene
+  // Spiel. Alter "nd_muted"-Wert wird einmalig uebernommen, Bestandsnutzer verlieren also ihre
+  // Einstellung nicht.
+  if(localStorage.getItem("nx_muted")==null && localStorage.getItem("nd_muted")!=null){
+    localStorage.setItem("nx_muted", localStorage.getItem("nd_muted"));
+  }
+  let muted = localStorage.getItem("nx_muted")==="1";
   let actx = null;
   function beep(freq, dur, type, vol){
     if(muted) return;
@@ -708,7 +716,7 @@
   document.getElementById("pauseRestartBtn").addEventListener("click",startGame);
   document.addEventListener("keydown",e=>{ if(e.key==="Escape") togglePause(); });
   document.getElementById("muteBtn").addEventListener("click",()=>{
-    muted=!muted;localStorage.setItem("nd_muted",muted?"1":"0");
+    muted=!muted;localStorage.setItem("nx_muted",muted?"1":"0");
     updateMuteIcon();
     document.getElementById("muteLabel").textContent=muted?I18N[lang].soundOff:I18N[lang].soundOn;
   });
