@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Free Arcade Games — Play Instantly, No Download | Nexus Arcade</title>
+<meta name="description" content="Free arcade games you can play right now in your browser: Dash, Racer, Run 3D, Snake, Breaker, Stack, Ticker. No download, no signup, just tap and play." />
+<meta name="keywords" content="free arcade games, browser arcade games, online arcade, no download games" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/c/arcade/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Free Arcade Games | Nexus Arcade" />
+<meta property="og:description" content="Free arcade games — no download, play instantly in your browser." />
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.8);--neon:#39e6ff;--pink:#ff3ea5;--mag:#c77dff;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;} html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1200px 600px at 50% -10%,rgba(57,230,255,0.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+  header.top{width:100%;max-width:900px;padding:16px 20px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:2px solid var(--neon);}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .brand .dot{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 16px var(--neon);}
+  .brand span{font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:999px;font-size:13px;text-decoration:none;}
+  .chip:hover{border-color:var(--neon);}
+  main{width:100%;max-width:900px;padding:28px 20px 60px;}
+  h1{font-size:clamp(26px,5vw,38px);margin:0 0 8px;background:linear-gradient(90deg,var(--neon),var(--mag),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 28px;max-width:640px;line-height:1.6;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;text-decoration:none;color:var(--text);transition:.15s;}
+  .card:hover{border-color:var(--neon);transform:translateY(-2px);}
+  .card h2{margin:0 0 6px;font-size:18px;}
+  .card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5;}
+  .cats{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0;}
+  .cats a{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:999px;font-size:12px;text-decoration:none;}
+  .cats a:hover{color:var(--neon);border-color:var(--neon);}
+  footer{color:var(--muted);font-size:12px;padding:20px 18px 40px;text-align:center;}
+  footer a{color:var(--neon);text-decoration:none;}
+</style>
+<script src="/ads-config.js"></script><script src="/ads.js"></script>
+<script src="/analytics-config.js"></script><script src="/analytics.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="dot"></span><span>NEXUS ARCADE</span></a>
+  <a class="chip" href="/">← All games</a>
+</header>
+<main>
+  <h1>Free Arcade Games</h1>
+  <p class="sub">Fast, twitchy, easy to pick up — these are the classic arcade-style games on Nexus Arcade. No download, no signup, just tap and play.</p>
+  <div class="grid">
+    <a class="card" href="/dash/"><h2>Nexus Dash</h2><p>Dodge the shards, grab the orbs, survive as long as you can. A fast reflex arcade game.</p></a>
+    <a class="card" href="/racer/"><h2>Nexus Racer</h2><p>Weave through traffic and outrun the pack in this endless racer.</p></a>
+    <a class="card" href="/run3d/"><h2>Nexus Run 3D</h2><p>A 3D endless runner — switch lanes, jump, and keep the streak alive.</p></a>
+    <a class="card" href="/snake/"><h2>Nexus Snake</h2><p>The classic, reimagined — grow your snake without hitting a wall.</p></a>
+    <a class="card" href="/breaker/"><h2>Nexus Breaker</h2><p>Neon breakout — bounce the ball, smash every brick, catch power-ups.</p></a>
+    <a class="card" href="/stack/"><h2>Nexus Stack</h2><p>Time your taps to stack blocks as high as you can.</p></a>
+    <a class="card" href="/ticker/"><h2>Nexus Ticker</h2><p>A fast 75-second trading round — read the market, cash out in time.</p></a>
+  </div>
+  <div class="cats">
+    <a href="/c/racing/">Racing</a><a href="/c/puzzle/">Puzzle</a><a href="/c/3d/">3D</a>
+    <a href="/c/idle/">Idle</a><a href="/c/rpg/">RPG</a><a href="/c/daily/">Daily</a>
+  </div>
+</main>
+<footer>© <span id="year"></span> Nexus Arcade · <a href="/">Back to all games</a> · <a href="/leaderboards/">Leaderboards</a> · <a href="/datenschutz/">Privacy Policy / Datenschutz</a></footer>
+<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body>
+</html>

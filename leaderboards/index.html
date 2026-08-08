@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leaderboards — Top Scores for Every Game | Nexus Arcade</title>
+<meta name="description" content="See the top 10 players for every free Nexus Arcade game — Dash, Racer, 2048, Snake, Breaker, Run 3D, Stack, Blocks and more. Live global rankings, updated in real time." />
+<meta name="keywords" content="leaderboard, high scores, top players, arcade rankings, free browser games leaderboard" />
+<meta name="theme-color" content="#05060f" />
+<link rel="canonical" href="https://nexusarcade.vercel.app/leaderboards/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nexus Arcade — Leaderboards" />
+<meta property="og:description" content="Top 10 players for every free Nexus Arcade game, live and updated in real time." />
+<style>
+  :root{--bg:#05060f;--panel:rgba(16,20,42,0.8);--neon:#39e6ff;--pink:#ff3ea5;--mag:#c77dff;--green:#7cff6b;--gold:#ffcf5c;--text:#eaf6ff;--muted:#8a97c2;--line:rgba(120,140,220,0.25);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;min-height:100%;}
+  body{background:radial-gradient(1200px 600px at 50% -10%,rgba(57,230,255,0.12),transparent 60%),radial-gradient(900px 500px at 90% 110%,rgba(255,62,165,0.12),transparent 60%),var(--bg);
+    color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
+  header.top{width:100%;max-width:1000px;padding:16px 20px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:2px solid var(--neon);}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .brand .dot{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--neon));box-shadow:0 0 16px var(--neon),0 0 34px var(--neon);}
+  .brand span{font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--neon),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;text-decoration:none;font-family:inherit;}
+  .chip:hover{border-color:var(--neon);}
+  main{width:100%;max-width:1000px;padding:28px 20px 60px;}
+  h1{font-size:clamp(28px,5vw,42px);margin:0 0 8px;background:linear-gradient(90deg,var(--neon),var(--mag),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 30px;max-width:640px;line-height:1.6;}
+  .jump{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px;}
+  .jump a{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:7px 13px;border-radius:999px;font-size:13px;text-decoration:none;}
+  .jump a:hover{border-color:var(--neon);color:var(--neon);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;scroll-margin-top:20px;}
+  .card h2{margin:0 0 4px;font-size:18px;display:flex;align-items:center;gap:8px;}
+  .card h2 a{color:var(--text);text-decoration:none;}
+  .card h2 a:hover{color:var(--neon);}
+  .playlink{font-size:12px;color:var(--neon);text-decoration:none;font-weight:700;}
+  .row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:8px;font-size:14px;}
+  .row:nth-child(odd){background:rgba(255,255,255,0.02);}
+  .rk{width:20px;font-weight:800;color:var(--muted);flex:none;}
+  .rk.g{color:var(--gold);} .rk.s{color:#c9d3f2;} .rk.b{color:#c98a3a;}
+  .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sc{font-weight:700;color:var(--neon);font-variant-numeric:tabular-nums;}
+  .empty{color:var(--muted);font-size:13px;padding:10px 4px;}
+  footer{color:var(--muted);font-size:12px;padding:20px 18px 40px;text-align:center;}
+  footer a{color:var(--neon);text-decoration:none;}
+</style>
+<script src="/ads-config.js"></script>
+<script src="/ads.js"></script>
+<script src="/analytics-config.js"></script>
+<script src="/analytics.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="dot"></span><span>NEXUS ARCADE</span></a>
+  <a class="chip" href="/">← All games</a>
+</header>
+
+<main>
+  <h1>Leaderboards</h1>
+  <p class="sub">Top 10 players for every game on Nexus Arcade, live from our global rankings. Sign in on any game page to claim your spot.</p>
+
+  <nav class="jump" id="jump"></nav>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>© <span id="year"></span> Nexus Arcade · <a href="/">Back to all games</a> · <a href="/datenschutz/">Privacy Policy / Datenschutz</a></footer>
+
+<script src="/account-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/nexus-i18n.js"></script>
+<script src="/nexus-data.js"></script>
+<script src="/account.js"></script>
+<script>
+(function(){
+  "use strict";
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+  var GAMES = [
+    {id:"dash",name:"Nexus Dash",href:"/dash/"},
+    {id:"racer",name:"Nexus Racer",href:"/racer/"},
+    {id:"merge",name:"Nexus 2048",href:"/merge/"},
+    {id:"run3d",name:"Nexus Run 3D",href:"/run3d/"},
+    {id:"snake",name:"Nexus Snake",href:"/snake/"},
+    {id:"breaker",name:"Nexus Breaker",href:"/breaker/"},
+    {id:"stack",name:"Nexus Stack",href:"/stack/"},
+    {id:"blocks",name:"Nexus Blocks",href:"/blocks/"},
+    {id:"ticker",name:"Nexus Ticker",href:"/ticker/"},
+    {id:"idle",name:"Nexus Realms",href:"/idle/"},
+    {id:"words",name:"Nexus Words",href:"/words/"},
+    {id:"tycoon",name:"Nexus Tycoon",href:"/tycoon/"}
+  ];
+
+  var jump = document.getElementById("jump");
+  var grid = document.getElementById("grid");
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  jump.innerHTML = GAMES.map(function(g){ return '<a href="#'+g.id+'">'+g.name+'</a>'; }).join("");
+  grid.innerHTML = GAMES.map(function(g){
+    return '<div class="card" id="'+g.id+'"><h2><a href="'+g.href+'">'+g.name+'</a></h2>'+
+      '<a class="playlink" href="'+g.href+'">Play now →</a>'+
+      '<div style="margin-top:10px" data-rows="'+g.id+'"><div class="empty">Loading…</div></div></div>';
+  }).join("");
+
+  function renderRows(gameId, rows){
+    var box = grid.querySelector('[data-rows="'+gameId+'"]');
+    if (!box) return;
+    if (!rows || !rows.length){ box.innerHTML = '<div class="empty">No scores yet — be the first!</div>'; return; }
+    box.innerHTML = rows.map(function(r, i){
+      var cls = i===0?"g":i===1?"s":i===2?"b":"";
+      return '<div class="row"><div class="rk '+cls+'">'+(i+1)+'</div><div class="nm">'+esc(r.name||"Player")+'</div><div class="sc">'+r.score+'</div></div>';
+    }).join("");
+  }
+
+  function loadAll(){
+    var A = window.NexusArcade;
+    if (!A || typeof A.fetchLeaderboard !== "function") return;
+    GAMES.forEach(function(g){
+      A.fetchLeaderboard(g.id).then(function(rows){ renderRows(g.id, rows); }).catch(function(){ renderRows(g.id, []); });
+    });
+  }
+
+  (function hook(){
+    if (window.NexusArcade && window.NexusArcade.ready) { window.NexusArcade.ready(loadAll); }
+    else setTimeout(hook, 250);
+  })();
+})();
+</script>
+</body>
+</html>
