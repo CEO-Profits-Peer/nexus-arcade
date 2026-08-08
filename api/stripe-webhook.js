@@ -36,6 +36,10 @@ module.exports = async (req, res) => {
       case "checkout.session.completed": {
         const session = event.data.object;
         const userId = session.client_reference_id || (session.metadata && session.metadata.userId);
+        // Fehlt z.B. bei per Hand aus dem Stripe-Dashboard verschickten Beispiel-Events (kein
+        // echter Checkout unserer Seite -> keine client_reference_id/metadata). setProStatus()
+        // no-opt dann eh, aber ohne Log sieht man in den Vercel-Logs nicht WARUM PRO nicht aktiviert wurde.
+        if (!userId) console.warn("stripe-webhook: checkout.session.completed ohne userId", session.id);
         await setProStatus(userId, true, session.customer);
         break;
       }
@@ -45,6 +49,7 @@ module.exports = async (req, res) => {
         const userId = sub.metadata && sub.metadata.userId;
         const active = sub.status === "active" || sub.status === "trialing";
         if (userId) await setProStatus(userId, active, sub.customer);
+        else console.warn("stripe-webhook: " + event.type + " ohne userId in metadata", sub.id);
         break;
       }
       default:

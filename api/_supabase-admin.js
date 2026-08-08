@@ -17,6 +17,11 @@ async function setProStatus(userId, isPro, stripeCustomerId) {
   if (!userId) return;
   const sb = supabaseAdmin();
   const existing = await sb.from("saves").select("data").eq("user_id", userId).maybeSingle();
+  // Bei einem echten Lesefehler (Netzwerk/DB) NICHT mit einem leeren Basisobjekt weitermachen -
+  // der anschliessende upsert wuerde sonst saves.data komplett ersetzen und Profil/Scores/
+  // Achievements des Nutzers loeschen, nur um das nexus_pro-Flag zu setzen. Stattdessen werfen,
+  // damit der Webhook-Handler 500 zurueckgibt und Stripe automatisch erneut zustellt.
+  if (existing.error) throw existing.error;
   const data = Object.assign({}, (existing.data && existing.data.data) || {}, { nexus_pro: isPro ? "1" : "0" });
   if (stripeCustomerId) data.stripe_customer_id = stripeCustomerId;
   const payload = { user_id: userId, data, updated_at: new Date().toISOString() };
