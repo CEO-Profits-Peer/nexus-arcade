@@ -471,7 +471,12 @@
     if(k==="nr_save_v1"){ return progScore(cloud)>progScore(local)?cloud:local; }
     if(k==="nx_finance_empire"){ return empProgScore(cloud)>empProgScore(local)?cloud:local; }
     if(k==="nw_v1_en"||k==="nw_v1_de"){ try{const a=JSON.parse(local),b=JSON.parse(cloud);const as=(a&&a.stats)||{},bs=(b&&b.stats)||{};return ((bs.played||0)+(bs.wins||0))>((as.played||0)+(as.wins||0))?cloud:local;}catch(e){return local;} }
-    if(k==="nexus_pro"){ return (local==="1"||cloud==="1") ? "1" : "0"; } // einmal PRO (Stripe-Webhook), bleibt PRO bei jedem Merge
+    // Cloud (vom Stripe-Webhook gesetzt) ist hier bewusst die einzige Quelle der Wahrheit,
+    // NICHT per OR mit lokal kombinieren: sonst kann ein Geraet, das PRO schon einmal lokal
+    // hatte, nach einer echten Kuendigung (Webhook setzt cloud auf "0") nie wieder herunter-
+    // gestuft werden - und pusht sein veraltetes "1" beim naechsten Sync sogar zurueck in die
+    // Cloud, was die Kuendigung aktiv rueckgaengig macht.
+    if(k==="nexus_pro"){ return cloud; }
     return local; // Einstellungen/Quests: lokal bevorzugen
   }
   async function pull(){
@@ -630,7 +635,10 @@
     try{
       const r = await sb.from("saves").select("data").eq("user_id",user.id).maybeSingle();
       const v = (r.data && r.data.data && r.data.data.nexus_pro) || "0";
-      if(v==="1") localStorage.setItem("nexus_pro","1");
+      // Auch auf "0" herunterschreiben (nicht nur auf "1" hochschreiben) - sonst bleibt ein
+      // Geraet nach einer Kuendigung serverseitig korrekt "0" in der Cloud, zeigt lokal aber
+      // fuer immer weiter PRO an, bis ein voller pull()-Merge-Reload passiert.
+      localStorage.setItem("nexus_pro", v==="1" ? "1" : "0");
       return v==="1";
     }catch(e){ return isPro(); }
   }
