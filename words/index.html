@@ -40,8 +40,8 @@
   @media(max-width:1080px){.ad-rail{display:none;}}
   .sub{color:var(--muted);font-size:13px;text-align:center;padding:2px 16px 6px;}
 
-  .board{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;padding:10px;width:min(94vw,340px);}
-  .brow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+  .board{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;padding:10px;width:min(94vw,340px);--len:5;}
+  .brow{display:grid;grid-template-columns:repeat(var(--len),1fr);gap:6px;}
   .tile{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,7vw,32px);font-weight:800;text-transform:uppercase;
     border:2px solid var(--gray);border-radius:8px;background:var(--empty);color:var(--text);transition:transform .1s;}
   .tile.filled{border-color:#5a6187;animation:pop .12s;}
@@ -75,6 +75,13 @@
   .count b{color:var(--neon);font-variant-numeric:tabular-nums;}
   .card button{margin-top:12px;border:none;padding:13px 26px;border-radius:999px;cursor:pointer;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--neon),var(--green));color:#04121a;width:100%;}
 
+  .menu-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px;text-align:left;}
+  .menu-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .menu-opt{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .menu-opt.active{background:linear-gradient(90deg,var(--neon),var(--green));color:#04121a;border-color:transparent;}
+  .menu-opt:disabled{opacity:.3;cursor:not-allowed;}
+  .mode-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--neon);background:rgba(57,230,255,.1);border:1px solid rgba(57,230,255,.3);border-radius:999px;padding:3px 10px;margin-top:4px;cursor:pointer;}
+
   .about{max-width:520px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
   .about h2{color:var(--text);font-size:17px;} .about a{color:var(--neon);}
   footer{color:var(--muted);font-size:12px;padding:0 18px 26px;text-align:center;}
@@ -98,6 +105,7 @@
   <a class="brand" href="/" style="text-decoration:none;color:inherit;cursor:pointer" title="Nexus Arcade — Home"><div class="gem"></div><span>NEXUS ARCADE</span></a>
   <div class="controls">
     <div class="chip" id="statsBtn">📊</div>
+    <div class="chip" id="menuBtn" title="Mode &amp; settings"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
     <div class="chip" id="rankBtn" title="Leaderboards"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></div>
     <div class="chip" id="langBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z"/></svg> <span id="langLabel">EN</span></div>
   </div>
@@ -107,6 +115,7 @@
 <div class="ad-slot"></div>
 
 <div class="sub" id="sub">Guess the 5-letter word in 6 tries. A new puzzle every day.</div>
+<div style="text-align:center"><span class="mode-badge" id="modeBadge">🗓️ Daily</span></div>
 
 <div class="board" id="board"></div>
 <div class="kb" id="kb"></div>
@@ -122,44 +131,98 @@
 
 <footer>© <span id="year"></span> Nexus Words · one new puzzle every day. · <a href="/datenschutz/">Privacy Policy / Datenschutz</a> · <a href="/impressum/">Impressum</a></footer>
 <div class="toast" id="toast"></div>
+<div class="modal hidden" id="modal"><div class="card"></div></div>
+<div class="modal hidden" id="menuModal">
+  <div class="card" style="text-align:left">
+    <h2 style="text-align:center" data-i18n="menuTitle">Mode &amp; Settings</h2>
+    <div class="menu-label" data-i18n="menuMode">Mode</div>
+    <div class="menu-row" id="menuModeRow"></div>
+    <div class="menu-label" data-i18n="menuLang">Language</div>
+    <div class="menu-row" id="menuLangRow"></div>
+    <div class="menu-label" id="menuLenLabel" data-i18n="menuLen">Word length (Practice)</div>
+    <div class="menu-row" id="menuLenRow"></div>
+    <button id="menuApplyBtn" data-i18n="menuApply" style="margin-top:16px">Apply &amp; play</button>
+  </div>
+</div>
 
 <script>
 "use strict";
 (function(){
-  /* ---------- word lists (answers = also the valid-guess pool) ---------- */
+  /* ---------- word lists (answers = also the valid-guess pool) ----------
+     WORDS[lang][length]. The original 5-letter EN/DE lists (the daily-puzzle
+     pool, backing nw_v1_en/nw_v1_de) are untouched below - only wrapped
+     under a "5" key. 4/6-letter lists are new, Practice-mode only. Spanish
+     deliberately has no accented vowels/ñ: the on-screen+physical keyboard
+     here only supports a-z, so an accented answer could never be typed. */
   const WORDS={
-    en:["about","above","actor","acute","admit","adopt","adult","agent","agree","ahead","alarm","album","alert","alike","alive","allow","alone","along","alter","amber","angel","anger","angle","apart","apple","apply","arena","argue","arise","armor","array","arrow","aside","asset","audio","audit","avoid","awake","award","aware","badly","baker","basic","beach","began","begin","being","below","bench","birth","black","blade","blame","blank","blast","blaze","blind","block","blood","board","boost","booth","bound","brain","brand","brave","bread","break","breed","brick","bride","brief","bring","broad","brown","brush","build","built","bunch","burst","cabin","cable","candy","cargo","carry","catch","cause","chain","chair","chalk","charm","chart","chase","cheap","check","cheer","chess","chest","chief","child","chill","choir","chose","civic","civil","claim","class","clean","clear","click","cliff","climb","clock","close","cloth","cloud","coach","coast","could","count","court","cover","crack","craft","crane","crash","crazy","cream","creek","crime","crisp","cross","crowd","crown","crude","cruel","crush","curve","cycle","daily","dairy","dance","dealt","death","debut","delay","delta","dense","depth","doubt","dozen","draft","drama","drank","dream","dress","dried","drink","drive","drove","eager","eagle","early","earth","eaten","elbow","elder","elect","elite","empty","enemy","enjoy","enter","entry","equal","error","essay","event","every","exact","exist","extra","fault","favor","feast","fence","fever","fiber","field","fiery","fifth","fifty","fight","final","first","flame","flash","fleet","flesh","float","flood","floor","flour","focus","force","forge","forth","forty","forum","found","frame","frank","fraud","fresh","front","frost","fruit","fully","funny","ghost","giant","given","glass","globe","glory","glove","grace","grade","grain","grand","grant","grape","graph","grasp","grass","grave","great","greed","green","greet","grief","grill","gross","group","grown","guard","guess","guest","guide","habit","happy","harsh","heart","heavy","hedge","hello","hobby","honey","honor","horse","hotel","house","human","humor","ideal","image","index","inner","input","ivory","jelly","jewel","joint","judge","juice","knife","knock","known","label","labor","large","laser","later","laugh","layer","learn","lease","least","leave","legal","lemon","level","light","limit","linen","liver","lobby","local","logic","loose","loser","lower","loyal","lucky","lunar","lunch","lyric","magic","major","maker","march","match","maybe","mayor","meant","medal","media","melon","mercy","merit","metal","meter","might","minor","minus","mixed","model","money","month","moral","motor","mount","mouse","mouth","movie","music","naked","nasty","naval","nerve","never","newly","night","noble","noise","north","novel","nurse","ocean","offer","often","olive","onion","order","other","ought","outer","owner","paint","panel","panic","paper","party","pasta","patch","pause","peace","pearl","phase","phone","photo","piano","piece","pilot","pitch","pixel","place","plain","plane","plant","plate","plaza","point","polar","porch","pound","power","press","price","pride","prime","print","prior","prize","proof","proud","prove","pulse","punch","pupil","purse","queen","query","quest","queue","quick","quiet","quite","quota","quote","radar","radio","raise","rally","ranch","range","rapid","ratio","razor","reach","ready","realm","rebel","refer","relax","relay","renew","reply","rifle","right","rigid","river","roast","robot","rough","round","route","royal","rugby","ruler","rural","salad","sauce","scale","scare","scarf","scene","scent","scope","score","scout","scrap","screw","sense","serve","seven","shade","shake","shall","shame","shape","share","shark","sharp","sheep","sheet","shelf","shell","shift","shine","shirt","shock","shoot","shore","short","shown","sight","silly","since","siren","sixth","sixty","skill","slate","sleep","slice","slide","slope","small","smart","smile","smoke","snake","sneak","solar","solid","solve","sorry","sound","south","space","spare","spark","speak","speed","spell","spend","spice","spike","spine","split","spoke","sport","spray","squad","stack","staff","stage","stain","stair","stake","stamp","stand","stare","start","state","steal","steam","steel","steep","steer","stern","stick","stiff","still","stock","stone","stood","store","storm","story","stove","straw","strip","study","stuff","style","sugar","suite","sunny","super","surge","sweat","sweep","sweet","swing","sword","table","taken","tally","taste","teach","tempo","tenth","thank","theft","their","theme","there","these","thick","thief","thing","think","third","those","three","threw","throw","thumb","tiger","tight","timer","title","toast","today","token","topic","torch","total","touch","tough","tower","toxic","trace","track","trade","trail","train","trait","trash","treat","trend","trial","tribe","trick","tried","troop","truck","truly","trunk","trust","truth","tumor","tutor","twice","twist","ultra","uncle","under","union","unite","unity","upper","upset","urban","usage","usual","valid","value","valve","vapor","vault","verse","video","villa","vinyl","virus","visit","vital","vivid","vocal","voice","voter","wagon","waist","waste","watch","water","weary","weird","whale","wheat","wheel","where","which","while","white","whole","whose","width","witch","woman","world","worry","worse","worst","worth","would","wound","wrist","write","wrong","wrote","yacht","yield","young","youth","zebra"],
-    de:["abend","apfel","augen","autos","basis","bauer","beere","beten","biene","blatt","blume","boden","boote","boxen","braun","brief","brote","bruch","buche","damen","dampf","decke","dosen","draht","druck","engel","enkel","erbse","essen","feder","feier","ferne","feste","feuer","fisch","fluss","folge","forum","frage","frist","frost","fuchs","gabel","gasse","gebet","geist","gerne","glanz","gleis","gnade","gramm","grund","gurke","hafen","hallo","haube","hecke","heide","herde","hobby","honig","humor","hunde","insel","jacke","jahre","jeans","jubel","kabel","kamin","karte","katze","kegel","kette","kiste","klage","klang","klein","klima","klotz","knabe","koala","kohle","komet","kraft","kranz","kreis","krieg","krone","kugel","kunde","kunst","kurve","lachs","laden","lampe","lager","laune","leben","leder","lehre","leine","liebe","lilie","linie","links","liste","lotus","luchs","magen","magie","maler","mango","mauer","meile","meise","milch","minze","mitte","mixer","monat","moral","motor","musik","nabel","nadel","natur","nebel","neffe","noten","nudel","onkel","opfer","orgel","otter","palme","panik","pause","pferd","pflug","pilot","pizza","platz","pluto","pokal","porto","preis","probe","punkt","quark","quell","radio","rampe","rasen","raten","regen","reich","reise","rente","riese","rille","rinde","rippe","rosen","rubin","ruder","ruhig","runde","sache","saite","salat","salbe","samen","sauna","schaf","schal","scheu","schuh","segel","seife","seite","sicht","silbe","sonne","spatz","speer","spiel","sport","stadt","stall","stamm","stand","stein","stern","stich","stiel","stift","stirn","stock","stoff","stolz","strom","stube","stuhl","sturm","suppe","szene","tafel","tante","tasse","taste","teich","tempo","thron","tiere","tinte","tisch","titel","torte","traum","treue","trick","trieb","tulpe","tuten","tutor","untat","vater","vogel","wache","wagen","wange","wanne","warze","weber","weide","weite","welle","wende","werft","werke","wesen","weste","wiese","wille","winde","wolke","wonne","wurst","zange","zebra","zeder","zehen","zeile","zelle","ziege","zitat","zunge","zweig"]
+    en:{
+      4:["able","acid","also","area","army","away","baby","back","ball","band","bank","base","bath","bear","beat","beer","bell","belt","bend","best","bike","bird","blue","boat","body","bond","bone","book","boot","born","boss","bowl","burn","bush","busy","cafe","cake","call","calm","came","camp","card","care","case","cash","cast","cave","cell","chef","chip","city","clay","club","coal","coat","code","cold","come","cook","cool","copy","core","corn","cost","crew","crop","dark","data","date"],
+      6:["accept","active","actual","advice","afford","agency","almost","always","amount","animal","annual","answer","anyone","appear","around","arrive","artist","aspect","assist","assume","attack","attend","august","author","avenue","backed","banana","barely","barrel","basket","battle","beauty","become","before","behind","belong","better","beyond","bishop","border","bottle","bottom","bought","bridge","bright","broken","budget","button","camera","cancel","cancer","cannot","canvas","carbon","career","castle","casual","caught","center","chance"],
+      5:["about","above","actor","acute","admit","adopt","adult","agent","agree","ahead","alarm","album","alert","alike","alive","allow","alone","along","alter","amber","angel","anger","angle","apart","apple","apply","arena","argue","arise","armor","array","arrow","aside","asset","audio","audit","avoid","awake","award","aware","badly","baker","basic","beach","began","begin","being","below","bench","birth","black","blade","blame","blank","blast","blaze","blind","block","blood","board","boost","booth","bound","brain","brand","brave","bread","break","breed","brick","bride","brief","bring","broad","brown","brush","build","built","bunch","burst","cabin","cable","candy","cargo","carry","catch","cause","chain","chair","chalk","charm","chart","chase","cheap","check","cheer","chess","chest","chief","child","chill","choir","chose","civic","civil","claim","class","clean","clear","click","cliff","climb","clock","close","cloth","cloud","coach","coast","could","count","court","cover","crack","craft","crane","crash","crazy","cream","creek","crime","crisp","cross","crowd","crown","crude","cruel","crush","curve","cycle","daily","dairy","dance","dealt","death","debut","delay","delta","dense","depth","doubt","dozen","draft","drama","drank","dream","dress","dried","drink","drive","drove","eager","eagle","early","earth","eaten","elbow","elder","elect","elite","empty","enemy","enjoy","enter","entry","equal","error","essay","event","every","exact","exist","extra","fault","favor","feast","fence","fever","fiber","field","fiery","fifth","fifty","fight","final","first","flame","flash","fleet","flesh","float","flood","floor","flour","focus","force","forge","forth","forty","forum","found","frame","frank","fraud","fresh","front","frost","fruit","fully","funny","ghost","giant","given","glass","globe","glory","glove","grace","grade","grain","grand","grant","grape","graph","grasp","grass","grave","great","greed","green","greet","grief","grill","gross","group","grown","guard","guess","guest","guide","habit","happy","harsh","heart","heavy","hedge","hello","hobby","honey","honor","horse","hotel","house","human","humor","ideal","image","index","inner","input","ivory","jelly","jewel","joint","judge","juice","knife","knock","known","label","labor","large","laser","later","laugh","layer","learn","lease","least","leave","legal","lemon","level","light","limit","linen","liver","lobby","local","logic","loose","loser","lower","loyal","lucky","lunar","lunch","lyric","magic","major","maker","march","match","maybe","mayor","meant","medal","media","melon","mercy","merit","metal","meter","might","minor","minus","mixed","model","money","month","moral","motor","mount","mouse","mouth","movie","music","naked","nasty","naval","nerve","never","newly","night","noble","noise","north","novel","nurse","ocean","offer","often","olive","onion","order","other","ought","outer","owner","paint","panel","panic","paper","party","pasta","patch","pause","peace","pearl","phase","phone","photo","piano","piece","pilot","pitch","pixel","place","plain","plane","plant","plate","plaza","point","polar","porch","pound","power","press","price","pride","prime","print","prior","prize","proof","proud","prove","pulse","punch","pupil","purse","queen","query","quest","queue","quick","quiet","quite","quota","quote","radar","radio","raise","rally","ranch","range","rapid","ratio","razor","reach","ready","realm","rebel","refer","relax","relay","renew","reply","rifle","right","rigid","river","roast","robot","rough","round","route","royal","rugby","ruler","rural","salad","sauce","scale","scare","scarf","scene","scent","scope","score","scout","scrap","screw","sense","serve","seven","shade","shake","shall","shame","shape","share","shark","sharp","sheep","sheet","shelf","shell","shift","shine","shirt","shock","shoot","shore","short","shown","sight","silly","since","siren","sixth","sixty","skill","slate","sleep","slice","slide","slope","small","smart","smile","smoke","snake","sneak","solar","solid","solve","sorry","sound","south","space","spare","spark","speak","speed","spell","spend","spice","spike","spine","split","spoke","sport","spray","squad","stack","staff","stage","stain","stair","stake","stamp","stand","stare","start","state","steal","steam","steel","steep","steer","stern","stick","stiff","still","stock","stone","stood","store","storm","story","stove","straw","strip","study","stuff","style","sugar","suite","sunny","super","surge","sweat","sweep","sweet","swing","sword","table","taken","tally","taste","teach","tempo","tenth","thank","theft","their","theme","there","these","thick","thief","thing","think","third","those","three","threw","throw","thumb","tiger","tight","timer","title","toast","today","token","topic","torch","total","touch","tough","tower","toxic","trace","track","trade","trail","train","trait","trash","treat","trend","trial","tribe","trick","tried","troop","truck","truly","trunk","trust","truth","tumor","tutor","twice","twist","ultra","uncle","under","union","unite","unity","upper","upset","urban","usage","usual","valid","value","valve","vapor","vault","verse","video","villa","vinyl","virus","visit","vital","vivid","vocal","voice","voter","wagon","waist","waste","watch","water","weary","weird","whale","wheat","wheel","where","which","while","white","whole","whose","width","witch","woman","world","worry","worse","worst","worth","would","wound","wrist","write","wrong","wrote","yacht","yield","young","youth","zebra"]
+    },
+    de:{
+      4:["auge","baum","bein","bett","blau","boot","brot","buch","dach","damm","dorf","drei","duft","ecke","ehre","eile","erde","fach","faul","feld","fell","fern","fest","film","flur","form","frau","frei","gabe","gans","gast","gelb","geld","gift","glas","gold","gras","halm","hand","haus","herz","holz","huhn","jahr","kalb","kamm","kanu","kern","kind","knie","kopf","kork","lack","lage","lamm","land","lied","loch","lohn","luft"],
+      6:["anfang","arbeit","banane","besuch","betrag","bezirk","bruder","cousin","diesel","drache","fabrik","fahrer","ferien","formel","garten","gebiet","gegend","genuss","geruch","gewinn","glaube","gruppe","handel","heimat","helfer","hoffen","hunger","kaffee","kanton","keller","kirche","klasse","koffer","konten","kredit","lachen","laster","leiter","lehrer","machen","makler","matrix","mensch","messer","mittel","monate","motive","mutter","nadeln","nehmen","norden","nutzen","ordnen","ordner","pfeife","planen","preise","presse","quelle","regeln","reisen","retten","ringen"],
+      5:["abend","apfel","augen","autos","basis","bauer","beere","beten","biene","blatt","blume","boden","boote","boxen","braun","brief","brote","bruch","buche","damen","dampf","decke","dosen","draht","druck","engel","enkel","erbse","essen","feder","feier","ferne","feste","feuer","fisch","fluss","folge","forum","frage","frist","frost","fuchs","gabel","gasse","gebet","geist","gerne","glanz","gleis","gnade","gramm","grund","gurke","hafen","hallo","haube","hecke","heide","herde","hobby","honig","humor","hunde","insel","jacke","jahre","jeans","jubel","kabel","kamin","karte","katze","kegel","kette","kiste","klage","klang","klein","klima","klotz","knabe","koala","kohle","komet","kraft","kranz","kreis","krieg","krone","kugel","kunde","kunst","kurve","lachs","laden","lampe","lager","laune","leben","leder","lehre","leine","liebe","lilie","linie","links","liste","lotus","luchs","magen","magie","maler","mango","mauer","meile","meise","milch","minze","mitte","mixer","monat","moral","motor","musik","nabel","nadel","natur","nebel","neffe","noten","nudel","onkel","opfer","orgel","otter","palme","panik","pause","pferd","pflug","pilot","pizza","platz","pluto","pokal","porto","preis","probe","punkt","quark","quell","radio","rampe","rasen","raten","regen","reich","reise","rente","riese","rille","rinde","rippe","rosen","rubin","ruder","ruhig","runde","sache","saite","salat","salbe","samen","sauna","schaf","schal","scheu","schuh","segel","seife","seite","sicht","silbe","sonne","spatz","speer","spiel","sport","stadt","stall","stamm","stand","stein","stern","stich","stiel","stift","stirn","stock","stoff","stolz","strom","stube","stuhl","sturm","suppe","szene","tafel","tante","tasse","taste","teich","tempo","thron","tiere","tinte","tisch","titel","torte","traum","treue","trick","trieb","tulpe","tuten","tutor","untat","vater","vogel","wache","wagen","wange","wanne","warze","weber","weide","weite","welle","wende","werft","werke","wesen","weste","wiese","wille","winde","wolke","wonne","wurst","zange","zebra","zeder","zehen","zeile","zelle","ziege","zitat","zunge","zweig"]
+    },
+    es:{
+      5:["abajo","acero","actor","ahora","altos","amigo","ancho","antes","arena","armar","arroz","asado","atlas","autor","bajar","banco","barco","barro","bella","bolsa","bomba","bonos","botas","brazo","breve","bueno","burro","cable","calle","calor","calvo","campo","canal","capaz","carga","carne","carro","carta","casar","casco","causa","cazar","cerca","cielo","cinco","clase","clave","clima","cobre","cocer","coche","comer","copia","corte","corto","costa","crear","creer","cuero","cueva","culpa","curva","dedos","dejar","deseo","doble","dolor","donde","dulce","duque","duros","echar","enero","entre","errar","estar","falda","falso","favor","fecha","feliz","fiera","final","firma","flaco","forma","fuego","fuera","gafas","ganar","gente","gordo","grado","grano","gripe","grito","grupo","guapo","hacer","hielo","hijos","hogar","honor","horno","huevo","humor","igual","indio","joven","jugar","junto","justo","lanza","largo","leche","lento","letra","libra","libre","libro","lista","lucha","lugar","lunes","luces","madre","mango","marca","mares","mayor","medio","mesas","metro","mismo","mitad","monte","mujer","mundo","museo","nadar","negro","nieve","noche","norte","nueva","nuevo","nunca","oeste","olivo","orden","oreja","pagar","panel","papel","parar","pared","parte","pasar","paseo","patio","pecho","pedir","pelea","perro","pesar","pieza","playa","plaza","plazo","pobre","poder","polvo","poner","primo","punto","queso","radio","rango","regla","reina","reloj","renta","resto","robar","rosas","rueda","sabio","sabor","salir","salsa","salud","santo","secar","sello","selva","serio","sexto","siglo","signo","silla","sobre","socio","techo","tenis","terco","tigre","tinta","tipos","tocar","todos","tomar","torre","total","trato","usted","valle","valor","vapor","venir","venta","verde","verso","viaje","video","viejo","vista","vivir","volar","yerno","zorro"]
+    }
   };
-  const LAYOUT={en:["qwertyuiop","asdfghjkl","zxcvbnm"],de:["qwertzuiop","asdfghjkl","yxcvbnm"]};
+  const LAYOUT={en:["qwertyuiop","asdfghjkl","zxcvbnm"],de:["qwertzuiop","asdfghjkl","yxcvbnm"],es:["qwertyuiop","asdfghjkl","zxcvbnm"]};
+  const LANGS=["en","de","es"];
+  function lensFor(l){ return Object.keys(WORDS[l]||{}).map(Number).sort((a,b)=>a-b); }
 
   let lang=(localStorage.getItem("nw_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const I18N={
     en:{hub:"Games",sub:"Guess the 5-letter word in 6 tries. A new puzzle every day.",
       aboutH:"About Nexus Words",
-      aboutP:"Nexus Words is a free daily word puzzle you can play right in your browser — no download, no signup. Every day there's one new 5-letter word to guess in six tries. Green means the letter is correct and in the right spot, yellow means it's in the word but in a different spot, and gray means it isn't in the word. Solve it, keep your streak alive, and share your result with friends. There's a fresh puzzle every day in both English and German.",
+      aboutP:"Nexus Words is a free daily word puzzle you can play right in your browser — no download, no signup. Every day there's one new 5-letter word to guess in six tries. Green means the letter is correct and in the right spot, yellow means it's in the word but in a different spot, and gray means it isn't in the word. Solve it, keep your streak alive, and share your result with friends. Play a Daily puzzle in English, German or Spanish, or switch to Practice mode for unlimited rounds with 4, 5 or 6-letter words.",
       win:["Genius!","Magnificent!","Impressive!","Splendid!","Great!","Phew!"],lose:"Next time!",
       notenough:"Not enough letters",played:"Played",winp:"Win %",streak:"Streak",maxstreak:"Max",
-      share:"Share",next:"Next puzzle in",copied:"Result copied — paste anywhere!",already:"You already played today's puzzle."},
+      share:"Share",next:"Next puzzle in",copied:"Result copied — paste anywhere!",already:"You already played today's puzzle.",
+      modeDaily:"🗓️ Daily",modePractice:"🎲 Practice",menuTitle:"Mode & Settings",menuMode:"Mode",menuLang:"Language",
+      menuLen:"Word length (Practice)",menuApply:"Apply & play",practiceRound:"Practice round",practiceWin:"Solved!",
+      practiceLose:"Out of tries!",newRound:"↻ New round",roundsPlayed:"Rounds this session"},
     de:{hub:"Spiele",sub:"Errate das 5-Buchstaben-Wort in 6 Versuchen. Jeden Tag ein neues Rätsel.",
       aboutH:"Über Nexus Words",
-      aboutP:"Nexus Words ist ein kostenloses tägliches Wort-Rätsel direkt im Browser — kein Download, keine Anmeldung. Jeden Tag gibt es ein neues 5-Buchstaben-Wort, das du in sechs Versuchen erraten musst. Grün heißt: der Buchstabe stimmt und steht an der richtigen Stelle, Gelb heißt: er kommt vor, aber woanders, Grau heißt: er kommt nicht vor. Löse es, halte deine Serie am Leben und teile dein Ergebnis mit Freunden. Jeden Tag ein frisches Rätsel auf Deutsch und Englisch.",
+      aboutP:"Nexus Words ist ein kostenloses tägliches Wort-Rätsel direkt im Browser — kein Download, keine Anmeldung. Jeden Tag gibt es ein neues 5-Buchstaben-Wort, das du in sechs Versuchen erraten musst. Grün heißt: der Buchstabe stimmt und steht an der richtigen Stelle, Gelb heißt: er kommt vor, aber woanders, Grau heißt: er kommt nicht vor. Löse es, halte deine Serie am Leben und teile dein Ergebnis mit Freunden. Spiele das tägliche Rätsel auf Deutsch, Englisch oder Spanisch, oder wechsle in den Übungsmodus für beliebig viele Runden mit 4, 5 oder 6 Buchstaben.",
       win:["Genial!","Großartig!","Beeindruckend!","Stark!","Gut!","Puh!"],lose:"Nächstes Mal!",
       notenough:"Zu wenige Buchstaben",played:"Gespielt",winp:"Gewinn %",streak:"Serie",maxstreak:"Max",
-      share:"Teilen",next:"Nächstes Rätsel in",copied:"Ergebnis kopiert — überall einfügen!",already:"Du hast das heutige Rätsel schon gespielt."}
+      share:"Teilen",next:"Nächstes Rätsel in",copied:"Ergebnis kopiert — überall einfügen!",already:"Du hast das heutige Rätsel schon gespielt.",
+      modeDaily:"🗓️ Täglich",modePractice:"🎲 Übung",menuTitle:"Modus & Einstellungen",menuMode:"Modus",menuLang:"Sprache",
+      menuLen:"Wortlänge (Übung)",menuApply:"Übernehmen & spielen",practiceRound:"Übungsrunde",practiceWin:"Gelöst!",
+      practiceLose:"Keine Versuche mehr!",newRound:"↻ Neue Runde",roundsPlayed:"Runden diese Sitzung"},
+    es:{hub:"Juegos",sub:"Adivina la palabra de 5 letras en 6 intentos. Un nuevo reto cada día.",
+      aboutH:"Sobre Nexus Words",
+      aboutP:"Nexus Words es un reto de palabras diario y gratuito que juegas directamente en el navegador — sin descargas, sin registro. Cada día hay una nueva palabra de 5 letras para adivinar en seis intentos. Verde significa que la letra es correcta y está en el lugar correcto, amarillo significa que está en la palabra pero en otro lugar, y gris significa que no está en la palabra. Resuélvelo, mantén tu racha y comparte tu resultado. Juega el reto diario en inglés, alemán o español, o cambia al modo Práctica para rondas ilimitadas con palabras de 4, 5 o 6 letras.",
+      win:["¡Genial!","¡Magnífico!","¡Impresionante!","¡Espléndido!","¡Bien!","¡Uf!"],lose:"¡La próxima vez!",
+      notenough:"Faltan letras",played:"Jugadas",winp:"% Victorias",streak:"Racha",maxstreak:"Máx",
+      share:"Compartir",next:"Próximo reto en",copied:"Resultado copiado — pégalo donde quieras!",already:"Ya jugaste el reto de hoy.",
+      modeDaily:"🗓️ Diario",modePractice:"🎲 Práctica",menuTitle:"Modo y ajustes",menuMode:"Modo",menuLang:"Idioma",
+      menuLen:"Longitud (Práctica)",menuApply:"Aplicar y jugar",practiceRound:"Ronda de práctica",practiceWin:"¡Resuelto!",
+      practiceLose:"¡Sin intentos!",newRound:"↻ Nueva ronda",roundsPlayed:"Rondas de esta sesión"}
   };
   const T=()=>I18N[lang];
 
   /* ---------- daily puzzle ---------- */
   const START=new Date(2025,0,1); START.setHours(0,0,0,0);
   function dayNum(){const t=new Date();t.setHours(0,0,0,0);return Math.floor((t-START)/86400000);}
-  function answer(){const l=WORDS[lang];return l[((dayNum()%l.length)+l.length)%l.length];}
+  function dailyAnswer(l){const list=WORDS[l][5];return list[((dayNum()%list.length)+list.length)%list.length];}
+  function randomAnswer(l,len){const list=(WORDS[l]&&WORDS[l][len])||WORDS[l][5];return list[Math.floor(Math.random()*list.length)];}
 
-  /* ---------- state ---------- */
-  let ANS, guesses, cur, done, won;
+  /* ---------- state ----------
+     mode: "daily" (default, backward-compatible) persists to nw_v1_<lang> exactly as
+     before - untouched shape, untouched key names, so account.js's mergeKey/readStats
+     integration keeps working unmodified. "practice" is deliberately NOT persisted
+     across reloads (no new sync key to design/merge) - it's just "keep playing more
+     rounds today" for the current session, picking a fresh random word each round. */
+  let mode = localStorage.getItem("nw_mode")==="practice" ? "practice" : "daily";
+  let plen = parseInt(localStorage.getItem("nw_plen")||"5",10);
+  let ANS, guesses, cur, done, won, curLen=5, roundsThisSession=0;
   const key=()=>"nw_v1_"+lang;
-  function loadState(){
-    ANS=answer();
+  function loadDaily(){
+    curLen=5; ANS=dailyAnswer(lang);
     let st;try{st=JSON.parse(localStorage.getItem(key())||"null");}catch(e){st=null;}
     const stats=(st&&st.stats)||{played:0,wins:0,streak:0,max:0,dist:[0,0,0,0,0,0]};
     if(st && st.day===dayNum()){guesses=st.guesses||[];done=!!st.done;won=!!st.won;}
@@ -167,20 +230,24 @@
     STATS=stats;cur="";
   }
   let STATS;
-  function saveState(){localStorage.setItem(key(),JSON.stringify({day:dayNum(),guesses,done,won,stats:STATS}));}
+  function saveDaily(){localStorage.setItem(key(),JSON.stringify({day:dayNum(),guesses,done,won,stats:STATS}));}
+  function startPractice(){
+    curLen = lensFor(lang).indexOf(plen)>=0 ? plen : 5;
+    ANS=randomAnswer(lang,curLen); guesses=[];done=false;won=false;cur="";
+  }
 
   /* ---------- render ---------- */
   const $=id=>document.getElementById(id);
   const board=$("board"),kb=$("kb");
   function buildBoard(){
-    board.innerHTML="";
+    board.innerHTML=""; board.style.setProperty("--len",curLen);
     for(let r=0;r<6;r++){
       const row=document.createElement("div");row.className="brow";row.id="row"+r;
-      for(let c=0;c<5;c++){const t=document.createElement("div");t.className="tile";t.id="t"+r+c;row.appendChild(t);}
+      for(let c=0;c<curLen;c++){const t=document.createElement("div");t.className="tile";t.id="t"+r+c;row.appendChild(t);}
       board.appendChild(row);
     }
     // fill past guesses
-    guesses.forEach((g,r)=>{const ev=evaluate(g,ANS);for(let c=0;c<5;c++){const t=$("t"+r+c);t.textContent=g[c];t.classList.add("filled",ev[c]);}});
+    guesses.forEach((g,r)=>{const ev=evaluate(g,ANS);for(let c=0;c<curLen;c++){const t=$("t"+r+c);t.textContent=g[c];t.classList.add("filled",ev[c]);}});
   }
   function buildKb(){
     kb.innerHTML="";const rows=LAYOUT[lang];
@@ -196,16 +263,16 @@
   function mkKey(label,val,wide){const b=document.createElement("button");b.className="key"+(wide?" wide":"");b.textContent=label;b.dataset.k=val;b.addEventListener("click",()=>press(val));return b;}
   function colorKeys(){
     const best={};
-    guesses.forEach(g=>{const ev=evaluate(g,ANS);for(let c=0;c<5;c++){const ch=g[c],s=ev[c];const rank={absent:1,present:2,correct:3};if(!best[ch]||rank[s]>rank[best[ch]])best[ch]=s;}});
+    guesses.forEach(g=>{const ev=evaluate(g,ANS);for(let c=0;c<curLen;c++){const ch=g[c],s=ev[c];const rank={absent:1,present:2,correct:3};if(!best[ch]||rank[s]>rank[best[ch]])best[ch]=s;}});
     kb.querySelectorAll(".key").forEach(k=>{const ch=k.dataset.k;k.classList.remove("correct","present","absent");if(best[ch])k.classList.add(best[ch]);});
   }
 
   /* ---------- logic ---------- */
   function evaluate(guess,ans){
-    const res=Array(5).fill("absent"),a=ans.split(""),cnt={};
+    const n=ans.length,res=Array(n).fill("absent"),a=ans.split(""),cnt={};
     for(const c of a)cnt[c]=(cnt[c]||0)+1;
-    for(let i=0;i<5;i++)if(guess[i]===a[i]){res[i]="correct";cnt[guess[i]]--;}
-    for(let i=0;i<5;i++){if(res[i]==="correct")continue;const c=guess[i];if(cnt[c]>0){res[i]="present";cnt[c]--;}}
+    for(let i=0;i<n;i++)if(guess[i]===a[i]){res[i]="correct";cnt[guess[i]]--;}
+    for(let i=0;i<n;i++){if(res[i]==="correct")continue;const c=guess[i];if(cnt[c]>0){res[i]="present";cnt[c]--;}}
     return res;
   }
   function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
@@ -214,32 +281,48 @@
     if(done)return;
     if(k==="enter")return submit();
     if(k==="back"){cur=cur.slice(0,-1);return paint();}
-    if(/^[a-z]$/.test(k)&&cur.length<5){cur+=k;paint();}
+    if(/^[a-z]$/.test(k)&&cur.length<curLen){cur+=k;paint();}
   }
   function paint(){
     const r=guesses.length;
-    for(let c=0;c<5;c++){const t=$("t"+r+c);if(!t)continue;t.textContent=cur[c]||"";t.classList.toggle("filled",!!cur[c]);}
+    for(let c=0;c<curLen;c++){const t=$("t"+r+c);if(!t)continue;t.textContent=cur[c]||"";t.classList.toggle("filled",!!cur[c]);}
   }
   function submit(){
     const r=guesses.length;
-    if(cur.length<5){shake(r);toast(T().notenough);return;}
+    if(cur.length<curLen){shake(r);toast(T().notenough);return;}
     const ev=evaluate(cur,ANS);
-    for(let c=0;c<5;c++){const t=$("t"+r+c);t.classList.add("reveal",ev[c]);t.style.animationDelay=(c*0.12)+"s";}
+    for(let c=0;c<curLen;c++){const t=$("t"+r+c);t.classList.add("reveal",ev[c]);t.style.animationDelay=(c*0.12)+"s";}
     guesses.push(cur);
     const guess=cur;cur="";
     colorKeys();
-    if(guess===ANS){won=true;done=true;finish(true,guesses.length);}
-    else if(guesses.length>=6){done=true;finish(false,0);}
-    saveState();
+    if(guess===ANS){won=true;done=true; mode==="daily"?finishDaily(true,guesses.length):finishPractice(true);}
+    else if(guesses.length>=6){done=true; mode==="daily"?finishDaily(false,0):finishPractice(false);}
+    if(mode==="daily") saveDaily();
   }
   function shake(r){const row=$("row"+r);row.classList.add("shake");setTimeout(()=>row.classList.remove("shake"),420);}
 
-  function finish(w,tries){
+  function finishDaily(w,tries){
     STATS.played++;
     if(w){STATS.wins++;STATS.streak++;STATS.max=Math.max(STATS.max,STATS.streak);STATS.dist[tries-1]++;}
     else STATS.streak=0;
-    saveState();
+    saveDaily();
     setTimeout(()=>showStats(true),900);
+  }
+  function finishPractice(w){
+    roundsThisSession++;
+    setTimeout(()=>showPracticeResult(w),900);
+  }
+  function showPracticeResult(w){
+    const t=T();
+    const modal=$("modal");
+    modal.querySelector(".card").innerHTML=`
+      <h2>${w?t.practiceWin:t.practiceLose}</h2>
+      ${!w?`<div class="word">${ANS.toUpperCase()}</div>`:""}
+      <div class="count">${t.roundsPlayed}: <b>${roundsThisSession}</b></div>
+      <button id="newRoundBtn">${t.newRound}</button>`;
+    modal.classList.remove("hidden");
+    const nb=$("newRoundBtn");
+    if(nb)nb.onclick=()=>{modal.classList.add("hidden");startPractice();buildBoard();buildKb();};
   }
 
   /* ---------- stats / share modal ---------- */
@@ -279,8 +362,9 @@
   async function share(){
     const emo={correct:"🟩",present:"🟨",absent:"⬛"};
     let grid=guesses.map(g=>evaluate(g,ANS).map(s=>emo[s]).join("")).join("\n");
-    const n=dayNum();const tries=won?guesses.length:"X";
-    const txt=`Nexus Words #${n} ${tries}/6\n${grid}`;
+    let txt;
+    if(mode==="daily"){const n=dayNum();const tries=won?guesses.length:"X";txt=`Nexus Words #${n} ${tries}/6\n${grid}`;}
+    else{const tries=won?guesses.length:"X";txt=`Nexus Words (${curLen}) ${tries}/6\n${grid}`;}
     const url=location.origin+location.pathname;
     if(navigator.share){try{await navigator.share({title:"Nexus Words",text:txt+"\n"+url});return;}catch(e){}}
     try{await navigator.clipboard.writeText(txt+"\n"+url);toast(T().copied);}catch(e){toast(T().copied);}
@@ -288,7 +372,7 @@
 
   /* ---------- physical keyboard ---------- */
   document.addEventListener("keydown",e=>{
-    if(!$("modal").classList.contains("hidden"))return;
+    if(!$("modal").classList.contains("hidden")||!$("menuModal").classList.contains("hidden"))return;
     if(e.key==="Enter")press("enter");
     else if(e.key==="Backspace")press("back");
     else{const k=e.key.toLowerCase();if(/^[a-z]$/.test(k))press(k);}
@@ -299,20 +383,53 @@
     document.documentElement.lang=lang;$("langLabel").textContent=lang.toUpperCase();
     document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});
     $("sub").textContent=T().sub;$("aboutH").textContent=T().aboutH;$("aboutP").textContent=T().aboutP;
-    loadState();buildBoard();buildKb();
+    if(mode==="daily")loadDaily();else startPractice();
+    $("modeBadge").textContent = mode==="daily" ? T().modeDaily : (T().modePractice+" · "+curLen);
+    buildBoard();buildKb();
   }
-  $("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nw_lang",lang);applyLang();});
+  $("langBtn").addEventListener("click",()=>{
+    lang=LANGS[(LANGS.indexOf(lang)+1)%LANGS.length];localStorage.setItem("nw_lang",lang);applyLang();
+  });
   $("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
-  $("statsBtn").addEventListener("click",()=>showStats(false));
+  $("statsBtn").addEventListener("click",()=>{ if(mode==="daily") showStats(false); else openMenu(); });
   $("modal") && $("modal").addEventListener("click",e=>{if(e.target.id==="modal")e.currentTarget.classList.add("hidden");});
   $("year").textContent=new Date().getFullYear();
 
+  /* ---------- mode/settings menu ---------- */
+  function openMenu(){renderMenu();$("menuModal").classList.remove("hidden");}
+  function closeMenu(){$("menuModal").classList.add("hidden");}
+  function renderMenu(){
+    const t=T();
+    $("menuModeRow").innerHTML=["daily","practice"].map(m=>
+      `<button class="menu-opt${mode===m?" active":""}" data-mode="${m}">${m==="daily"?t.modeDaily:t.modePractice}</button>`
+    ).join("");
+    $("menuLangRow").innerHTML=LANGS.map(l=>
+      `<button class="menu-opt${lang===l?" active":""}" data-lang="${l}">${l.toUpperCase()}</button>`
+    ).join("");
+    const avail=lensFor(lang);
+    const showLen = mode==="practice";
+    $("menuLenLabel").style.display=showLen?"block":"none";
+    $("menuLenRow").style.display=showLen?"flex":"none";
+    $("menuLenRow").innerHTML=[4,5,6].map(n=>
+      `<button class="menu-opt${plen===n?" active":""}" data-len="${n}" ${avail.indexOf(n)<0?"disabled":""}>${n}</button>`
+    ).join("");
+    $("menuModeRow").querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;renderMenu();});
+    $("menuLangRow").querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;if(lensFor(lang).indexOf(plen)<0)plen=5;renderMenu();});
+    $("menuLenRow").querySelectorAll("[data-len]").forEach(b=>b.onclick=()=>{if(b.disabled)return;plen=+b.dataset.len;renderMenu();});
+  }
+  $("menuBtn").addEventListener("click",openMenu);
+  $("modeBadge").addEventListener("click",openMenu);
+  $("menuModal").addEventListener("click",e=>{if(e.target.id==="menuModal")closeMenu();});
+  $("menuApplyBtn").addEventListener("click",()=>{
+    localStorage.setItem("nw_mode",mode);localStorage.setItem("nw_lang",lang);localStorage.setItem("nw_plen",String(plen));
+    closeMenu();applyLang();
+  });
+
   /* ---------- boot ---------- */
-  loadState();buildBoard();buildKb();applyLang();
-  if(done)setTimeout(()=>showStats(true),300);
+  applyLang();
+  if(mode==="daily"&&done)setTimeout(()=>showStats(true),300);
 })();
 </script>
-<div class="modal hidden" id="modal"><div class="card"></div></div>
 <script src="/account-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/nexus-i18n.js"></script>

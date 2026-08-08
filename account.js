@@ -21,7 +21,7 @@
   // "nx_muted" ist jetzt der EINE geteilte Sound-Key ueber alle Spiele (Dash+Racer, siehe
   // dash/index.html-Kommentar) - "nd_muted" gibt es nicht mehr, Dash migriert Bestandsnutzer
   // beim ersten Laden automatisch auf "nx_muted".
-  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_lang","nd_upgrades","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nx_racer_best","nx_racer_upg","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
+  const SYNC_KEYS = ["nexus_profile","nexus_ach","nexus_quests","nexus_favs","nd_best","nd_lang","nd_upgrades","nr_save_v1","nr_lang","nw_lang","nw_v1_en","nw_v1_de","nw_v1_es","nx_racer_best","nx_racer_upg","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best","nx_lang","nx_muted","nexus_pro"];
   // Pro-Spiel-Upgrade-Level (Coins-Shops in Dash/Racer/...): reines "hoeher gewinnt" pro Track,
   // wie bei Erfolgen - ein gekauftes Upgrade darf durch einen Merge nie wieder sinken.
   const UPGRADE_SYNC_KEYS = ["nd_upgrades","nx_racer_upg"];
@@ -46,7 +46,7 @@
   function saveAch(){ localStorage.setItem("nexus_ach", JSON.stringify(achieved)); }
 
   /* ---------- XP & Erfolge ---------- */
-  const GAME_KEYS = ["nd_best","nr_save_v1","nw_v1_en","nw_v1_de","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best"];
+  const GAME_KEYS = ["nd_best","nr_save_v1","nw_v1_en","nw_v1_de","nw_v1_es","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_finance_empire","nx_ticker_best"];
   let quiet=false, evalTimer=null;
   function grantXP(n){
     if(!n) return;
@@ -96,7 +96,7 @@
       st.idle_dps=(r.up&&r.up.dps)||0; st.idle_gold=r.gold||0;
     }catch(e){ st.idle_zone=1; st.idle_hero=1; st.idle_shards=0; st.idle_dps=0; st.idle_gold=0; }
     let wins=0,played=0,mx=0,perfect=0;
-    for(const lg of ["en","de"]){ try{ const w=JSON.parse(localStorage.getItem("nw_v1_"+lg)||"null"); if(w&&w.stats){ wins+=w.stats.wins||0; played+=w.stats.played||0; mx=Math.max(mx,w.stats.max||0); const d=w.stats.dist||[]; if((d[0]||0)+(d[1]||0)>0) perfect=1; } }catch(e){} }
+    for(const lg of ["en","de","es"]){ try{ const w=JSON.parse(localStorage.getItem("nw_v1_"+lg)||"null"); if(w&&w.stats){ wins+=w.stats.wins||0; played+=w.stats.played||0; mx=Math.max(mx,w.stats.max||0); const d=w.stats.dist||[]; if((d[0]||0)+(d[1]||0)>0) perfect=1; } }catch(e){} }
     st.words_wins=wins; st.words_played=played; st.words_max=mx; st.words_perfect=perfect;
     return st;
   }
@@ -477,7 +477,9 @@
     if(k==="nexus_favs"){ try{const a=JSON.parse(local)||[],b=JSON.parse(cloud)||[];return JSON.stringify(Array.from(new Set(a.concat(b))));}catch(e){return local;} }
     if(k==="nr_save_v1"){ return progScore(cloud)>progScore(local)?cloud:local; }
     if(k==="nx_finance_empire"){ return empProgScore(cloud)>empProgScore(local)?cloud:local; }
-    if(k==="nw_v1_en"||k==="nw_v1_de"){ try{const a=JSON.parse(local),b=JSON.parse(cloud);const as=(a&&a.stats)||{},bs=(b&&b.stats)||{};return ((bs.played||0)+(bs.wins||0))>((as.played||0)+(as.wins||0))?cloud:local;}catch(e){return local;} }
+    // "nw_v1_" statt fest "en"/"de" verdrahtet - neue Words-Sprachen (z.B. "es") brauchen
+    // dadurch keine weitere Anpassung hier.
+    if(k.indexOf("nw_v1_")===0){ try{const a=JSON.parse(local),b=JSON.parse(cloud);const as=(a&&a.stats)||{},bs=(b&&b.stats)||{};return ((bs.played||0)+(bs.wins||0))>((as.played||0)+(as.wins||0))?cloud:local;}catch(e){return local;} }
     // Cloud (vom Stripe-Webhook gesetzt) ist hier bewusst die einzige Quelle der Wahrheit,
     // NICHT per OR mit lokal kombinieren: sonst kann ein Geraet, das PRO schon einmal lokal
     // hatte, nach einer echten Kuendigung (Webhook setzt cloud auf "0") nie wieder herunter-
