@@ -26,6 +26,8 @@
   .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:10px 0;}
   .lang{display:none;}
   .lang.active{display:block;}
+  footer{color:var(--muted);font-size:12px;padding:0 20px 40px;text-align:center;}
+  footer a{color:var(--neon);}
 </style>
 </head>
 <body>
@@ -49,6 +51,8 @@
   <p><strong>Konto &amp; Spielstände (Supabase):</strong> Wenn du dich per Magic-Link einloggst, speichern wir deine E-Mail-Adresse sowie deine Spielstände, Erfolge, Level/XP und Favoriten. Diese Daten sind über Zugriffsregeln (Row-Level-Security) nur für dein eigenes Konto lesbar.</p>
   <p><strong>Werbung (Google AdSense):</strong> Wir zeigen Werbung über Google AdSense. Dabei können Cookies bzw. Geräte-Kennungen gesetzt werden, um Anzeigen auszuliefern und ggf. zu personalisieren. Beim ersten Besuch fragen wir dich per Einwilligungsbanner, ob du personalisierter Werbung zustimmst. Du kannst deine Auswahl jederzeit über "Optionen verwalten" im Banner ändern.</p>
   <p><strong>Analyse (Cloudflare Web Analytics):</strong> Wir nutzen ein cookieloses, datenschutzfreundliches Analyse-Tool, das keine personenbezogenen Profile erstellt.</p>
+  <p><strong>Zahlungen für NEXUS ARCADE PRO (Stripe):</strong> Wenn du das PRO-Abo abschließt, läuft der gesamte Bezahlvorgang über Stripe's eigene Checkout-Seite — deine Zahlungsdaten (Karten-/Kontodaten) sehen und speichern wir zu keinem Zeitpunkt selbst. Wir erhalten von Stripe lediglich deine E-Mail-Adresse, eine Stripe-Kundennummer und den Abo-Status (aktiv/gekündigt), die wir zusammen mit deinem Konto speichern, um den Werbefrei-Status geräteübergreifend freizuschalten.</p>
+  <p><strong>Rewarded-Video-Werbung (AdinPlay):</strong> In einzelnen Spielen kannst du dich freiwillig entscheiden, ein Werbevideo über das Netzwerk AdinPlay anzusehen, um eine Belohnung (z. B. Coins) zu erhalten. Dabei können, wie bei AdSense, Cookies bzw. Geräte-Kennungen gesetzt werden. Diese Funktion lädt nur, wenn du sie aktiv über den entsprechenden Button startest.</p>
   <p><strong>Lokale Speicherung:</strong> Spielfortschritt, Spracheinstellung und ähnliche Präferenzen speichern wir im localStorage deines Browsers, nicht auf unseren Servern.</p>
 
   <h2>3. Rechtsgrundlagen</h2>
@@ -60,6 +64,8 @@
     <li>Supabase (Konto/Datenbank) — <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a></li>
     <li>Cloudflare (Analyse) — <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">cloudflare.com/privacypolicy</a></li>
     <li>Vercel (Hosting) — <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">vercel.com/legal/privacy-policy</a></li>
+    <li>Stripe (Zahlungsabwicklung für PRO) — <a href="https://stripe.com/privacy" target="_blank" rel="noopener">stripe.com/privacy</a></li>
+    <li>AdinPlay (Rewarded-Video-Werbung, optional) — <a href="https://www.adinplay.com/privacy-policy" target="_blank" rel="noopener">adinplay.com/privacy-policy</a></li>
   </ul>
   <p>Diese Anbieter können Daten außerhalb der EU (v.a. USA) verarbeiten. Google, Supabase, Cloudflare und Vercel stützen internationale Übermittlungen auf Standardvertragsklauseln bzw. das EU-US Data Privacy Framework.</p>
 
@@ -87,6 +93,8 @@
   <p><strong>Account &amp; game data (Supabase):</strong> When you sign in via magic link, we store your email address plus your scores, achievements, level/XP and favorites. This data is protected by row-level security and only readable for your own account.</p>
   <p><strong>Advertising (Google AdSense):</strong> We show ads via Google AdSense, which may set cookies or device identifiers to serve and potentially personalize ads. On first visit we ask for your consent via a banner; you can change your choice anytime via "Manage options" in that banner.</p>
   <p><strong>Analytics (Cloudflare Web Analytics):</strong> We use a cookieless, privacy-friendly analytics tool that does not build personal profiles.</p>
+  <p><strong>Payments for NEXUS ARCADE PRO (Stripe):</strong> If you subscribe to PRO, the entire payment flow runs on Stripe's own checkout page — we never see or store your payment details (card/bank data) ourselves. We only receive your email address, a Stripe customer ID, and the subscription status (active/cancelled) from Stripe, which we store with your account to unlock the ad-free status across your devices.</p>
+  <p><strong>Rewarded video ads (AdinPlay):</strong> In some games you can optionally choose to watch an ad video via the AdinPlay network to receive a reward (e.g. coins). As with AdSense, this may set cookies or device identifiers. This feature only loads when you actively start it via the corresponding button.</p>
   <p><strong>Local storage:</strong> Game progress, language preference and similar settings are stored in your browser's localStorage, not on our servers.</p>
 
   <h2>3. Legal basis</h2>
@@ -98,6 +106,8 @@
     <li>Supabase (account/database) — <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a></li>
     <li>Cloudflare (analytics) — <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">cloudflare.com/privacypolicy</a></li>
     <li>Vercel (hosting) — <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">vercel.com/legal/privacy-policy</a></li>
+    <li>Stripe (payment processing for PRO) — <a href="https://stripe.com/privacy" target="_blank" rel="noopener">stripe.com/privacy</a></li>
+    <li>AdinPlay (rewarded video ads, optional) — <a href="https://www.adinplay.com/privacy-policy" target="_blank" rel="noopener">adinplay.com/privacy-policy</a></li>
   </ul>
   <p>These providers may process data outside the EU (mainly the US). Google, Supabase, Cloudflare and Vercel rely on Standard Contractual Clauses and/or the EU-US Data Privacy Framework for international transfers.</p>
 
@@ -112,6 +122,8 @@
 </div>
 
 </main>
+<footer>© <span id="year"></span> Nexus Arcade · <a href="/">Back to all games</a> · <a href="/impressum/">Impressum</a></footer>
+<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
 <script>
   var btn = document.getElementById('langBtn');
   var de = document.getElementById('de'), en = document.getElementById('en');
