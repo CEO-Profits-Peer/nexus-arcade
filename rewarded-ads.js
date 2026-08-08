@@ -26,6 +26,7 @@
   var cfg = window.NEXUS_REWARDED_ADS || {};
   var publisherId = cfg.publisherId, siteId = cfg.siteId;
   var MIN_GAP_MS = 15 * 60 * 1000; // AdinPlay-Empfehlung: nicht öfter als alle 15min
+  var MIN_WATCH_MS = 3000; // Schutz gegen Kein-Fill: siehe AIP_REMOVE weiter unten
 
   var initStarted = false, adEl = null, innerEl = null, pending = null;
   var lastShownAt = -Infinity;
@@ -65,7 +66,14 @@
           LOADING_TEXT: "Loading ad…",
           PREROLL_ELEM: function () { return innerEl; },
           AIP_REMOVE: function () {
-            if (pending) { var p = pending; pending = null; hide(); p.resolve(true); }
+            if (pending) {
+              var p = pending; pending = null; hide();
+              // Ohne Fill entfernt AdinPlay den Player oft praktisch sofort wieder, ohne dass
+              // je etwas zu sehen war. Nur als "angesehen" werten (Reward geben), wenn der
+              // Player mindestens MIN_WATCH_MS sichtbar war - sonst gäbe es den Bonus
+              // geschenkt, ohne dass überhaupt eine Anzeige (und damit Werbeerlös) stattfand.
+              p.resolve((performance.now() - lastShownAt) >= MIN_WATCH_MS);
+            }
           },
         });
       });
