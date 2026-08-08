@@ -38,8 +38,11 @@
   footer{color:var(--muted);font-size:12px;padding:30px 18px 40px;text-align:center;}
   footer a{color:var(--neon);text-decoration:none;}
 </style>
-<script src="/ads-config.js"></script><script src="/ads.js"></script>
-<script src="/analytics-config.js"></script><script src="/analytics.js"></script>
+<script defer src="/ads-config.js"></script><script defer src="/ads.js"></script>
+<script defer src="/analytics-config.js"></script><script defer src="/analytics.js"></script>
+<!-- NICHT defer: das Inline-Script unten liest window.NexusPromo synchron sofort nach dem
+     Laden (initPromoBanner(), kein ready()-Wrapper) - mit defer waere pro-promo.js noch
+     nicht gelaufen und das Willkommensangebot wuerde beim Aufruf mit ?promo=CODE fehlen. -->
 <script src="/pro-promo-config.js"></script><script src="/pro-promo.js"></script>
 </head>
 <body>
