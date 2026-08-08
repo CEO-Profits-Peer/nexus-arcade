@@ -140,6 +140,22 @@
   .new-best{color:var(--accent);font-weight:800;letter-spacing:1px;animation:pulse 1s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
+  .shop-modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,6,15,0.85);backdrop-filter:blur(3px);}
+  .shop-modal.hidden{display:none;}
+  .shop-card{background:var(--panel);border:1px solid rgba(120,140,220,0.3);border-radius:18px;padding:22px;max-width:420px;width:100%;max-height:86vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 0 40px rgba(57,230,255,0.1);}
+  .shop-list{display:flex;flex-direction:column;gap:10px;width:100%;text-align:left;padding:2px;margin-top:6px;}
+  .shop-item{background:var(--panel);border:1px solid rgba(120,140,220,0.3);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+  .shop-item .info{flex:1;min-width:0;}
+  .shop-item .name{font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;}
+  .shop-item .desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .shop-item .pips{display:flex;gap:3px;margin-top:5px;}
+  .shop-item .pip{width:14px;height:5px;border-radius:3px;background:rgba(120,140,220,0.25);}
+  .shop-item .pip.on{background:var(--neon);box-shadow:0 0 6px var(--neon);}
+  .shop-buy{border:none;cursor:pointer;font-weight:800;font-size:12px;padding:9px 12px;border-radius:9px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));white-space:nowrap;flex:none;}
+  .shop-buy:disabled{opacity:.4;cursor:not-allowed;background:rgba(120,140,220,0.25);color:var(--muted);}
+  .shop-buy.max{opacity:.7;cursor:default;background:rgba(124,255,107,0.25);color:var(--accent);}
+  .shop-coins{font-weight:800;color:var(--gold,#ffcf5c);font-size:15px;}
+
   .about{max-width:960px;padding:8px 18px 40px;color:var(--muted);line-height:1.7;}
   .about h2{color:var(--text);font-size:18px;margin-top:22px;}
   .about a{color:var(--neon);}
@@ -190,7 +206,10 @@
     <div class="overlay" id="startOverlay">
       <h1>NEXUS DASH</h1>
       <p data-i18n="intro">Move your node with the mouse or your finger. Dodge the red shards, grab the glowing orbs, survive as long as you can. One hit ends the run.</p>
-      <button class="btn" id="startBtn" data-i18n="play">▶ PLAY</button>
+      <div class="btn-row">
+        <button class="btn" id="startBtn" data-i18n="play">▶ PLAY</button>
+        <button class="btn secondary" id="shopBtn" data-i18n="upgrades">⚡ UPGRADES</button>
+      </div>
       <div class="sub" data-i18n="hint">Desktop: move mouse · Mobile: drag finger</div>
     </div>
 
@@ -203,6 +222,7 @@
       <div class="btn-row">
         <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
         <button class="btn secondary" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+        <button class="btn secondary" id="shopBtn2" data-i18n="upgrades">⚡ UPGRADES</button>
       </div>
     </div>
 
@@ -218,6 +238,19 @@
       </div>
       <a class="btn secondary" id="pauseHomeBtn" href="/" data-i18n="home">🏠 HOME</a>
     </div>
+  </div>
+</div>
+
+<!-- Upgrade shop modal — deliberately NOT nested inside .canvas-frame: that box is
+     aspect-ratio-locked (16/10), so on narrow mobile widths it's only ~200px tall and a
+     shop list with 4 items has nowhere to go. Full-viewport fixed modal instead, same
+     pattern as the PRO promo popup (pro-promo.js). -->
+<div class="shop-modal hidden" id="shopOverlay">
+  <div class="shop-card">
+    <h1 style="font-size:clamp(20px,5vw,28px);margin:0 0 4px" data-i18n="upgrades">⚡ UPGRADES</h1>
+    <div class="shop-coins">💰 <span id="shopCoins">0</span></div>
+    <div class="shop-list" id="shopList"></div>
+    <button class="btn secondary" id="shopCloseBtn" data-i18n="close" style="margin-top:14px">✕ CLOSE</button>
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
@@ -253,7 +286,13 @@
       shareText:(s)=>`I scored ${s} in Nexus Dash! Can you beat me?`,
       copied:"Score copied — paste it anywhere!",
       soundOn:"On", soundOff:"Off",
-      paused:"PAUSED", resume:"▶ RESUME", home:"🏠 HOME"
+      paused:"PAUSED", resume:"▶ RESUME", home:"🏠 HOME",
+      upgrades:"⚡ UPGRADES", close:"✕ CLOSE", needMore:"Not enough coins — earn more by leveling up, finishing quests or watching a rewarded ad.",
+      maxed:"MAX", buy:"Buy",
+      upMagnetName:"Orb Magnet", upMagnetDesc:"Nearby orbs get pulled toward you — bigger radius per level.",
+      upShieldName:"Shield", upShieldDesc:"Start each run with shield charges that absorb one hit each, then break.",
+      upHeadstartName:"Head Start", upHeadstartDesc:"Start each run with a higher multiplier instead of x1.",
+      upHitboxName:"Compact Core", upHitboxDesc:"Slightly smaller hit detection — a few more close calls survive."
     },
     de:{
       score:"Punkte", multi:"Multiplikator", best:"Bestwert", play:"▶ SPIELEN", retry:"↻ NOCHMAL",
@@ -267,7 +306,13 @@
       shareText:(s)=>`Ich habe ${s} Punkte in Nexus Dash! Schaffst du mehr?`,
       copied:"Score kopiert — überall einfügen!",
       soundOn:"An", soundOff:"Aus",
-      paused:"PAUSIERT", resume:"▶ WEITER", home:"🏠 HUB"
+      paused:"PAUSIERT", resume:"▶ WEITER", home:"🏠 HUB",
+      upgrades:"⚡ UPGRADES", close:"✕ SCHLIESSEN", needMore:"Nicht genug Coins — verdiene mehr durch Level-Ups, Quests oder ein Werbevideo.",
+      maxed:"MAX", buy:"Kaufen",
+      upMagnetName:"Orb-Magnet", upMagnetDesc:"Orbs in der Nähe werden angezogen — größerer Radius pro Stufe.",
+      upShieldName:"Schild", upShieldDesc:"Startet jeden Lauf mit Schild-Ladungen, die je einen Treffer absorbieren und dann zerbrechen.",
+      upHeadstartName:"Kopfstart", upHeadstartDesc:"Startet jeden Lauf mit einem höheren Multiplikator statt x1.",
+      upHitboxName:"Kompakter Kern", upHitboxDesc:"Etwas kleinere Trefferzone — ein paar knappe Treffer mehr werden überlebt."
     }
   };
   let lang = (navigator.language||"en").toLowerCase().startsWith("de") ? "de" : "en";
@@ -285,6 +330,7 @@
     document.getElementById("howH").textContent = t.howH;
     document.getElementById("howP").textContent = t.howP;
     document.getElementById("muteLabel").textContent = muted ? t.soundOff : t.soundOn;
+    if(!document.getElementById("shopOverlay").classList.contains("hidden")) renderShop();
   }
 
   /* ---------------- Sound (WebAudio, no assets) ---------------- */
@@ -306,6 +352,7 @@
   }
   const sOrb = ()=>beep(660,0.10,"triangle",0.07);
   const sHit = ()=>{beep(120,0.35,"sawtooth",0.12); setTimeout(()=>beep(80,0.4,"sawtooth",0.1),60);};
+  const sShieldBreak = ()=>{beep(500,0.12,"square",0.08); setTimeout(()=>beep(320,0.18,"square",0.07),70);};
 
   /* ---------------- Canvas setup ---------------- */
   const canvas = document.getElementById("game");
@@ -322,6 +369,29 @@
   }
   window.addEventListener("resize", resize);
 
+  /* ---------------- Upgrade shop (coins-based, window.NexusArcade.spendCoins) ---------------- */
+  // Balance-Notiz: Kosten bewusst deutlich ueber den 120-800 Coins der Cosmetics-Shop-Items
+  // (siehe nexus-data.js PREMIUM_FRAMES/PREMIUM_AVATARS) - Gameplay-Vorteile wirken JEDEN Lauf,
+  // sollten also spuerbar mehr Grinding kosten als ein einmaliger Cosmetic-Kauf. Alle vier Tracks
+  // zusammen komplett maxen kostet ~6500 Coins (bei 50/Level-up + 30/Quest + 50/Ad-Watch also
+  // realistisch viele Sessions) - absichtlich kein Trivial-Pay-to-Win, aber jede einzelne Stufe
+  // ist schon einzeln kaufbar und spuerbar, damit sich frueher Fortschritt lohnt.
+  const UPGRADES = [
+    { id:"magnet", nameKey:"upMagnetName", descKey:"upMagnetDesc", icon:"🧲",
+      costs:[80,150,240,350,480], values:[0,60,90,120,150,180] }, // Radius in px (Index 0 = Level 0)
+    { id:"shield", nameKey:"upShieldName", descKey:"upShieldDesc", icon:"🛡️",
+      costs:[250,550,1000], values:[0,1,2,3] }, // Schild-Ladungen pro Lauf
+    { id:"headstart", nameKey:"upHeadstartName", descKey:"upHeadstartDesc", icon:"🚀",
+      costs:[120,260,450,700], values:[0,1,2,3,4] }, // Bonus auf Start-Multiplikator
+    { id:"hitbox", nameKey:"upHitboxName", descKey:"upHitboxDesc", icon:"◎",
+      costs:[150,320,550,850], values:[0,0.03,0.06,0.09,0.12] } // Abzug vom Kollisionsfaktor (0.75 Basis)
+  ];
+  const UPG_KEY="nd_upgrades";
+  function loadUpgrades(){ try{ return JSON.parse(localStorage.getItem(UPG_KEY)||"{}")||{}; }catch(e){ return {}; } }
+  let upg = loadUpgrades();
+  function upgLevel(id){ return Math.max(0, Math.min((upg[id]||0), UPGRADES.find(u=>u.id===id).costs.length)); }
+  function saveUpgrades(){ localStorage.setItem(UPG_KEY, JSON.stringify(upg)); }
+
   /* ---------------- Game state ---------------- */
   const BEST_KEY="nd_best";
   let best = parseInt(localStorage.getItem(BEST_KEY)||"0",10);
@@ -329,13 +399,17 @@
   let paused=false;
   let player=null, enemies=[], orbs=[], particles=[];
   let score, multiplier, elapsed, spawnT, orbT, targetX, targetY, hasPointer;
+  let shields=0, invulnT=0;
   let lastTime=0;
 
   function reset(){
     player={x:W/2,y:H/2,r:Math.max(8,Math.min(W,H)*0.018),tx:W/2,ty:H/2};
     targetX=W/2; targetY=H/2; hasPointer=false;
     enemies=[]; orbs=[]; particles=[];
-    score=0; multiplier=1; elapsed=0; spawnT=0; orbT=0;
+    score=0; elapsed=0; spawnT=0; orbT=0;
+    multiplier=1+UPGRADES.find(u=>u.id==="headstart").values[upgLevel("headstart")];
+    shields=UPGRADES.find(u=>u.id==="shield").values[upgLevel("shield")];
+    invulnT=0;
     updateHUD();
   }
 
@@ -382,6 +456,7 @@
     if(state!=="playing"||paused) return;
     elapsed+=dt;
     score += dt*10*multiplier;
+    if(invulnT>0) invulnT=Math.max(0,invulnT-dt);
 
     // smooth follow
     const ease=Math.min(1,dt*14);
@@ -396,17 +471,35 @@
     if(orbT<=0){spawnOrb(); orbT=2.2+Math.random()*1.6;}
 
     // enemies
+    const hitboxFactor=0.75-UPGRADES.find(u=>u.id==="hitbox").values[upgLevel("hitbox")];
     for(let i=enemies.length-1;i>=0;i--){
       const e=enemies[i];
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.rot+=dt*3;
       if(e.x<-60||e.x>W+60||e.y<-60||e.y>H+60){enemies.splice(i,1);continue;}
+      if(invulnT>0) continue;
       const dx=e.x-player.x,dy=e.y-player.y;
-      if(dx*dx+dy*dy < (e.r+player.r)*(e.r+player.r)*0.75){ gameOver(); return; }
+      if(dx*dx+dy*dy < (e.r+player.r)*(e.r+player.r)*hitboxFactor){
+        if(shields>0){
+          shields--; enemies.splice(i,1);
+          burst(player.x,player.y,"57,230,255",22);
+          sShieldBreak(); invulnT=0.7; updateHUD();
+          continue;
+        }
+        gameOver(); return;
+      }
     }
-    // orbs
+    // orbs (magnet pulls nearby orbs toward the player before the pickup check)
+    const magnetR=UPGRADES.find(u=>u.id==="magnet").values[upgLevel("magnet")];
     for(let i=orbs.length-1;i>=0;i--){
       const o=orbs[i]; o.t+=dt; o.life-=dt;
       if(o.life<=0){orbs.splice(i,1);continue;}
+      if(magnetR>0){
+        const mdx=o.x-player.x, mdy=o.y-player.y, mdist=Math.sqrt(mdx*mdx+mdy*mdy)||1;
+        if(mdist<magnetR){
+          const pull=Math.min(mdist,320*dt);
+          o.x-=(mdx/mdist)*pull; o.y-=(mdy/mdist)*pull;
+        }
+      }
       const dx=o.x-player.x,dy=o.y-player.y;
       if(dx*dx+dy*dy < (o.r+player.r)*(o.r+player.r)){
         orbs.splice(i,1);
@@ -462,12 +555,23 @@
     // player
     if(state==="playing"&&player){
       ctx.save();
+      if(invulnT>0) ctx.globalAlpha=0.55+Math.sin(performance.now()*0.03)*0.25;
       ctx.shadowColor="rgba(124,255,107,0.9)";ctx.shadowBlur=22;
       const grd=ctx.createRadialGradient(player.x,player.y,1,player.x,player.y,player.r);
       grd.addColorStop(0,"#ffffff");grd.addColorStop(1,"#7cff6b");
       ctx.fillStyle=grd;
       ctx.beginPath();ctx.arc(player.x,player.y,player.r,0,6.283);ctx.fill();
       ctx.restore();
+      // Schild-Ladungen: kleine Ringe ueber dem Node, damit man den Vorteil aus dem
+      // Upgrade-Shop im Spiel tatsaechlich sieht (nicht nur im Menue).
+      if(shields>0){
+        ctx.save();
+        for(let i=0;i<shields;i++){
+          ctx.strokeStyle="rgba(57,230,255,0.9)";ctx.lineWidth=2;
+          ctx.beginPath();ctx.arc(player.x,player.y,player.r+6+i*5,0,6.283);ctx.stroke();
+        }
+        ctx.restore();
+      }
     }
   }
 
@@ -496,6 +600,52 @@
     document.getElementById("pauseBtn").classList.remove("hidden");
     if(actx && actx.state==="suspended") actx.resume();
   }
+  /* ---------------- Upgrade shop UI ---------------- */
+  let shopReturnId=null;
+  function openShop(returnId){
+    shopReturnId=returnId;
+    document.getElementById(returnId).classList.add("hidden");
+    document.getElementById("shopOverlay").classList.remove("hidden");
+    renderShop();
+  }
+  function closeShop(){
+    document.getElementById("shopOverlay").classList.add("hidden");
+    if(shopReturnId) document.getElementById(shopReturnId).classList.remove("hidden");
+  }
+  function renderShop(){
+    const t=I18N[lang];
+    const coins=(window.NexusArcade && window.NexusArcade.getProfile) ? (window.NexusArcade.getProfile().coins||0) : 0;
+    document.getElementById("shopCoins").textContent=coins;
+    document.getElementById("shopList").innerHTML=UPGRADES.map(function(u){
+      const lvl=upgLevel(u.id), maxLvl=u.costs.length, maxed=lvl>=maxLvl;
+      const cost=maxed?0:u.costs[lvl];
+      const afford=!maxed && coins>=cost;
+      const pips=Array.from({length:maxLvl},function(_,i){return '<span class="pip'+(i<lvl?' on':'')+'"></span>';}).join("");
+      return '<div class="shop-item">'+
+        '<div class="info"><div class="name">'+u.icon+' '+t[u.nameKey]+' <span style="color:var(--muted);font-weight:600">Lv '+lvl+'/'+maxLvl+'</span></div>'+
+        '<div class="desc">'+t[u.descKey]+'</div>'+
+        '<div class="pips">'+pips+'</div></div>'+
+        (maxed
+          ? '<button class="shop-buy max" disabled>'+t.maxed+'</button>'
+          : '<button class="shop-buy" data-up="'+u.id+'" '+(afford?'':'disabled')+'>'+t.buy+'<br>💰'+cost+'</button>')+
+        '</div>';
+    }).join("");
+    document.querySelectorAll(".shop-buy[data-up]").forEach(function(b){
+      b.addEventListener("click",function(){ buyUpgrade(b.getAttribute("data-up")); });
+    });
+  }
+  function buyUpgrade(id){
+    const u=UPGRADES.find(function(x){return x.id===id;});
+    const lvl=upgLevel(id);
+    if(lvl>=u.costs.length) return;
+    const cost=u.costs[lvl];
+    if(!window.NexusArcade || !window.NexusArcade.spendCoins){ toast(I18N[lang].needMore); return; }
+    const ok=window.NexusArcade.spendCoins(cost);
+    if(!ok){ toast(I18N[lang].needMore); return; }
+    upg[id]=lvl+1; saveUpgrades();
+    renderShop();
+  }
+
   function togglePause(){
     if(state!=="playing") return;
     paused=!paused;
@@ -539,6 +689,9 @@
   document.getElementById("startBtn").addEventListener("click",startGame);
   document.getElementById("retryBtn").addEventListener("click",startGame);
   document.getElementById("shareBtn").addEventListener("click",share);
+  document.getElementById("shopBtn").addEventListener("click",()=>openShop("startOverlay"));
+  document.getElementById("shopBtn2").addEventListener("click",()=>openShop("overOverlay"));
+  document.getElementById("shopCloseBtn").addEventListener("click",closeShop);
   document.getElementById("langBtn").addEventListener("click",()=>{
     lang=lang==="en"?"de":"en";localStorage.setItem("nd_lang",lang);applyLang();
   });
