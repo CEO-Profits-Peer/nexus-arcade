@@ -23,7 +23,11 @@ window.NEXUS_DATA=(function(){
     {id:"lava",price:500,shop:true,label:{en:"Lava",de:"Lava"},css:"border-color:#ff5a2a;color:#ff5a2a;animation:nxPulse 1.15s infinite;box-shadow:0 0 16px #ff5a2a"},
     {id:"matrix",price:800,shop:true,label:{en:"Matrix",de:"Matrix"},css:"border-color:#3aff7a;box-shadow:0 0 18px #3aff7a,inset 0 0 12px #052"}
   ];
-  const ALLFRAMES = FRAMES.concat(PREMIUM_FRAMES);
+  // NEXUS ARCADE PRO: exklusiver Rahmen, nicht käuflich/level-basiert — nur bei aktivem PRO-Abo wählbar
+  // (siehe account.js isPro() / renderModal "profile"-Tab).
+  const PRO_FRAME = {id:"proglow", pro:true, label:{en:"PRO Glow",de:"PRO-Glanz"},
+    css:"border-image:linear-gradient(135deg,#ffcf5c,#ff3ea5,#39e6ff) 1;animation:nxHue 4s linear infinite;box-shadow:0 0 22px #ffcf5c,0 0 10px #ff3ea5"};
+  const ALLFRAMES = FRAMES.concat(PREMIUM_FRAMES).concat([PRO_FRAME]);
   const frameById = id => ALLFRAMES.find(f=>f.id===id)||FRAMES[0];
   const PREMIUM_AVATARS = [
     {id:"av_cool",e:"😎",price:120},{id:"av_ninja",e:"🥷",price:160},{id:"av_vamp",e:"🧛",price:180},
@@ -201,5 +205,5 @@ window.NEXUS_DATA=(function(){
     finance:'<path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/>',
     ticker:'<path d="M3 17l5-5 4 4 7-8"/><path d="M15 6h5v5"/>'
   };
-  return {FRAMES:FRAMES,PREMIUM_FRAMES:PREMIUM_FRAMES,ALLFRAMES:ALLFRAMES,frameById:frameById,PREMIUM_AVATARS:PREMIUM_AVATARS,SVG_ICON:SVG_ICON,SVG_AVATARS:SVG_AVATARS,CUSTOM_IMG_LEVEL:CUSTOM_IMG_LEVEL,TITLES:TITLES,titleById:titleById,ACH:ACH,achById:achById,QUESTS:QUESTS,questSub:questSub,questById:questById,SCORE_MAP:SCORE_MAP,GAMES_CATALOG:GAMES_CATALOG,GAME_ICONS:GAME_ICONS};
+  return {FRAMES:FRAMES,PREMIUM_FRAMES:PREMIUM_FRAMES,PRO_FRAME:PRO_FRAME,ALLFRAMES:ALLFRAMES,frameById:frameById,PREMIUM_AVATARS:PREMIUM_AVATARS,SVG_ICON:SVG_ICON,SVG_AVATARS:SVG_AVATARS,CUSTOM_IMG_LEVEL:CUSTOM_IMG_LEVEL,TITLES:TITLES,titleById:titleById,ACH:ACH,achById:achById,QUESTS:QUESTS,questSub:questSub,questById:questById,SCORE_MAP:SCORE_MAP,GAMES_CATALOG:GAMES_CATALOG,GAME_ICONS:GAME_ICONS};
 })();
