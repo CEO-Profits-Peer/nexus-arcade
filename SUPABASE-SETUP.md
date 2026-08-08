@@ -168,6 +168,24 @@ Der Code dafür ist fertig (`/pro/`, `/api/create-checkout-session.js`, `/api/cr
 
 **Abo kündigen:** Der „Manage subscription"-Button auf `/pro/` öffnet Stripes gehostetes Kunden-Portal (kein eigener Code nötig) — dort können Nutzer selbst kündigen/Zahlungsmittel ändern; der Webhook entfernt danach automatisch den PRO-Status.
 
+## 7. Rewarded Ads (AdinPlay) — Setup
+
+Der Code dafür ist fertig (`rewarded-ads-config.js`, `rewarded-ads.js`, „📺 Video ansehen · +50 Coins"-Button im Konto-Fenster, Profil-Tab), aber **inaktiv** bis publisherId/siteId eingetragen sind — ohne sie bleibt der Button unsichtbar, kein Request an AdinPlay.
+
+1. Konto anlegen auf **adinplay.com** → Publishers → Freischaltung beantragen (dauert je nach Traffic; kleine/neue Sites können abgelehnt oder auf Warteliste gesetzt werden).
+2. Nach Freischaltung: im Dashboard eine **Site** für `nexusarcade.vercel.app` anlegen. Das Dashboard zeigt dann ein Tag-Script in der Form:
+   ```
+   https://api.adinplay.com/libs/aiptag/pub/<PUBLISHER>/<SITE>/tag.min.js
+   ```
+3. Die beiden Teile in **`rewarded-ads-config.js`** eintragen:
+   ```js
+   window.NEXUS_REWARDED_ADS = { publisherId: "<PUBLISHER>", siteId: "<SITE>" };
+   ```
+4. Deployen. Danach erscheint der „📺 Video ansehen"-Button im Konto-Fenster (Tab Profil) für alle Spieler, maximal alle 15 Minuten nutzbar (AdinPlay-Empfehlung gegen zu häufige Video-Ads).
+5. Belohnung (aktuell 50 Coins, `WATCH_AD_REWARD` in `account.js`) anpassbar.
+
+**Technischer Hinweis:** Die Integration nutzt AdinPlays Standard-Preroll-Player (`aiptag.cmd.player` / `aipPlayer` / `AIP_REMOVE`) — dasselbe Muster, das z.B. das Open-Source-Spiel shapez.io produktiv einsetzt. „Reward" wird vergeben, sobald der Nutzer den Ad-Screen bis zum Schließen angesehen hat.
+
 ## Nächste Ausbaustufe (Phase 2)
 
 Tiefere, spielspezifische Erfolge (z.B. „2000 Punkte in Dash", „Reich 5 in Realms", „5-Tage-Serie in Words") sowie XP für konkrete Leistungen und Boost-Rewards, die im Spiel wirken. Das Gerüst dafür steht bereits (`NexusArcade.unlock(id)` / `NexusArcade.addXP(n)`).

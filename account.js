@@ -244,6 +244,7 @@
         '<div style="height:8px;background:rgba(0,0,0,.4);border-radius:6px;margin-top:5px;overflow:hidden"><div style="height:100%;width:'+pr.pct+'%;background:linear-gradient(90deg,#39e6ff,#7cff6b)"></div></div>'+
         '<div style="font-size:12px;color:var(--gold,#ffcf5c);font-weight:700;margin-top:5px">💰 '+(profile.coins||0)+' '+t.coins+'</div>'+
         '</div></div>'+
+        '<button id="nxWatchAd" style="display:none;width:100%;margin-bottom:14px;padding:10px;border-radius:9px;border:1px solid rgba(255,207,92,.4);background:rgba(255,207,92,.08);color:var(--gold,#ffcf5c);font-weight:700;font-size:13px;cursor:pointer"></button>'+
         '<label style="font-size:12px;color:var(--muted,#8a97c2)">'+t.name+'</label>'+
         '<input id="nxName" value="'+esc(profile.name)+'" maxlength="18" style="width:100%;margin:4px 0 12px;padding:9px 12px;border-radius:9px;border:1px solid var(--line,#333);background:#0d1226;color:inherit;font-family:inherit">'+
         '<div style="font-size:12px;color:var(--muted,#8a97c2);margin-bottom:5px">'+t.avatar+'</div>'+
@@ -352,6 +353,7 @@
       const img=dom.card.querySelector("#nxImg");
       if(img) img.onchange=e=>{ const f=e.target.files[0]; if(f) resizeImg(f,url=>{profile.avatar=url;saveProfile();syncPush();renderModal();renderButton();}); };
       dom.card.querySelector("#nxSave").onclick=()=>{ profile.name=(dom.card.querySelector("#nxName").value||"").trim(); saveProfile(); syncPush(); renderButton(); toast("✓ "+t.saved); };
+      wireWatchAd();
     }
     if(activeTab==="acc"){
       const lb=dom.card.querySelector("#nxLogin");
@@ -361,6 +363,34 @@
       const lo=dom.card.querySelector("#nxLogout");
       if(lo) lo.onclick=async()=>{ try{ await sb.auth.signOut(); }catch(e){} sessionStorage.removeItem("nexus_pulled"); user=null; renderButton(); renderModal(); };
     }
+  }
+
+  const WATCH_AD_REWARD = 50;
+  function wireWatchAd(){
+    const btn = dom.card.querySelector("#nxWatchAd");
+    if(!btn) return;
+    const rw = window.NexusRewarded;
+    if(!rw || !rw.isConfigured()) return; // kein Netzwerk konfiguriert -> Button bleibt versteckt
+    btn.style.display = "block";
+    const ready = rw.isAvailable();
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? "1" : ".5";
+    btn.style.cursor = ready ? "pointer" : "not-allowed";
+    btn.textContent = "📺 " + t.watchAdCta.replace("{n}", WATCH_AD_REWARD);
+    if(!ready) return;
+    btn.onclick = async ()=>{
+      btn.disabled = true; btn.style.cursor = "wait"; btn.textContent = t.watchAdLoading;
+      const ok = await rw.show();
+      if(ok){
+        profile.coins = (profile.coins||0) + WATCH_AD_REWARD;
+        saveProfile(); syncPush();
+        toast("📺 +" + WATCH_AD_REWARD + " " + t.coins);
+        renderButton();
+      } else {
+        toast(t.watchAdNone);
+      }
+      if(activeTab==="profile") renderModal();
+    };
   }
 
   function resizeImg(file, cb){
