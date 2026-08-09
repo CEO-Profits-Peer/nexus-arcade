@@ -225,7 +225,7 @@
   function bestMoney(key){let n=parseInt(localStorage.getItem(key)||"0",10)||0;if(n<=0)return null;const S=["","K","M","B","T"];let t=0;while(n>=1000&&t<S.length-1){n/=1000;t++;}return T().best+": $"+(n<10?n.toFixed(1):Math.floor(n))+S[t];}
   function bestRealm(){try{const r=JSON.parse(localStorage.getItem("nr_save_v1")||"{}");if(r.maxZone>1)return T().realm+" "+r.maxZone;}catch(e){}return null;}
   function bestEmpireCapital(){try{const o=JSON.parse(localStorage.getItem("nx_finance_empire")||"null");if(!o||!(o.capital>0))return null;let n=o.capital;const S=["","K","M","B","T"];let t=0;while(n>=1000&&t<S.length-1){n/=1000;t++;}return T().best+": $"+(n<10?n.toFixed(1):Math.floor(n))+S[t];}catch(e){return null;}}
-  function bestStreak(){try{let mx=0;for(const l of["en","de"]){const w=JSON.parse(localStorage.getItem("nw_v1_"+l)||"null");if(w&&w.stats)mx=Math.max(mx,w.stats.max||0);}if(mx>0)return T().streak+" "+mx;}catch(e){}return null;}
+  function bestStreak(){try{let mx=0;for(const l of["en","de","es"]){const w=JSON.parse(localStorage.getItem("nw_v1_"+l)||"null");if(w&&w.stats)mx=Math.max(mx,w.stats.max||0);}if(mx>0)return T().streak+" "+mx;}catch(e){}return null;}
 
   function renderCats(){const c=document.getElementById("cats");c.innerHTML=CATS.map(x=>'<button class="cat'+(activeCat===x.id?' active':'')+'" data-c="'+x.id+'">'+x[lang]+'</button>').join("");
     c.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{activeCat=b.getAttribute("data-c");renderCats();renderGrid();});}

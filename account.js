@@ -164,7 +164,7 @@
       (document.head||document.documentElement).appendChild(st);
     }
     // Konto-Button in vorhandene Kopfzeile einfügen (oder fixiert)
-    const chip = document.createElement(location ? "div":"div");
+    const chip = document.createElement("div");
     chip.id = "nxAccountBtn";
     chip.style.cssText = "display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;"+
       "background:var(--panel,rgba(16,20,42,.85));border:1px solid var(--line,rgba(120,140,220,.3));"+
@@ -297,8 +297,8 @@
     }
     else if(activeTab==="ach"){
       const got = Object.keys(achieved).filter(id=>achById(id)).length;
-      const gLabel={arcade:"Nexus Arcade",dash:"Nexus Dash",idle:"Nexus Realms",words:"Nexus Words",racer:"Nexus Racer",merge:"Nexus 2048",run3d:"Nexus Run 3D",snake:"Nexus Snake",breaker:"Nexus Breaker",tycoon:"Nexus Tycoon",stack:"Nexus Stack",blocks:"Nexus Blocks",finance:"Nexus Finance"};
-      const gOrder={arcade:0,dash:1,idle:2,words:3,racer:4,merge:5,run3d:6,snake:7,breaker:8,tycoon:9,stack:10,blocks:11,finance:12};
+      const gLabel={arcade:"Nexus Arcade",dash:"Nexus Dash",idle:"Nexus Realms",words:"Nexus Words",racer:"Nexus Racer",merge:"Nexus 2048",run3d:"Nexus Run 3D",snake:"Nexus Snake",breaker:"Nexus Breaker",tycoon:"Nexus Tycoon",stack:"Nexus Stack",blocks:"Nexus Blocks",finance:"Nexus Finance",ticker:"Nexus Ticker"};
+      const gOrder={arcade:0,dash:1,idle:2,words:3,racer:4,merge:5,run3d:6,snake:7,breaker:8,tycoon:9,stack:10,blocks:11,finance:12,ticker:13};
       const sorted=ACH.slice().sort((a,b)=>(gOrder[a.game]-gOrder[b.game]));
       let lastG=null;
       body = '<div style="font-size:13px;color:var(--muted,#8a97c2);margin-bottom:6px">🏆 '+got+' '+t.of+' '+ACH.length+' '+t.progress+'</div>'+
@@ -320,7 +320,7 @@
           '<div style="font-size:11px;color:var(--muted,#8a97c2);margin-top:3px;text-align:right">'+p+' / '+q.target+'</div></div>';}).join(""):"");
     }
     else if(activeTab==="ranks"){
-      const games=[["dash","Dash"],["racer","Racer"],["merge","2048"],["run3d","Run 3D"],["snake","Snake"],["breaker","Breaker"],["tycoon","Tycoon"],["stack","Stack"],["blocks","Blocks"],["finance","Finance"],["idle","Realms"],["words","Words"]];
+      const games=[["dash","Dash"],["racer","Racer"],["merge","2048"],["run3d","Run 3D"],["snake","Snake"],["breaker","Breaker"],["tycoon","Tycoon"],["stack","Stack"],["blocks","Blocks"],["finance","Finance"],["ticker","Ticker"],["idle","Realms"],["words","Words"]];
       body='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+games.map(function(g){return '<button class="nxLb" data-g="'+g[0]+'" style="padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;background:'+(lbGame===g[0]?'var(--neon,#39e6ff);color:#04121a':'#141a33;color:var(--text,#eaf6ff)')+';border:1px solid var(--line,#333)">'+g[1]+'</button>';}).join('')+'</div>'+
         '<div id="nxLbList" style="min-height:120px;color:var(--muted,#8a97c2);font-size:13px">'+t.loading+'</div>'+
         (user?'':'<div style="font-size:12px;color:var(--muted,#8a97c2);margin-top:10px">🔒 '+t.lbLoginToRank+'</div>');
@@ -472,6 +472,14 @@
     let stockVal=0; if(o.stocks&&o.stocks.holdings&&o.stocks.prices){ for(const id in o.stocks.holdings){ stockVal+=(o.stocks.holdings[id]||0)*(o.stocks.prices[id]||0); } }
     return (o.capital||0)+((o.stats&&o.stats.careerProfit)||0)*2+((o.stats&&o.stats.bizProfit)||0)*2+((o.owned&&o.owned.length)||0)*5000+(o.xp||0)*10+(o.founderXp||0)*10+biz.length*5000+biz.filter(b=>b.manager).length*10000+stockVal+((o.stats&&o.stats.dayProfit)||0);
   }catch(e){return -1;} }
+  // "inv" (Prestige-Waehrung, ueberlebt einen Reset) zaehlt bewusst extrem schwer - ein Spieler
+  // der schonmal prestiged hat, hat mehr echten Fortschritt als einer mit mehr Rohbargeld ohne
+  // je zu prestigen. Gleiches Muster wie progScore/empProgScore oben, nur fehlte es fuer
+  // nx_tycoon bisher komplett - fiel sonst auf "lokal gewinnt immer" zurueck (siehe mergeKey
+  // default), was bei zwei Geraeten echten Fortschritt verlieren kann.
+  function tycoonProgScore(sv){ try{const o=JSON.parse(sv)||{}; const biz=o.b||[];
+    return (o.earned||0)+(o.inv||0)*1e7+biz.reduce((s,b)=>s+(b.owned||0),0)*1000+biz.filter(b=>b.mgr).length*5000+((o.spec&&o.spec.tier)||0)*2000;
+  }catch(e){return -1;} }
   const NUM_BESTS=["nd_best","nx_racer_best","nx_2048_best","nx_run3d_best","nx_snake_best","nx_breaker_best","nx_tycoon_best","nx_stack_best","nx_blocks_best","nx_finance_best","nx_ticker_best"];
   function mergeKey(k,local,cloud){
     if(cloud==null) return local;
@@ -483,6 +491,7 @@
     if(k==="nexus_favs"){ try{const a=JSON.parse(local)||[],b=JSON.parse(cloud)||[];return JSON.stringify(Array.from(new Set(a.concat(b))));}catch(e){return local;} }
     if(k==="nr_save_v1"){ return progScore(cloud)>progScore(local)?cloud:local; }
     if(k==="nx_finance_empire"){ return empProgScore(cloud)>empProgScore(local)?cloud:local; }
+    if(k==="nx_tycoon"){ return tycoonProgScore(cloud)>tycoonProgScore(local)?cloud:local; }
     // "nw_v1_" statt fest "en"/"de" verdrahtet - neue Words-Sprachen (z.B. "es") brauchen
     // dadurch keine weitere Anpassung hier.
     if(k.indexOf("nw_v1_")===0){ try{const a=JSON.parse(local),b=JSON.parse(cloud);const as=(a&&a.stats)||{},bs=(b&&b.stats)||{};return ((bs.played||0)+(bs.wins||0))>((as.played||0)+(as.wins||0))?cloud:local;}catch(e){return local;} }

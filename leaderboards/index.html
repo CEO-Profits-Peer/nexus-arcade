@@ -55,12 +55,15 @@
 <body>
 <header class="top">
   <a class="brand" href="/"><span class="dot"></span><span>NEXUS ARCADE</span></a>
-  <a class="chip" href="/">← All games</a>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <a class="chip" href="/" id="homeChip">← All games</a>
+    <button class="chip" id="langBtn">DE</button>
+  </div>
 </header>
 
 <main>
-  <h1>Leaderboards</h1>
-  <p class="sub">Top 10 players for every game on Nexus Arcade, live from our global rankings. Sign in on any game page to claim your spot.</p>
+  <h1 id="h1Title">Leaderboards</h1>
+  <p class="sub" id="subText">Top 10 players for every game on Nexus Arcade, live from our global rankings. Sign in on any game page to claim your spot.</p>
 
   <nav class="jump" id="jump"></nav>
   <div class="grid" id="grid"></div>
@@ -77,6 +80,29 @@
 (function(){
   "use strict";
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+  var I18N = {
+    en:{home:"← All games",title:"Leaderboards",sub:"Top 10 players for every game on Nexus Arcade, live from our global rankings. Sign in on any game page to claim your spot.",
+      loading:"Loading…",empty:"No scores yet — be the first!",play:"Play now →"},
+    de:{home:"← Alle Spiele",title:"Bestenlisten",sub:"Top 10 Spieler für jedes Spiel auf Nexus Arcade, live aus unseren globalen Ranglisten. Melde dich auf einer Spielseite an, um deinen Platz zu sichern.",
+      loading:"Lädt…",empty:"Noch keine Scores — sei der Erste!",play:"Jetzt spielen →"}
+  };
+  var lang = (localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de") ? "de" : "en";
+  function T(){ return I18N[lang]; }
+  function applyLang(){
+    document.documentElement.lang = lang;
+    document.getElementById("langBtn").textContent = lang==="de" ? "EN" : "DE";
+    document.getElementById("homeChip").textContent = T().home;
+    document.getElementById("h1Title").textContent = T().title;
+    document.getElementById("subText").textContent = T().sub;
+    grid.querySelectorAll(".playlink").forEach(function(a){ a.textContent = T().play; });
+    grid.querySelectorAll(".empty").forEach(function(el){ if(el.getAttribute("data-state")==="empty") el.textContent = T().empty; else if(el.getAttribute("data-state")==="loading") el.textContent = T().loading; });
+  }
+  document.getElementById("langBtn").addEventListener("click", function(){
+    lang = lang==="en" ? "de" : "en";
+    localStorage.setItem("nx_lang", lang);
+    applyLang();
+  });
 
   var GAMES = [
     {id:"dash",name:"Nexus Dash",href:"/dash/"},
@@ -100,14 +126,15 @@
   jump.innerHTML = GAMES.map(function(g){ return '<a href="#'+g.id+'">'+g.name+'</a>'; }).join("");
   grid.innerHTML = GAMES.map(function(g){
     return '<div class="card" id="'+g.id+'"><h2><a href="'+g.href+'">'+g.name+'</a></h2>'+
-      '<a class="playlink" href="'+g.href+'">Play now →</a>'+
-      '<div style="margin-top:10px" data-rows="'+g.id+'"><div class="empty">Loading…</div></div></div>';
+      '<a class="playlink" href="'+g.href+'">'+T().play+'</a>'+
+      '<div style="margin-top:10px" data-rows="'+g.id+'"><div class="empty" data-state="loading">'+T().loading+'</div></div></div>';
   }).join("");
+  applyLang();
 
   function renderRows(gameId, rows){
     var box = grid.querySelector('[data-rows="'+gameId+'"]');
     if (!box) return;
-    if (!rows || !rows.length){ box.innerHTML = '<div class="empty">No scores yet — be the first!</div>'; return; }
+    if (!rows || !rows.length){ box.innerHTML = '<div class="empty" data-state="empty">'+T().empty+'</div>'; return; }
     box.innerHTML = rows.map(function(r, i){
       var cls = i===0?"g":i===1?"s":i===2?"b":"";
       return '<div class="row"><div class="rk '+cls+'">'+(i+1)+'</div><div class="nm">'+esc(r.name||"Player")+'</div><div class="sc">'+r.score+'</div></div>';
