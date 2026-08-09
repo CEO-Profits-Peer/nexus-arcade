@@ -1,3 +1,4 @@
 .vercel
 .claude
 .env*
+NO_CLAUDE_NO_GITHUB
