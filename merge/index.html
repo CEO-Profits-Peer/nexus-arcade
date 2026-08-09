@@ -135,12 +135,12 @@
 <script>
 "use strict";
 (function(){
-  const I={en:{hub:"Games",score:"Score",best:"Best",gameover:"GAME OVER",retry:"↻ NEW GAME",share:"⤴ SHARE",newgame:"↻ New Game",win:"YOU REACHED 2048!",keepgoing:"Keep going",
+  const I={en:{hub:"Games",score:"Score",best:"Best",gameover:"GAME OVER",retry:"↻ NEW GAME",share:"⤴ SHARE",newgame:"↻ New Game",win:"YOU REACHED 2048!",
     hint:"Swipe or use arrow keys · WASD",aboutH:"About Nexus 2048",
     aboutP:"Nexus 2048 is a free merge puzzle game you can play right in your browser — no download, no signup. Slide the tiles in any direction; when two tiles with the same number touch, they merge into one. Keep combining to reach the 2048 tile, then push for an even higher score. Easy to learn, hard to put down. Works on desktop and mobile, and your best score is saved.",
     shareText:s=>`I scored ${s} in Nexus 2048! Can you beat me?`,copied:"Copied — paste anywhere!",
     paused:"PAUSED",resume:"▶ RESUME",home:"HOME"},
-  de:{hub:"Spiele",score:"Punkte",best:"Bestwert",gameover:"GAME OVER",retry:"↻ NEUES SPIEL",share:"⤴ TEILEN",newgame:"↻ Neues Spiel",win:"2048 ERREICHT!",keepgoing:"Weiterspielen",
+  de:{hub:"Spiele",score:"Punkte",best:"Bestwert",gameover:"GAME OVER",retry:"↻ NEUES SPIEL",share:"⤴ TEILEN",newgame:"↻ Neues Spiel",win:"2048 ERREICHT!",
     hint:"Wischen oder Pfeiltasten · WASD",aboutH:"Über Nexus 2048",
     aboutP:"Nexus 2048 ist ein kostenloses Merge-Puzzle direkt im Browser — kein Download, keine Anmeldung. Schiebe die Kacheln in eine Richtung; berühren sich zwei mit derselben Zahl, verschmelzen sie. Kombiniere weiter bis zur 2048-Kachel und dann zu einem noch höheren Score. Leicht zu lernen, schwer aufzuhören. Läuft auf Desktop und Handy, dein Bestwert wird gespeichert.",
     shareText:s=>`Ich habe ${s} Punkte in Nexus 2048! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",
@@ -151,7 +151,7 @@
   const N=4;
   const BEST="nx_2048_best";
   let best=parseInt(localStorage.getItem(BEST)||"0",10);
-  let grid,score,tiles,idc,won,dead,paused=false;
+  let grid,score,idc,won,dead,paused=false;
   const board=document.getElementById("board");
   let cells=[];
 
@@ -190,10 +190,6 @@
     let moved=false;
     const order=[];
     for(let i=0;i<N;i++)order.push(i);
-    const read=(r,c)=>grid[r][c];
-    // build traversal
-    const rows=[...order],cols=[...order];
-    if(dir===1)cols.reverse();if(dir===2)rows.reverse();
     for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(grid[r][c])grid[r][c].merged=false;}
     const rr=(dir===2)?[...order].reverse():order;
     const cc=(dir===1)?[...order].reverse():order;

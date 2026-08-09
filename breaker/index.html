@@ -177,7 +177,7 @@
     // powers
     for(let i=powers.length-1;i>=0;i--){const p=powers[i];p.y+=p.vy*dt;if(p.y>H){powers.splice(i,1);continue;}
       if(p.y>paddle.y-8&&p.x>paddle.x&&p.x<paddle.x+paddle.w){powers.splice(i,1);if(p.type==="wide"){paddle.w=Math.min(W*0.5,paddle.w*1.35);}else{const src=balls[0];if(src){for(let n=0;n<2;n++){const sp=Math.hypot(src.vx,src.vy)||300;const a=(Math.random()-0.5)*1.2;balls.push({x:src.x,y:src.y,vx:Math.sin(a)*sp,vy:-Math.abs(Math.cos(a)*sp),r:src.r});}}}score+=20;hud();}}
-    if(!bricks.length){level++;if(window.NexusArcade){try{window.NexusArcade.addXP(50);}catch(e){}}newLevel();hud();}
+    if(!bricks.length){level++;toast("🎉 "+T().cleared);if(window.NexusArcade){try{window.NexusArcade.addXP(50);}catch(e){}}newLevel();hud();}
   }
   function draw(){
     ctx.clearRect(0,0,W,H);

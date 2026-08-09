@@ -187,7 +187,11 @@
   }
   function startBiz(i){if(s.b[i].owned>0&&!s.b[i].run){s.b[i].run=true;s.b[i].t=0;}}
   function buy(i){const c=buyCost(i);if(s.cash>=c){s.cash-=c;s.b[i].owned++;if(s.spec.hints>0)s.spec.hints--;if(s.b[i].mgr)s.b[i].run=true;const wasVis=visible(i+1);refresh();if(i+1<BIZ.length&&s.b[i].owned===1)buildList();if(window.NexusArcade){try{window.NexusArcade.addXP(1);}catch(e){}}save();}}
-  function hire(i){if(s.b[i].mgr)return;const c=mgrCost(i);if(s.cash>=c){s.cash-=c;s.b[i].mgr=true;if(s.b[i].owned>0)s.b[i].run=true;refresh();save();}}
+  // s.b[i].owned<=0 muss hier UND im disabled-Zustand des Buttons unten geprueft werden:
+  // visible(i) macht Zeile i schon sichtbar sobald Business i-1 besessen wird, nicht erst wenn
+  // i selbst gekauft ist - ohne diese Pruefung liess sich ein Manager fuer ein Business kaufen,
+  // das man noch gar nicht besitzt (Umsatz waere 0, da rev(i) mit owned multipliziert).
+  function hire(i){if(s.b[i].mgr||s.b[i].owned<=0)return;const c=mgrCost(i);if(s.cash>=c){s.cash-=c;s.b[i].mgr=true;if(s.b[i].owned>0)s.b[i].run=true;refresh();save();}}
   const prestigeGain=()=>Math.floor(Math.sqrt(s.earned/1e6));
   function prestige(){if(prestigeGain()<1)return;const g=prestigeGain();$("modalTitle").textContent=T().cashout;$("modalBody").textContent=T().confirm+" "+g+" "+T().invUnit+". "+T().permBoost;$("modalBig").textContent="✦ "+g;const btn=$("modalBtn");btn.textContent=T().doCashout;$("modal").classList.remove("hidden");btn.onclick=()=>{const inv=s.inv+g;s=fresh();s.inv=inv;$("modal").classList.add("hidden");buildList();save();if(window.NexusArcade){try{window.NexusArcade.addXP(120);}catch(e){}}};}
 
@@ -198,7 +202,7 @@
       const own=$("own"+i);if(own)own.textContent="x"+s.b[i].owned;
       const rv=$("rev"+i);if(rv)rv.textContent=fmt(rev(i))+" / "+BIZ[i].time+"s";
       const bb=$("buy"+i);if(bb){bb.innerHTML=(i===bi?"★ ":"")+T().buy+" · "+fmt(buyCost(i));bb.disabled=s.cash<buyCost(i);bb.classList.toggle("bestbuy",i===bi);}
-      const mb=$("mgr"+i);if(mb){if(s.b[i].mgr){mb.textContent=T().hired;mb.classList.add("owned");mb.disabled=true;}else{mb.innerHTML=T().manager+" · "+fmt(mgrCost(i));mb.disabled=s.cash<mgrCost(i);}}
+      const mb=$("mgr"+i);if(mb){if(s.b[i].mgr){mb.textContent=T().hired;mb.classList.add("owned");mb.disabled=true;}else{mb.innerHTML=T().manager+" · "+fmt(mgrCost(i));mb.disabled=s.b[i].owned<=0||s.cash<mgrCost(i);}}
     }
     const pr=$("prestige");if(pr){const g=prestigeGain();pr.classList.toggle("dis",g<1);$("prInfo").textContent=g<1?T().prestigeNeed:T().prestigeInfo(g);}
     const sp=$("specBtn");if(sp){const st=s.spec.tier;if(st>=SPEC_TIERS.length){sp.classList.add("dis");$("specInfo").textContent=T().specMaxed+(s.spec.hints>0?" · "+s.spec.hints+" "+T().specTips:"");}else{const c=SPEC_TIERS[st].cost;sp.classList.toggle("dis",s.cash<c);$("specInfo").textContent=fmt(c)+(s.spec.hints>0?" · "+s.spec.hints+" "+T().specTips:"");}}
