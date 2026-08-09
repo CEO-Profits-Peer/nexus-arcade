@@ -186,8 +186,10 @@
   /* ---------------- i18n ---------------- */
   const I={
     en:{hub:"Games",gold:"Gold",lvl:"Hero",shards:"Shards",region:"Region",stage:"Wave",xp:"XP",
-      tGear:"Gear",tBag:"Bag",tMap:"Map",tParty:"Party",tAsc:"Ascend",
-      weapon:"Weapon",armor:"Armor",empty:"— empty —",equip:"Equip",salvage:"Salvage",upgrade:"Upgrade",equipped:"Equipped",
+      tGear:"Gear",tBag:"Bag",tMap:"Map",tParty:"Party",tAsc:"Ascend",tSkills:"Skills",
+      weapon:"Weapon",armor:"Armor",ring:"Ring",amulet:"Amulet",empty:"— empty —",equip:"Equip",salvage:"Salvage",upgrade:"Upgrade",equipped:"Equipped",
+      skillPtsInfo:"Skill Points (earned by Ascending):",
+      skDmg:"Warrior's Edge",skDmgD:"+% all damage",skGold:"Greed",skGoldD:"+% gold",skXp:"Scholar",skXpD:"+% XP",skCrit:"Ruthless",skCritD:"+ crit chance",
       power:"Power",travel:"Travel",curRegion:"You are here",locked:"Reach Region",bagFull:"Bag full — salvage something!",
       dropped:"Loot:",salvaged:"Salvaged for",equippedMsg:"Equipped",
       u_click:"Blade Focus",u_click_d:"+ tap damage",u_dps:"Companion",u_dps_d:"+ auto dps",u_gold:"Fortune",u_gold_d:"+ gold",u_crit:"Precision",u_crit_d:"+ crit chance",
@@ -199,8 +201,10 @@
       rar:["Common","Rare","Epic","Legendary"],
       aboutH:"About Nexus Realms",aboutP:document.getElementById('aboutP')?document.getElementById('aboutP').textContent:""},
     de:{hub:"Spiele",gold:"Gold",lvl:"Held",shards:"Splitter",region:"Region",stage:"Welle",xp:"EP",
-      tGear:"Ausrüstung",tBag:"Beutel",tMap:"Karte",tParty:"Gruppe",tAsc:"Aufstieg",
-      weapon:"Waffe",armor:"Rüstung",empty:"— leer —",equip:"Anlegen",salvage:"Zerlegen",upgrade:"Verbessern",equipped:"Angelegt",
+      tGear:"Ausrüstung",tBag:"Beutel",tMap:"Karte",tParty:"Gruppe",tAsc:"Aufstieg",tSkills:"Skills",
+      weapon:"Waffe",armor:"Rüstung",ring:"Ring",amulet:"Amulett",empty:"— leer —",equip:"Anlegen",salvage:"Zerlegen",upgrade:"Verbessern",equipped:"Angelegt",
+      skillPtsInfo:"Skillpunkte (durch Aufstieg verdient):",
+      skDmg:"Kriegerschärfe",skDmgD:"+% Gesamtschaden",skGold:"Gier",skGoldD:"+% Gold",skXp:"Gelehrter",skXpD:"+% EP",skCrit:"Gnadenlos",skCritD:"+ Krit-Chance",
       power:"Stärke",travel:"Reisen",curRegion:"Du bist hier",locked:"Erreiche Region",bagFull:"Beutel voll — zerlege etwas!",
       dropped:"Beute:",salvaged:"Zerlegt für",equippedMsg:"Angelegt",
       u_click:"Klingenfokus",u_click_d:"+ Tipp-Schaden",u_dps:"Gefährte",u_dps_d:"+ Auto-DPS",u_gold:"Reichtum",u_gold_d:"+ Gold",u_crit:"Präzision",u_crit_d:"+ Krit-Chance",
@@ -241,18 +245,50 @@
     {k:"boots",n:{en:"Boots",de:"Stiefel"},ic:"👢",d:{en:"+% gold",de:"+% Gold"}},
     {k:"helm", n:{en:"Helm",de:"Helm"},ic:"⛑️",d:{en:"+% auto damage",de:"+% Auto-Schaden"}}
   ];
+  // Zwei neue Ausruestungs-Slots (Ring/Amulett) - ROADMAP.md "mehr Ausruestungs-Slots".
+  // Bewusst generische Stat-Sticks statt neuer Kampfmechaniken (die haben Waffen/Ruestung
+  // schon) - Ringe/Amulette passen thematisch besser als reine Verstaerker.
+  const RT=[
+    {k:"ringpow",n:{en:"Ring of Power",de:"Ring der Macht"},ic:"💍",d:{en:"+% all damage",de:"+% Gesamtschaden"}},
+    {k:"ringfor",n:{en:"Ring of Fortune",de:"Ring des Glücks"},ic:"💫",d:{en:"+% gold",de:"+% Gold"}}
+  ];
+  const MT=[
+    {k:"amuwis",n:{en:"Amulet of Wisdom",de:"Amulett der Weisheit"},ic:"🔱",d:{en:"+% XP gain",de:"+% EP-Gewinn"}},
+    {k:"amufoc",n:{en:"Amulet of Focus",de:"Amulett der Konzentration"},ic:"🧿",d:{en:"+ crit chance",de:"+ Krit-Chance"}}
+  ];
   const RAR=[{col:"#9aa7cc",m:1},{col:"#39e6ff",m:1.9},{col:"#c77dff",m:3.4},{col:"#ffcf5c",m:6.5}];
-  const typeDef=(t,k)=>(t==="w"?WT:AT).find(x=>x.k===k)||(t==="w"?WT[0]:AT[0]);
+  const TYPEARR={w:WT,a:AT,r:RT,m:MT};
+  const typeDef=(t,k)=>{const arr=TYPEARR[t]||WT;return arr.find(x=>x.k===k)||arr[0];};
+  // Set-Boni (ROADMAP.md "Set-Boni"): jedes Item bekommt beim Droppen zusaetzlich ein Set-
+  // Tag (unabhaengig vom Typ) - 2/3/4 gleichzeitig ausgeruestete Teile desselben Sets geben
+  // gestaffelt +% Gesamtschaden. Alte Items ohne "set"-Feld (vor diesem Update) zaehlen
+  // einfach nicht mit (setOf() gibt -1), bleiben aber voll nutzbar fuer ihren Basis-Bonus.
+  const SETS=[
+    {n:{en:"Warlord",de:"Kriegsherr"},col:"#ff5470"},
+    {n:{en:"Shade",de:"Schatten"},col:"#c77dff"},
+    {n:{en:"Arcanist",de:"Arkanist"},col:"#39e6ff"}
+  ];
+  const setOf=it=>(it&&it.set!=null)?it.set:-1;
+  const SET_TIERS=[[2,0.08],[3,0.14],[4,0.25]]; // [benoetigte Teile, +Schaden]
+  function setBonusInfo(){
+    const counts={};["w","a","r","m"].forEach(slot=>{const it=s.equip[slot];const so=setOf(it);if(so>=0)counts[so]=(counts[so]||0)+1;});
+    let bestSet=-1,bestCount=0;for(const k in counts){if(counts[k]>bestCount){bestCount=counts[k];bestSet=+k;}}
+    let bonus=0;for(const[need,pct]of SET_TIERS){if(bestCount>=need)bonus=pct;}
+    return {set:bestSet,count:bestCount,bonus};
+  }
 
   /* ---------------- state ---------------- */
   const SAVE="nr_save_v1";
   let s;
   function fresh(){return{gold:0,gems:0,heroLv:1,heroXp:0,zone:1,stage:1,maxZone:1,
-    up:{click:1,dps:0,gold:0,crit:0}, region:1, equip:{w:null,a:null}, inv:[], lastSave:Date.now()};}
+    up:{click:1,dps:0,gold:0,crit:0}, region:1, equip:{w:null,a:null,r:null,m:null}, inv:[], lastSave:Date.now(),
+    skillPts:0, skills:{dmg:0,gold:0,xp:0,crit:0}};}
   function load(){
     try{const raw=localStorage.getItem(SAVE);if(raw){s=Object.assign(fresh(),JSON.parse(raw));
       s.up=Object.assign({click:1,dps:0,gold:0,crit:0},s.up||{});
-      s.equip=Object.assign({w:null,a:null},s.equip||{});
+      s.equip=Object.assign({w:null,a:null,r:null,m:null},s.equip||{});
+      s.skillPts=s.skillPts||0;
+      s.skills=Object.assign({dmg:0,gold:0,xp:0,crit:0},s.skills||{});
       if(!Array.isArray(s.inv))s.inv=[];
       s.zone=Math.max(1,Math.min(s.zone||1,REGIONS.length));
       s.maxZone=Math.max(1,Math.min(s.maxZone||1,REGIONS.length));
@@ -271,20 +307,24 @@
   function salvageValue(it){ return Math.ceil(10*RAR[it.r].m*it.lvl*Math.pow(1.4,s.region)); }
   function upgradeCost(it){ return Math.ceil(25*RAR[it.r].m*Math.pow(1.5,it.lvl)*Math.pow(1.3,s.region)); }
   function rollRarity(boss){ let r=Math.random()* (boss?0.75:1); if(r<0.62)return 0; if(r<0.87)return 1; if(r<0.975)return 2; return 3; }
+  // Drop-Chance 0.09->0.16 angehoben (ROADMAP.md "Loot-Rate nachbalancieren") - bei einem
+  // Loot-getriebenen Idle-RPG fuehlte sich unter 1-in-10 normalen Kills zu selten an, um das
+  // "neue Beute!"-Gefuehl zu tragen, das die About-Seite selbst bewirbt.
   function rollLoot(boss){
-    const chance = boss?1:0.09; if(Math.random()>chance) return null;
-    const t = Math.random()<0.5?"w":"a";
-    const pool=(t==="w"?WT:AT); const k=pool[(Math.random()*pool.length)|0].k;
+    const chance = boss?1:0.16; if(Math.random()>chance) return null;
+    const types=["w","a","r","m"]; const t=types[(Math.random()*types.length)|0];
+    const pool=TYPEARR[t]; const k=pool[(Math.random()*pool.length)|0].k;
     const r=rollRarity(boss);
+    const set=(Math.random()*SETS.length)|0;
     const lvl=Math.max(1,Math.round(s.zone*1.1 + Math.random()*s.zone + (boss?s.zone*0.6:0)));
-    return {t,k,r,lvl};
+    return {t,k,r,lvl,set};
   }
 
   /* ---------------- combat stats ---------------- */
   const prestige=()=>1+s.gems*0.10;
   function cstats(){
     let clickMul=1,dpsMul=1,goldMul=1,xpMul=1,bossMul=1,burn=0,crit=Math.min(0.6,0.03+s.up.crit*0.015);
-    const w=s.equip.w,a=s.equip.a;
+    const w=s.equip.w,a=s.equip.a,r=s.equip.r,m=s.equip.m;
     if(w){const p=powerOf(w);
       if(w.k==="sword")clickMul*=(1+p*1.6);
       else if(w.k==="dagger")crit+=p*0.45;
@@ -298,6 +338,19 @@
       else if(a.k==="cloak")crit+=p*0.4;
       else if(a.k==="boots")goldMul*=(1+p*1.6);
       else if(a.k==="helm")dpsMul*=(1+p*1.6);}
+    if(r){const p=powerOf(r);
+      if(r.k==="ringpow"){clickMul*=(1+p*1.1);dpsMul*=(1+p*1.1);}
+      else if(r.k==="ringfor")goldMul*=(1+p*1.4);}
+    if(m){const p=powerOf(m);
+      if(m.k==="amuwis")xpMul*=(1+p*1.4);
+      else if(m.k==="amufoc")crit+=p*0.35;}
+    // Set-Boni: gestaffelter Gesamtschaden-Bonus, siehe SET_TIERS weiter oben.
+    const setBonus=setBonusInfo().bonus;
+    if(setBonus>0){clickMul*=(1+setBonus);dpsMul*=(1+setBonus);}
+    // Skills (permanente Skillpunkte aus dem Aufstieg, siehe ascend()) - eigene, kleine
+    // additive Schicht obendrauf, unabhaengig von Ausruestung/Prestige-Multiplikator.
+    clickMul*=(1+s.skills.dmg*0.01); dpsMul*=(1+s.skills.dmg*0.01);
+    goldMul*=(1+s.skills.gold*0.01); xpMul*=(1+s.skills.xp*0.01); crit+=s.skills.crit*0.005;
     return {clickMul,dpsMul,goldMul,xpMul,bossMul,burn,crit:Math.min(0.8,crit)};
   }
   const clickDmg=()=> (2+s.up.click*3)*(1+s.heroLv*0.12)*prestige()*cstats().clickMul;
@@ -305,7 +358,13 @@
   const critMult=()=> 2+s.up.crit*0.15;
   const monsterLevel=()=> (s.zone-1)*10 + s.stage;
   const isBoss=()=> s.stage===10;
-  const monsterMaxHp=()=>{ const reg=REGIONS[s.zone-1]||REGIONS[0]; let hp=10*Math.pow(1.42,s.stage-1)*reg.hp*Math.pow(1.9,s.zone-1); if(isBoss())hp*=6.5; return Math.ceil(hp); };
+  // Stage-Exponent 1.42->1.31 gesenkt (ROADMAP.md "HP-Kurve nachbalancieren): 1.42^8 (bis
+  // Welle 9 einer Region) waren vorher ~15.7x HP-Zuwachs NUR innerhalb einer einzigen Region,
+  // obendrauf auf den Region-zu-Region-Sprung (1.9x) - macht sich am staerksten in tiefen
+  // Regionen bemerkbar, wo die letzten paar Wellen jeder Region ueberproportional zäh wurden
+  // im Vergleich zum Fortschritt bei Ausruestung/Aufstieg. 1.31^8 ~= 9.6x, spuerbar sanfter,
+  // Regionswechsel (1.9x) bleibt der groessere Schwierigkeitssprung, wie es sein soll.
+  const monsterMaxHp=()=>{ const reg=REGIONS[s.zone-1]||REGIONS[0]; let hp=10*Math.pow(1.31,s.stage-1)*reg.hp*Math.pow(1.9,s.zone-1); if(isBoss())hp*=6.5; return Math.ceil(hp); };
   const killGold=()=>{ const reg=REGIONS[s.zone-1]||REGIONS[0]; return Math.ceil(monsterMaxHp()*0.30*(1+s.up.gold*0.25)*reg.gold*cstats().goldMul*(isBoss()?4:1)); };
   const killXp=()=> Math.ceil(monsterLevel()*1.6*cstats().xpMul*(isBoss()?5:1));
   const xpNeed=()=> Math.ceil(20*Math.pow(s.heroLv,1.55));
@@ -364,7 +423,7 @@
     newMonster();renderStats();refreshTab();save();
   }
   function addLoot(it){
-    if(s.inv.length>=24){ toast("🎒 "+T().bagFull); return; }
+    if(s.inv.length>=30){ toast("🎒 "+T().bagFull); return; } // 24->30: mehr Item-Typen (Ring/Amulett) droppen jetzt, Beutel etwas grosszuegiger
     s.inv.push(it);
     floatText("🎁",itemColor(it),true);
     toast(T().dropped+" "+RARname(it.r)+" "+itemName(it)+" (Lv"+it.lvl+")");
@@ -374,7 +433,7 @@
   /* ---------------- equip / bag ---------------- */
   function equipItem(idx){
     const it=s.inv[idx]; if(!it)return;
-    const slot=it.t==="w"?"w":"a";
+    const slot=it.t; // "w"/"a"/"r"/"m" - Item-Typ ist jetzt direkt der Slot-Key
     const cur=s.equip[slot];
     s.equip[slot]=it; s.inv.splice(idx,1);
     if(cur)s.inv.push(cur);
@@ -402,10 +461,11 @@
     bag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>',
     map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>',
     party:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.5c3 .4 5 2 5 5"/></svg>',
+    skills:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>',
     asc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l3 6 6 .5-4.5 4 1.5 6-6-3.5L6 19.5 7.5 13.5 3 9.5 9 9z"/></svg>'
   };
   function renderTabs(){
-    const defs=[["party",T().tParty],["gear",T().tGear],["bag",T().tBag],["map",T().tMap],["asc",T().tAsc]];
+    const defs=[["party",T().tParty],["gear",T().tGear],["bag",T().tBag],["skills",T().tSkills],["map",T().tMap],["asc",T().tAsc]];
     $("tabs").innerHTML=defs.map(d=>'<button data-tab="'+d[0]+'" class="'+(tab===d[0]?"on":"")+'">'+TABICON[d[0]]+'<span>'+d[1]+'</span></button>').join("");
     $("tabs").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.getAttribute("data-tab");renderTabs();refreshTab();});
   }
@@ -414,6 +474,7 @@
     if(tab==="party") b.innerHTML=partyHTML();
     else if(tab==="gear") b.innerHTML=gearHTML();
     else if(tab==="bag") b.innerHTML=bagHTML();
+    else if(tab==="skills") b.innerHTML=skillsHTML();
     else if(tab==="map") b.innerHTML=mapHTML();
     else if(tab==="asc") b.innerHTML=ascHTML();
     wireTab();
@@ -422,21 +483,51 @@
     const rows=[["click","⚔️","u_click","u_click_d"],["dps","🧝","u_dps","u_dps_d"],["gold","💰","u_gold","u_gold_d"],["crit","🎯","u_crit","u_crit_d"]];
     return rows.map(r=>{const k=r[0],c=upCost(k);return '<div class="up'+(s.gold<c?" dis":"")+'" data-up="'+k+'"><div class="ic">'+r[1]+'</div><div class="mid"><div class="t">'+T()[r[2]]+'</div><div class="d">'+T()[r[3]]+'</div><div class="lv">Lv '+s.up[k]+'</div></div><div class="cost">'+fmt(c)+'</div></div>';}).join("");
   }
+  const SLOT_LABEL=()=>({w:T().weapon,a:T().armor,r:T().ring,m:T().amulet});
+  const SLOT_ICON={w:"🗡️",a:"🛡️",r:"💍",m:"🔱"};
+  const SLOT_BADGE={w:"⚔",a:"🛡",r:"💍",m:"🔱"};
+  function setTag(it){
+    const so=setOf(it); if(so<0)return "";
+    return ' · <span style="color:'+SETS[so].col+'">'+SETS[so].n[lang]+'</span>';
+  }
   function gearSlot(slot){
-    const it=s.equip[slot]; const label=slot==="w"?T().weapon:T().armor;
-    if(!it) return '<div class="gearrow"><div class="gearicon" style="border-color:#5a6187">'+(slot==="w"?"🗡️":"🛡️")+'</div><div class="gearmid"><div class="gs">'+label+'</div><div class="gn" style="color:var(--muted)">'+T().empty+'</div></div></div>';
+    const it=s.equip[slot]; const label=SLOT_LABEL()[slot];
+    if(!it) return '<div class="gearrow"><div class="gearicon" style="border-color:#5a6187">'+SLOT_ICON[slot]+'</div><div class="gearmid"><div class="gs">'+label+'</div><div class="gn" style="color:var(--muted)">'+T().empty+'</div></div></div>';
     const d=typeDef(it.t,it.k);const p=powerOf(it);const c=upgradeCost(it);
     return '<div class="gearrow"><div class="gearicon" style="border-color:'+itemColor(it)+';box-shadow:0 0 12px '+itemColor(it)+'66">'+d.ic+'</div>'+
-      '<div class="gearmid"><div class="gs" style="color:'+itemColor(it)+'">'+label+' · '+RARname(it.r)+' · Lv'+it.lvl+'</div>'+
+      '<div class="gearmid"><div class="gs" style="color:'+itemColor(it)+'">'+label+' · '+RARname(it.r)+' · Lv'+it.lvl+setTag(it)+'</div>'+
       '<div class="gn">'+d.n[lang]+'</div><div class="gs">'+d.d[lang]+' · '+T().power+' '+(p*100).toFixed(0)+'%</div></div>'+
       '<button class="btn" data-upg="'+slot+'" '+(s.gold<c?"disabled":"")+'>⬆ '+fmt(c)+'</button></div>';
   }
-  function gearHTML(){ return gearSlot("w")+gearSlot("a"); }
+  function gearHTML(){
+    const sb=setBonusInfo();
+    let h=gearSlot("w")+gearSlot("a")+gearSlot("r")+gearSlot("m");
+    if(sb.set>=0&&sb.count>=2){
+      h+='<div style="text-align:center;font-size:12px;color:'+SETS[sb.set].col+';margin-top:6px;padding:8px;border:1px dashed '+SETS[sb.set].col+';border-radius:10px">'+
+        '✦ '+SETS[sb.set].n[lang]+' '+sb.count+'/4 · +'+(sb.bonus*100).toFixed(0)+'% '+(lang==="de"?"Schaden":"damage")+'</div>';
+    }
+    return h;
+  }
   function bagHTML(){
     if(!s.inv.length) return '<div style="text-align:center;color:var(--muted);padding:20px">'+T().empty+'</div>';
     let h='<div class="bag">';
-    s.inv.forEach((it,i)=>{h+='<div class="slot" data-slot="'+i+'" style="border-color:'+itemColor(it)+'"><span>'+itemIcon(it)+'</span><span class="lv">'+it.lvl+'</span><span class="eq">'+(it.t==="w"?"⚔":"🛡")+'</span></div>';});
-    h+='</div><div style="font-size:11px;color:var(--muted);margin-top:8px">'+s.inv.length+'/24 · '+(lang==="de"?"Tippen zum Anlegen / Zerlegen":"Tap to equip / salvage")+'</div>';
+    s.inv.forEach((it,i)=>{h+='<div class="slot" data-slot="'+i+'" style="border-color:'+itemColor(it)+'"><span>'+itemIcon(it)+'</span><span class="lv">'+it.lvl+'</span><span class="eq">'+SLOT_BADGE[it.t]+'</span></div>';});
+    h+='</div><div style="font-size:11px;color:var(--muted);margin-top:8px">'+s.inv.length+'/30 · '+(lang==="de"?"Tippen zum Anlegen / Zerlegen":"Tap to equip / salvage")+'</div>';
+    return h;
+  }
+  const SKILL_DEFS=[
+    ["dmg","⚔️","skDmg","skDmgD",0.01,999],
+    ["gold","💰","skGold","skGoldD",0.01,999],
+    ["xp","📖","skXp","skXpD",0.01,999],
+    ["crit","🎯","skCrit","skCritD",0.005,999]
+  ];
+  function skillsHTML(){
+    let h='<div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:8px">'+T().skillPtsInfo+' <b style="color:var(--mag)">'+s.skillPts+'</b></div>';
+    h+=SKILL_DEFS.map(function(d){
+      const k=d[0],rank=s.skills[k],per=d[4];
+      const has=s.skillPts>0;
+      return '<div class="up'+(has?"":" dis")+'" data-sk="'+k+'"><div class="ic">'+d[1]+'</div><div class="mid"><div class="t">'+T()[d[2]]+'</div><div class="d">'+T()[d[3]]+' ('+(per*100).toFixed(1)+'%/'+(lang==="de"?"Rang":"rank")+')</div><div class="lv">Rang '+rank+'</div></div><div class="cost">'+(has?"1 ✦":"—")+'</div></div>';
+    }).join("");
     return h;
   }
   function mapHTML(){
@@ -455,6 +546,7 @@
   function wireTab(){
     const b=$("tabBody");
     b.querySelectorAll("[data-up]").forEach(el=>el.onclick=()=>buyUp(el.getAttribute("data-up")));
+    b.querySelectorAll("[data-sk]").forEach(el=>el.onclick=()=>buySkill(el.getAttribute("data-sk")));
     b.querySelectorAll("[data-upg]").forEach(el=>el.onclick=()=>upgradeEquip(el.getAttribute("data-upg")));
     b.querySelectorAll("[data-slot]").forEach(el=>el.onclick=()=>itemMenu(+el.getAttribute("data-slot")));
     b.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>travel(+el.getAttribute("data-go")));
@@ -463,6 +555,7 @@
     const rb=$("resetBtn");if(rb)rb.onclick=()=>{if(confirm(T().resetC)){localStorage.removeItem(SAVE);s=fresh();mobHp=monsterMaxHp();renderAll();}};
   }
   function buyUp(k){const c=upCost(k);if(s.gold>=c){s.gold-=c;s.up[k]++;renderStats();renderArena();refreshTab();save();}}
+  function buySkill(k){if(s.skillPts<=0)return;s.skillPts--;s.skills[k]++;toast("✦ "+T()[SKILL_DEFS.find(function(d){return d[0]===k;})[2]]+" Rang "+s.skills[k]);renderStats();refreshTab();save();}
   function itemMenu(i){
     const it=s.inv[i];if(!it)return;
     // simple: equip on tap, long options via confirm
@@ -476,7 +569,12 @@
   function ascend(){ if(ascGain()<1)return; const g=ascGain();
     $("mTitle").textContent=T().ascTitle;$("mBody").textContent=T().ascConfirm(g);$("mBig").textContent="✦ "+g;$("mBig").style.color="var(--mag)";
     const btn=$("mBtn");btn.textContent=T().doAsc;$("modal").classList.remove("hidden");
-    btn.onclick=()=>{const gems=s.gems+g;s=fresh();s.gems=gems;mobHp=monsterMaxHp();$("modal").classList.add("hidden");renderAll();save();if(window.NexusArcade){try{window.NexusArcade.addXP(150);}catch(e){}}};
+    // Aufstieg vertieft (ROADMAP.md "Prestige-System"): neben den Splittern (temporaeres Reset
+    // gegen dauerhaftes +Schaden) gibt jeder Aufstieg jetzt zusaetzlich 1 Skillpunkt, und
+    // sowohl skillPts als auch bereits gekaufte Skill-Raenge ueberleben den Reset genau wie
+    // die Splitter selbst - macht den Skill-Baum zu einer zweiten Saeule dauerhaften
+    // Fortschritts, nicht nur der flache Pauschalbonus pro Splitter.
+    btn.onclick=()=>{const gems=s.gems+g,skillPts=s.skillPts+1,skills=s.skills;s=fresh();s.gems=gems;s.skillPts=skillPts;s.skills=skills;mobHp=monsterMaxHp();$("modal").classList.add("hidden");renderAll();save();if(window.NexusArcade){try{window.NexusArcade.addXP(150);}catch(e){}}};
   }
 
   /* ---------------- loop ---------------- */
