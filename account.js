@@ -60,7 +60,13 @@
     if(achieved[id]) return false;
     const a=achById(id); if(!a) return false;
     achieved[id]=new Date().toISOString(); saveAch();
-    if(!quiet) toast(a.icon+" "+t.unlocked+" "+a.name[L]);
+    // Achievements gaben bisher nur XP, Quests aber XP+Coins (siehe checkQuests unten) - Coins
+    // sind jetzt in mehreren Spielen (Dash/Racer/Run3D-Shops) echte Kaufkraft, also sollten
+    // Achievements dieselbe Belohnungsform haben. Proportional zur XP statt Quests' festen 30,
+    // da Achievement-XP stark streut (40 bis 900) - grober Richtwert xp/4, mit Mindestbetrag.
+    const coinReward=Math.max(5,Math.round(a.xp/4));
+    profile.coins=(profile.coins||0)+coinReward;
+    if(!quiet) toast(a.icon+" "+t.unlocked+" "+a.name[L]+" +"+coinReward+"💰");
     grantXP(a.xp);
     return true;
   }

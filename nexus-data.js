@@ -17,11 +17,19 @@ window.NEXUS_DATA=(function(){
     {id:"rainbow",req:32, label:{en:"Prisma",de:"Prisma"},  css:"border-color:#ff4d6d;animation:nxHue 5s linear infinite;box-shadow:0 0 16px currentColor"},
     {id:"void",   req:42, label:{en:"Void",de:"Leere"},     css:"border-color:#3a2b5c;box-shadow:0 0 18px #7b2ff7,inset 0 0 10px #000"},
     {id:"nexus",  req:55, label:{en:"Nexus",de:"Nexus"},    css:"border-image:linear-gradient(135deg,#39e6ff,#c77dff,#ffcf5c) 1;animation:nxHue 6s linear infinite;box-shadow:0 0 22px #39e6ff"},
+    // Level 55-100 hatte bisher keine weiteren Rahmen-Belohnungen mehr, obwohl es dafuer schon
+    // Level-Achievements gibt (siehe addTier("lvl",...) unten bis Level 100) - Luecke geschlossen.
+    {id:"eclipse",req:70, label:{en:"Eclipse",de:"Finsternis"},css:"border-color:#1a1030;box-shadow:0 0 20px #7b2ff7,0 0 8px #ff3ea5 inset;animation:nxPulse 2.4s infinite"},
+    {id:"aurum",  req:85, label:{en:"Aurum",de:"Aurum"},     css:"border-image:linear-gradient(135deg,#ffcf5c,#fff,#ffcf5c) 1;box-shadow:0 0 24px #ffcf5c;animation:nxHue 8s linear infinite"},
+    {id:"zenith", req:100,label:{en:"Zenith",de:"Zenit"},    css:"border-image:linear-gradient(135deg,#fff,#39e6ff,#c77dff,#ff3ea5,#ffcf5c,#fff) 1;animation:nxHue 3s linear infinite;box-shadow:0 0 28px #fff"},
   ];
   const PREMIUM_FRAMES = [
     {id:"aurora",price:300,shop:true,label:{en:"Aurora",de:"Aurora"},css:"border-image:linear-gradient(135deg,#7cff6b,#39e6ff,#c77dff) 1;animation:nxHue 7s linear infinite;box-shadow:0 0 18px #39e6ff"},
     {id:"lava",price:500,shop:true,label:{en:"Lava",de:"Lava"},css:"border-color:#ff5a2a;color:#ff5a2a;animation:nxPulse 1.15s infinite;box-shadow:0 0 16px #ff5a2a"},
-    {id:"matrix",price:800,shop:true,label:{en:"Matrix",de:"Matrix"},css:"border-color:#3aff7a;box-shadow:0 0 18px #3aff7a,inset 0 0 12px #052"}
+    {id:"matrix",price:800,shop:true,label:{en:"Matrix",de:"Matrix"},css:"border-color:#3aff7a;box-shadow:0 0 18px #3aff7a,inset 0 0 12px #052"},
+    {id:"blossom",price:220,shop:true,label:{en:"Blossom",de:"Blüte"},css:"border-color:#ff8fc7;box-shadow:0 0 14px #ff8fc799"},
+    {id:"abyss",price:650,shop:true,label:{en:"Abyss",de:"Abgrund"},css:"border-color:#1a2b5c;box-shadow:0 0 20px #2a4bcc,inset 0 0 14px #000"},
+    {id:"solstice",price:1100,shop:true,label:{en:"Solstice",de:"Sonnenwende"},css:"border-image:linear-gradient(135deg,#ff9a3a,#ffcf5c,#ff3ea5) 1;animation:nxHue 5s linear infinite;box-shadow:0 0 24px #ff9a3a"}
   ];
   // NEXUS ARCADE PRO: exklusiver Rahmen, nicht käuflich/level-basiert — nur bei aktivem PRO-Abo wählbar
   // (siehe account.js isPro() / renderModal "profile"-Tab).
@@ -31,7 +39,8 @@ window.NEXUS_DATA=(function(){
   const frameById = id => ALLFRAMES.find(f=>f.id===id)||FRAMES[0];
   const PREMIUM_AVATARS = [
     {id:"av_cool",e:"😎",price:120},{id:"av_ninja",e:"🥷",price:160},{id:"av_vamp",e:"🧛",price:180},
-    {id:"av_alien",e:"👽",price:200},{id:"av_dragon",e:"🐉",price:260},{id:"av_lion",e:"🦁",price:150}
+    {id:"av_alien",e:"👽",price:200},{id:"av_dragon",e:"🐉",price:260},{id:"av_lion",e:"🦁",price:150},
+    {id:"av_unicorn",e:"🦄",price:170},{id:"av_shark",e:"🦈",price:190},{id:"av_phoenix",e:"🐦‍🔥",price:320}
   ];
   const SVG_ICON={
     nexus:c=>'<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="'+c+'" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7 4v10l-7 4-7-4V7z"/><circle cx="12" cy="12" r="2.6" fill="'+c+'"/></svg>',
@@ -55,6 +64,9 @@ window.NEXUS_DATA=(function(){
     {id:"master",    req:28, name:{en:"Master",de:"Meister"}},
     {id:"legend",    req:40, name:{en:"Legend",de:"Legende"}},
     {id:"ascendant", req:55, name:{en:"Nexus Ascendant",de:"Nexus-Aufgestiegener"}},
+    // Gleiche Luecke wie bei FRAMES: Level 55-100 gab bisher keinen weiteren Titel mehr.
+    {id:"paragon",   req:75, name:{en:"Paragon",de:"Musterbeispiel"}},
+    {id:"eternal",   req:100,name:{en:"Nexus Eternal",de:"Nexus-Ewiger"}},
   ];
   const titleById = id => TITLES.find(x=>x.id===id)||TITLES[0];
 
