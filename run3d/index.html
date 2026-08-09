@@ -57,6 +57,22 @@
   .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
   .new-best{color:var(--accent);font-weight:800;animation:pulse 1s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .shop-modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,6,15,0.85);backdrop-filter:blur(3px);}
+  .shop-modal.hidden{display:none;}
+  .shop-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;max-width:420px;width:100%;max-height:86vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 0 40px rgba(57,230,255,0.1);}
+  .shop-list{display:flex;flex-direction:column;gap:10px;width:100%;text-align:left;padding:2px;margin-top:6px;}
+  .shop-item{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+  .shop-item .info{flex:1;min-width:0;}
+  .shop-item .name{font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;}
+  .shop-item .desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .shop-item .pips{display:flex;gap:3px;margin-top:5px;}
+  .shop-item .pip{width:14px;height:5px;border-radius:3px;background:rgba(120,140,220,0.25);}
+  .shop-item .pip.on{background:var(--neon);box-shadow:0 0 6px var(--neon);}
+  .shop-buy{border:none;cursor:pointer;font-weight:800;font-size:12px;padding:9px 12px;border-radius:9px;color:#04121a;background:linear-gradient(90deg,var(--neon),var(--accent));white-space:nowrap;flex:none;}
+  .shop-buy:disabled{opacity:.4;cursor:not-allowed;background:rgba(120,140,220,0.25);color:var(--muted);}
+  .shop-buy.max{opacity:.7;cursor:default;background:rgba(124,255,107,0.25);color:var(--accent);}
+  .shop-coins{font-weight:800;color:#ffcf5c;font-size:15px;}
+
   .about{max-width:720px;padding:8px 20px 40px;color:var(--muted);line-height:1.7;font-size:14px;}
   .about h2{color:var(--text);font-size:17px;}
   footer{color:var(--muted);font-size:12px;padding:0 18px 24px;text-align:center;}
@@ -97,7 +113,10 @@
     <div class="overlay" id="startO">
       <h1>NEXUS RUN 3D</h1>
       <p data-i18n="intro">Switch lanes with ← → or A/D (or swipe), jump with Space / ↑ / tap. Dodge the red blocks, grab the orbs, run as far as you can.</p>
-      <button class="btn" id="startBtn" data-i18n="play">▶ RUN</button>
+      <div class="btnrow">
+        <button class="btn" id="startBtn" data-i18n="play">▶ RUN</button>
+        <button class="btn sec" id="shopBtn" data-i18n="upgrades">⚡ UPGRADES</button>
+      </div>
       <div class="sub" data-i18n="hint">← → move · Space jump · swipe on mobile</div>
     </div>
     <div class="overlay hidden" id="overO">
@@ -108,8 +127,19 @@
       <div class="btnrow">
         <button class="btn" id="retryBtn" data-i18n="retry">↻ RETRY</button>
         <button class="btn sec" id="shareBtn" data-i18n="share">⤴ SHARE</button>
+        <button class="btn sec" id="shopBtn2" data-i18n="upgrades">⚡ UPGRADES</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Upgrade shop modal — fixed full-viewport (mobile lesson from Dash/Racer). -->
+<div class="shop-modal hidden" id="shopOverlay">
+  <div class="shop-card">
+    <h1 style="font-size:clamp(20px,5vw,28px);margin:0 0 4px" data-i18n="upgrades">⚡ UPGRADES</h1>
+    <div class="shop-coins">💰 <span id="shopCoins">0</span></div>
+    <div class="shop-list" id="shopList"></div>
+    <button class="btn sec" id="shopCloseBtn" data-i18n="close" style="margin-top:14px">✕ CLOSE</button>
   </div>
 </div>
 <div class="belowgame" id="belowGame"></div>
@@ -130,12 +160,22 @@
     intro:"Switch lanes with ← → or A/D (or swipe), jump with Space / ↑ / tap. Dodge the red blocks, grab the orbs, run as far as you can.",
     hint:"← → move · Space jump · swipe on mobile",aboutH:"About Nexus Run 3D",
     aboutP:"Nexus Run 3D is a free 3D endless runner you can play right in your browser — no download, no signup. Sprint down a glowing neon tunnel, switch between three lanes, jump over obstacles and scoop up energy orbs. The speed keeps climbing, so your reflexes have to keep up. Beat your distance record and challenge your friends. Runs on desktop and mobile.",
-    shareText:s=>`I ran ${s}m in Nexus Run 3D! Can you go further?`,copied:"Copied — paste anywhere!",noWebGL:"Your browser could not start 3D graphics."},
+    shareText:s=>`I ran ${s}m in Nexus Run 3D! Can you go further?`,copied:"Copied — paste anywhere!",noWebGL:"Your browser could not start 3D graphics.",
+    upgrades:"⚡ UPGRADES",close:"✕ CLOSE",needMore:"Not enough coins — earn more by leveling up, finishing quests or watching a rewarded ad.",maxed:"MAX",buy:"Buy",
+    upMagnetName:"Orb Magnet",upMagnetDesc:"Orbs in nearby lanes drift toward you — bigger range per level.",
+    upShieldName:"Shield",upShieldDesc:"Start each run with shield charges that absorb one crash each, then break.",
+    upJumpName:"Sky Jump",upJumpDesc:"Jump higher — clear obstacles with more room to spare.",
+    upPaceName:"Steady Pace",upPaceDesc:"The track speeds up more slowly — more time before it gets hectic."},
   de:{hub:"Spiele",dist:"Distanz",orbs:"Orbs",best:"Bestwert",play:"▶ LOS",retry:"↻ NOCHMAL",share:"⤴ TEILEN",crash:"GAME OVER",newbest:"★ NEUER REKORD ★",
     intro:"Spur wechseln mit ← → oder A/D (oder wischen), springen mit Leertaste / ↑ / tippen. Weiche den roten Blöcken aus, sammle Orbs, lauf so weit du kannst.",
     hint:"← → Spur · Leertaste Sprung · wischen am Handy",aboutH:"Über Nexus Run 3D",
     aboutP:"Nexus Run 3D ist ein kostenloser 3D-Endless-Runner direkt im Browser — kein Download, keine Anmeldung. Sprinte durch einen leuchtenden Neon-Tunnel, wechsle zwischen drei Spuren, springe über Hindernisse und sammle Energie-Orbs. Das Tempo steigt stetig, deine Reflexe müssen mithalten. Knacke deinen Distanz-Rekord und fordere Freunde heraus. Läuft auf Desktop und Handy.",
-    shareText:s=>`Ich bin ${s}m in Nexus Run 3D gelaufen! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",noWebGL:"Dein Browser konnte die 3D-Grafik nicht starten."}};
+    shareText:s=>`Ich bin ${s}m in Nexus Run 3D gelaufen! Schaffst du mehr?`,copied:"Kopiert — überall einfügen!",noWebGL:"Dein Browser konnte die 3D-Grafik nicht starten.",
+    upgrades:"⚡ UPGRADES",close:"✕ SCHLIESSEN",needMore:"Nicht genug Coins — verdiene mehr durch Level-Ups, Quests oder ein Werbevideo.",maxed:"MAX",buy:"Kaufen",
+    upMagnetName:"Orb-Magnet",upMagnetDesc:"Orbs in Nachbarspuren driften zu dir — größere Reichweite pro Stufe.",
+    upShieldName:"Schild",upShieldDesc:"Startet jeden Lauf mit Schild-Ladungen, die je einen Crash absorbieren und dann zerbrechen.",
+    upJumpName:"Himmelssprung",upJumpDesc:"Springe höher — überwinde Hindernisse mit mehr Spielraum.",
+    upPaceName:"Ruhiges Tempo",upPaceDesc:"Die Strecke wird langsamer schneller — mehr Zeit, bevor es hektisch wird."}};
   let lang=(localStorage.getItem("nx_lang")||navigator.language||"en").toLowerCase().startsWith("de")?"de":"en";
   const T=()=>I[lang];
   const $=id=>document.getElementById(id);
@@ -143,8 +183,31 @@
   let best=parseInt(localStorage.getItem(BEST)||"0",10);
   const LANES=[-2.4,0,2.4];
   const frame=$("frame");
-  let renderer,scene,camera,player,ground,obstacles=[],orbs=[],decos=[];
+  let renderer,scene,camera,player,ground,obstacles=[],orbs=[],decos=[],shieldMesh=null;
   let state="menu",lane=1,py=0,vy=0,onGround=true,speed=14,dist=0,orbCount=0,spawnZ,last=0,elapsed=0;
+  let shields=0,invulnT=0;
+
+  // ---- Upgrade shop (coins-based, window.NexusArcade.spendCoins) ----
+  // Gleiche Preis-Groessenordnung wie Dash/Racer (siehe deren Kommentare): deutlich ueber den
+  // 120-800 Coins der Cosmetics, da Vorteile JEDEN Lauf wirken. "Magnet" zieht hier echte 3D-
+  // Orbs aus Nachbarspuren zu einem, "Steady Pace" bremst die Tempo-Rampe statt Schaden/Gold
+  // zu skalieren (die es in diesem Spiel gar nicht gibt) - beide auf DIESES Spiel zugeschnitten,
+  // nicht 1:1 aus Dash/Racer kopiert.
+  const UPGRADES=[
+    {id:"magnet",nameKey:"upMagnetName",descKey:"upMagnetDesc",icon:"🧲",
+      costs:[80,150,240,350,480],values:[0,8,12,16,20,24]}, // Reichweite in Z-Einheiten voraus
+    {id:"shield",nameKey:"upShieldName",descKey:"upShieldDesc",icon:"🛡️",
+      costs:[250,550,1000],values:[0,1,2,3]}, // Schild-Ladungen pro Lauf
+    {id:"jump",nameKey:"upJumpName",descKey:"upJumpDesc",icon:"🚀",
+      costs:[120,260,450,700],values:[0,0.8,1.6,2.4,3.2]}, // Bonus auf Sprung-Geschwindigkeit (vy)
+    {id:"pace",nameKey:"upPaceName",descKey:"upPaceDesc",icon:"◎",
+      costs:[150,320,550,850],values:[0.5,0.44,0.38,0.32,0.26]} // Tempo-Rampe (niedriger = sanfter)
+  ];
+  const UPG_KEY="nx_run3d_upg";
+  function loadUpg(){try{return JSON.parse(localStorage.getItem(UPG_KEY)||"{}")||{};}catch(e){return{};}}
+  let upg=loadUpg();
+  function upgLevel(id){return Math.max(0,Math.min(upg[id]||0,UPGRADES.find(u=>u.id===id).costs.length));}
+  function saveUpg(){localStorage.setItem(UPG_KEY,JSON.stringify(upg));}
 
   function init(){
     try{
@@ -182,6 +245,11 @@
     const pgeo=new THREE.BoxGeometry(1.1,1.1,1.1);
     const pmat=new THREE.MeshStandardMaterial({color:0x7cff6b,emissive:0x2a6b1f,emissiveIntensity:0.9,metalness:0.3,roughness:0.3});
     player=new THREE.Mesh(pgeo,pmat);player.position.set(0,0.55,0);scene.add(player);
+    // Schild-Anzeige aus dem Upgrade-Shop: einfache Wireframe-Kugel um den Spieler, sichtbar
+    // solange shields>0 - sichtbares Feedback im 3D-Raum statt eines 2D-HUD-Icons.
+    const sgeo=new THREE.SphereGeometry(1.0,12,12);
+    const smat=new THREE.MeshBasicMaterial({color:0x39e6ff,wireframe:true,transparent:true,opacity:0.55});
+    shieldMesh=new THREE.Mesh(sgeo,smat);shieldMesh.visible=false;player.add(shieldMesh);
     window.addEventListener("resize",onResize);onResize();
     return true;
   }
@@ -199,13 +267,14 @@
   }
   function clearWorld(){for(const o of obstacles)scene.remove(o);for(const o of orbs)scene.remove(o);obstacles=[];orbs=[];}
 
-  function reset(){clearWorld();lane=1;py=0;vy=0;onGround=true;speed=14;dist=0;orbCount=0;elapsed=0;spawnZ=-30;player.position.set(0,0.55,0);hud();
+  function reset(){clearWorld();lane=1;py=0;vy=0;onGround=true;speed=14;dist=0;orbCount=0;elapsed=0;spawnZ=-30;player.position.set(0,0.55,0);
+    shields=UPGRADES.find(u=>u.id==="shield").values[upgLevel("shield")];invulnT=0;hud();
     for(let z=-30;z>-120;z-=Math.random()*6+5){ if(Math.random()<0.72)makeObstacle(z); else makeOrb(z); }
   }
-  function hud(){$("distVal").textContent=Math.floor(dist);$("orbVal").textContent=orbCount;$("bestVal").textContent=best;}
+  function hud(){$("distVal").textContent=Math.floor(dist);$("orbVal").textContent=orbCount;$("bestVal").textContent=best;if(shieldMesh)shieldMesh.visible=shields>0;}
 
   function moveLane(d){lane=Math.max(0,Math.min(2,lane+d));}
-  function jump(){if(onGround){vy=9.2;onGround=false;}}
+  function jump(){if(onGround){vy=9.2+UPGRADES.find(u=>u.id==="jump").values[upgLevel("jump")];onGround=false;}}
 
   // input
   document.addEventListener("keydown",e=>{if(state!=="playing")return;const k=e.key;if(k==="ArrowLeft"||k==="a"||k==="A"){moveLane(-1);e.preventDefault();}else if(k==="ArrowRight"||k==="d"||k==="D"){moveLane(1);e.preventDefault();}else if(k===" "||k==="ArrowUp"||k==="w"||k==="W"){jump();e.preventDefault();}});
@@ -215,7 +284,8 @@
 
   function update(dt){
     if(state!=="playing")return;
-    elapsed+=dt;speed=14+elapsed*0.5;
+    if(invulnT>0)invulnT=Math.max(0,invulnT-dt);
+    elapsed+=dt;speed=14+elapsed*UPGRADES.find(u=>u.id==="pace").values[upgLevel("pace")];
     dist+=speed*dt*0.1;
     // player lane + jump physics
     const tx=LANES[lane];player.position.x+=(tx-player.position.x)*Math.min(1,dt*14);
@@ -225,8 +295,15 @@
     const dz=speed*dt;
     for(const d of decos){d.position.z+=dz;if(d.position.z>10)d.position.z-=120;}
     for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.position.z+=dz;o.rotation.y+=dt;if(o.position.z>10){scene.remove(o);obstacles.splice(i,1);continue;}
-      if(o.position.z>-0.9&&o.position.z<1.1&&Math.abs(o.position.x-player.position.x)<1.15&&player.position.y<1.4){crash();return;}}
+      if(invulnT>0)continue;
+      if(o.position.z>-0.9&&o.position.z<1.1&&Math.abs(o.position.x-player.position.x)<1.15&&player.position.y<1.4){
+        if(shields>0){shields--;scene.remove(o);obstacles.splice(i,1);invulnT=0.7;hud();continue;}
+        crash();return;
+      }}
+    // Magnet: Orbs in Nachbarspuren driften zur Spieler-X-Position, sobald sie nah genug sind.
+    const magnetR=UPGRADES.find(u=>u.id==="magnet").values[upgLevel("magnet")];
     for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];o.position.z+=dz;o.rotation.y+=dt*2;if(o.position.z>10){scene.remove(o);orbs.splice(i,1);continue;}
+      if(magnetR>0&&o.position.z>-magnetR&&o.position.z<3){o.position.x+=(player.position.x-o.position.x)*Math.min(1,dt*3);}
       if(o.position.z>-1.2&&o.position.z<1.2&&Math.abs(o.position.x-player.position.x)<1.1&&Math.abs(player.position.y-1.0)<1.1){scene.remove(o);orbs.splice(i,1);orbCount++;hud();}}
     // spawn ahead
     spawnZ-=dz;
@@ -248,11 +325,46 @@
   }
   function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
   async function share(){const fs=Math.floor(dist),txt=T().shareText(fs),url=location.origin+location.pathname;if(navigator.share){try{await navigator.share({title:"Nexus Run 3D",text:txt,url});return;}catch(e){}}try{await navigator.clipboard.writeText(txt+" "+url);toast(T().copied);}catch(e){toast(txt);}}
-  function applyLang(){document.documentElement.lang=lang;$("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});$("aboutH").textContent=T().aboutH;$("aboutP").textContent=T().aboutP;}
+  function applyLang(){document.documentElement.lang=lang;$("langLabel").textContent=lang.toUpperCase();document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");if(T()[k])el.textContent=T()[k];});$("aboutH").textContent=T().aboutH;$("aboutP").textContent=T().aboutP;if(!$("shopOverlay").classList.contains("hidden"))renderShop();}
+
+  // ---- Upgrade shop UI ----
+  let shopReturnId=null;
+  function openShop(returnId){shopReturnId=returnId;$(returnId).classList.add("hidden");$("shopOverlay").classList.remove("hidden");renderShop();}
+  function closeShop(){$("shopOverlay").classList.add("hidden");if(shopReturnId)$(shopReturnId).classList.remove("hidden");}
+  function renderShop(){
+    const t=T();
+    const coinsBal=(window.NexusArcade&&window.NexusArcade.getProfile)?(window.NexusArcade.getProfile().coins||0):0;
+    $("shopCoins").textContent=coinsBal;
+    $("shopList").innerHTML=UPGRADES.map(function(u){
+      const lvl=upgLevel(u.id),maxLvl=u.costs.length,maxed=lvl>=maxLvl;
+      const cost=maxed?0:u.costs[lvl];
+      const afford=!maxed&&coinsBal>=cost;
+      const pips=Array.from({length:maxLvl},function(_,i){return '<span class="pip'+(i<lvl?' on':'')+'"></span>';}).join("");
+      return '<div class="shop-item">'+
+        '<div class="info"><div class="name">'+u.icon+' '+t[u.nameKey]+' <span style="color:var(--muted);font-weight:600">Lv '+lvl+'/'+maxLvl+'</span></div>'+
+        '<div class="desc">'+t[u.descKey]+'</div><div class="pips">'+pips+'</div></div>'+
+        (maxed?'<button class="shop-buy max" disabled>'+t.maxed+'</button>'
+          :'<button class="shop-buy" data-up="'+u.id+'" '+(afford?'':'disabled')+'>'+t.buy+'<br>💰'+cost+'</button>')+
+        '</div>';
+    }).join("");
+    document.querySelectorAll(".shop-buy[data-up]").forEach(function(b){b.addEventListener("click",function(){buyUpgrade(b.getAttribute("data-up"));});});
+  }
+  function buyUpgrade(id){
+    const u=UPGRADES.find(function(x){return x.id===id;});
+    const lvl=upgLevel(id);
+    if(lvl>=u.costs.length)return;
+    const cost=u.costs[lvl];
+    if(!window.NexusArcade||!window.NexusArcade.spendCoins){toast(T().needMore);return;}
+    if(!window.NexusArcade.spendCoins(cost)){toast(T().needMore);return;}
+    upg[id]=lvl+1;saveUpg();renderShop();
+  }
 
   $("startBtn").addEventListener("click",start);
   $("retryBtn").addEventListener("click",start);
   $("shareBtn").addEventListener("click",share);
+  $("shopBtn").addEventListener("click",()=>openShop("startO"));
+  $("shopBtn2").addEventListener("click",()=>openShop("overO"));
+  $("shopCloseBtn").addEventListener("click",closeShop);
   $("langBtn").addEventListener("click",()=>{lang=lang==="en"?"de":"en";localStorage.setItem("nx_lang",lang);applyLang();});
   $("rankBtn").addEventListener("click",()=>{ if(window.NexusArcade&&window.NexusArcade.openRanks) window.NexusArcade.openRanks(); });
   $("year").textContent=new Date().getFullYear();
